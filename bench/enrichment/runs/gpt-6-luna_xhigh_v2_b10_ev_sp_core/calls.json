@@ -1,0 +1,374 @@
+{
+ "meta": {
+  "model": "gpt-6-luna",
+  "effort": "xhigh",
+  "spec": "v2",
+  "batch": 10,
+  "evidence": true,
+  "sparse": true,
+  "fieldset": "core",
+  "n": 150
+ },
+ "calls": [
+  {
+   "error": null,
+   "seconds": 61.64932302758098,
+   "usage": {
+    "input_tokens": 6479,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2593,
+    "reasoning_output_tokens": 1880
+   },
+   "missing_ids": [],
+   "ids": [
+    1336,
+    1364,
+    1546,
+    2046,
+    2479,
+    2685,
+    2864,
+    3266,
+    3303,
+    4183
+   ]
+  },
+  {
+   "error": null,
+   "seconds": 55.34675532672554,
+   "usage": {
+    "input_tokens": 6582,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2803,
+    "reasoning_output_tokens": 2070
+   },
+   "missing_ids": [],
+   "ids": [
+    1042,
+    1333,
+    1487,
+    1821,
+    2108,
+    2266,
+    2343,
+    3124,
+    4096,
+    31564
+   ]
+  },
+  {
+   "error": null,
+   "seconds": 46.89329982921481,
+   "usage": {
+    "input_tokens": 6521,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2339,
+    "reasoning_output_tokens": 1701
+   },
+   "missing_ids": [],
+   "ids": [
+    1064,
+    1600,
+    1870,
+    2642,
+    3344,
+    3490,
+    3862,
+    3914,
+    3955,
+    31412
+   ]
+  },
+  {
+   "error": null,
+   "seconds": 57.16981958877295,
+   "usage": {
+    "input_tokens": 6548,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2427,
+    "reasoning_output_tokens": 1738
+   },
+   "missing_ids": [],
+   "ids": [
+    1330,
+    1511,
+    1637,
+    1905,
+    2224,
+    2944,
+    2959,
+    3414,
+    3887,
+    31504
+   ]
+  },
+  {
+   "error": null,
+   "seconds": 64.11359220650047,
+   "usage": {
+    "input_tokens": 6553,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 3336,
+    "reasoning_output_tokens": 2588
+   },
+   "missing_ids": [],
+   "ids": [
+    1174,
+    1181,
+    1257,
+    1534,
+    1576,
+    2128,
+    2865,
+    3849,
+    4224,
+    4251
+   ]
+  },
+  {
+   "error": null,
+   "seconds": 52.84097929112613,
+   "usage": {
+    "input_tokens": 6583,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2716,
+    "reasoning_output_tokens": 2028
+   },
+   "missing_ids": [],
+   "ids": [
+    1139,
+    1482,
+    1586,
+    1592,
+    1619,
+    1813,
+    2495,
+    3295,
+    3689,
+    3821
+   ]
+  },
+  {
+   "error": null,
+   "seconds": 149.91337587498128,
+   "usage": {
+    "input_tokens": 6558,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 3286,
+    "reasoning_output_tokens": 2439
+   },
+   "missing_ids": [],
+   "ids": [
+    1162,
+    1214,
+    1224,
+    1395,
+    1710,
+    1949,
+    3069,
+    3443,
+    3794,
+    3847
+   ]
+  },
+  {
+   "error": null,
+   "seconds": 72.59767040144652,
+   "usage": {
+    "input_tokens": 6623,
+    "cached_input_tokens": 4864,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 3203,
+    "reasoning_output_tokens": 2346
+   },
+   "missing_ids": [],
+   "ids": [
+    1165,
+    1337,
+    1864,
+    2330,
+    3038,
+    3112,
+    3617,
+    3937,
+    4027,
+    31399
+   ]
+  },
+  {
+   "error": null,
+   "seconds": 69.5971941491589,
+   "usage": {
+    "input_tokens": 6596,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2946,
+    "reasoning_output_tokens": 2252
+   },
+   "missing_ids": [],
+   "ids": [
+    1114,
+    1506,
+    1890,
+    2036,
+    3235,
+    3237,
+    3383,
+    3460,
+    3938,
+    31478
+   ]
+  },
+  {
+   "error": null,
+   "seconds": 51.57469747774303,
+   "usage": {
+    "input_tokens": 6574,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2439,
+    "reasoning_output_tokens": 1620
+   },
+   "missing_ids": [],
+   "ids": [
+    22219,
+    22556,
+    23847,
+    27631,
+    42475,
+    43483,
+    43548,
+    43752,
+    53620,
+    54441
+   ]
+  },
+  {
+   "error": null,
+   "seconds": 47.079569939523935,
+   "usage": {
+    "input_tokens": 6381,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2410,
+    "reasoning_output_tokens": 1775
+   },
+   "missing_ids": [],
+   "ids": [
+    21300,
+    21561,
+    21941,
+    25744,
+    26553,
+    30814,
+    31697,
+    42749,
+    52447,
+    53898
+   ]
+  },
+  {
+   "error": null,
+   "seconds": 49.311253995634615,
+   "usage": {
+    "input_tokens": 6497,
+    "cached_input_tokens": 4864,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2494,
+    "reasoning_output_tokens": 1741
+   },
+   "missing_ids": [],
+   "ids": [
+    4458,
+    21250,
+    21604,
+    31779,
+    37673,
+    42951,
+    43589,
+    43593,
+    53760,
+    53926
+   ]
+  },
+  {
+   "error": null,
+   "seconds": 78.49173473753035,
+   "usage": {
+    "input_tokens": 6709,
+    "cached_input_tokens": 4864,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 4177,
+    "reasoning_output_tokens": 3428
+   },
+   "missing_ids": [],
+   "ids": [
+    25405,
+    30476,
+    30811,
+    31086,
+    31118,
+    38878,
+    43354,
+    48223,
+    52385,
+    54945
+   ]
+  },
+  {
+   "error": null,
+   "seconds": 70.95265766326338,
+   "usage": {
+    "input_tokens": 6713,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 3392,
+    "reasoning_output_tokens": 2269
+   },
+   "missing_ids": [],
+   "ids": [
+    19760,
+    19900,
+    20039,
+    20265,
+    20455,
+    54062,
+    54091,
+    54334,
+    54638,
+    54705
+   ]
+  },
+  {
+   "error": null,
+   "seconds": 60.797248356975615,
+   "usage": {
+    "input_tokens": 6597,
+    "cached_input_tokens": 4864,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2943,
+    "reasoning_output_tokens": 1991
+   },
+   "missing_ids": [],
+   "ids": [
+    19631,
+    19634,
+    20683,
+    54059,
+    54209,
+    54294,
+    54314,
+    54547,
+    54663,
+    55142
+   ]
+  }
+ ]
+}

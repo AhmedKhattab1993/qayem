@@ -1,0 +1,276 @@
+{
+ "meta": {
+  "model": "gpt-5.6-luna",
+  "effort": "low",
+  "spec": "v2",
+  "batch": 20,
+  "evidence": true,
+  "sparse": true,
+  "fieldset": "core",
+  "n": 150
+ },
+ "calls": [
+  {
+   "error": null,
+   "seconds": 37.42719838861376,
+   "usage": {
+    "input_tokens": 5288,
+    "cached_input_tokens": 1792,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 1897,
+    "reasoning_output_tokens": 478
+   },
+   "missing_ids": [],
+   "ids": [
+    1042,
+    1333,
+    1336,
+    1364,
+    1487,
+    1546,
+    1821,
+    2046,
+    2108,
+    2266,
+    2343,
+    2479,
+    2685,
+    2864,
+    3124,
+    3266,
+    3303,
+    4096,
+    4183,
+    31564
+   ]
+  },
+  {
+   "error": null,
+   "seconds": 34.89078581891954,
+   "usage": {
+    "input_tokens": 5288,
+    "cached_input_tokens": 1792,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 1769,
+    "reasoning_output_tokens": 476
+   },
+   "missing_ids": [],
+   "ids": [
+    1064,
+    1330,
+    1511,
+    1600,
+    1637,
+    1870,
+    1905,
+    2224,
+    2642,
+    2944,
+    2959,
+    3344,
+    3414,
+    3490,
+    3862,
+    3887,
+    3914,
+    3955,
+    31412,
+    31504
+   ]
+  },
+  {
+   "error": null,
+   "seconds": 34.89681906811893,
+   "usage": {
+    "input_tokens": 5363,
+    "cached_input_tokens": 1792,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 1755,
+    "reasoning_output_tokens": 328
+   },
+   "missing_ids": [],
+   "ids": [
+    1139,
+    1174,
+    1181,
+    1257,
+    1482,
+    1534,
+    1576,
+    1586,
+    1592,
+    1619,
+    1813,
+    2128,
+    2495,
+    2865,
+    3295,
+    3689,
+    3821,
+    3849,
+    4224,
+    4251
+   ]
+  },
+  {
+   "error": null,
+   "seconds": 51.09318057913333,
+   "usage": {
+    "input_tokens": 5410,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2308,
+    "reasoning_output_tokens": 716
+   },
+   "missing_ids": [],
+   "ids": [
+    1162,
+    1165,
+    1214,
+    1224,
+    1337,
+    1395,
+    1710,
+    1864,
+    1949,
+    2330,
+    3038,
+    3069,
+    3112,
+    3443,
+    3617,
+    3794,
+    3847,
+    3937,
+    4027,
+    31399
+   ]
+  },
+  {
+   "error": null,
+   "seconds": 40.42250089999288,
+   "usage": {
+    "input_tokens": 5387,
+    "cached_input_tokens": 2816,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2059,
+    "reasoning_output_tokens": 591
+   },
+   "missing_ids": [],
+   "ids": [
+    1114,
+    1506,
+    1890,
+    2036,
+    3235,
+    3237,
+    3383,
+    3460,
+    3938,
+    22219,
+    22556,
+    23847,
+    27631,
+    31478,
+    42475,
+    43483,
+    43548,
+    43752,
+    53620,
+    54441
+   ]
+  },
+  {
+   "error": null,
+   "seconds": 38.9666557200253,
+   "usage": {
+    "input_tokens": 5103,
+    "cached_input_tokens": 1792,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 1994,
+    "reasoning_output_tokens": 516
+   },
+   "missing_ids": [],
+   "ids": [
+    4458,
+    21250,
+    21300,
+    21561,
+    21604,
+    21941,
+    25744,
+    26553,
+    30814,
+    31697,
+    31779,
+    37673,
+    42749,
+    42951,
+    43589,
+    43593,
+    52447,
+    53760,
+    53898,
+    53926
+   ]
+  },
+  {
+   "error": null,
+   "seconds": 50.4077744493261,
+   "usage": {
+    "input_tokens": 5649,
+    "cached_input_tokens": 2816,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2615,
+    "reasoning_output_tokens": 807
+   },
+   "missing_ids": [],
+   "ids": [
+    19760,
+    19900,
+    20039,
+    20265,
+    20455,
+    25405,
+    30476,
+    30811,
+    31086,
+    31118,
+    38878,
+    43354,
+    48223,
+    52385,
+    54062,
+    54091,
+    54334,
+    54638,
+    54705,
+    54945
+   ]
+  },
+  {
+   "error": null,
+   "seconds": 26.060631597414613,
+   "usage": {
+    "input_tokens": 4579,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 1196,
+    "reasoning_output_tokens": 236
+   },
+   "missing_ids": [],
+   "ids": [
+    19631,
+    19634,
+    20683,
+    54059,
+    54209,
+    54294,
+    54314,
+    54547,
+    54663,
+    55142
+   ]
+  }
+ ]
+}

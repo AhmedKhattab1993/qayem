@@ -1,0 +1,2541 @@
+{
+ "2046": {
+  "id": 2046,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  },
+  "area_m2": {
+   "value": 120.0,
+   "evidence": "120 متر صافي"
+  },
+  "finishing": {
+   "value": "super_lux",
+   "evidence": "شقة سوبر لوكس"
+  }
+ },
+ "3266": {
+  "id": 3266,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه للبيع"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "بها عدد 3 اوض"
+  },
+  "bathrooms": {
+   "value": 1,
+   "evidence": "وحمام"
+  }
+ },
+ "2479": {
+  "id": 2479,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة تحت الإنشاء"
+  },
+  "is_resale": {
+   "value": true,
+   "evidence": "للتنازل مطلوب المدفوع فقط"
+  },
+  "delivery_status": {
+   "value": "under_construction",
+   "evidence": "شقة تحت الإنشاء"
+  },
+  "compound": {
+   "value": "Vida Residence",
+   "evidence": "في كمبوند Vida Residence"
+  }
+ },
+ "1546": {
+  "id": 1546,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه استلام فوري"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  }
+ },
+ "1336": {
+  "id": 1336,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه للبيع"
+  },
+  "area_m2": {
+   "value": 106.0,
+   "evidence": "شقه 106 متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف نوم"
+  },
+  "bathrooms": {
+   "value": 1,
+   "evidence": "حمام"
+  }
+ },
+ "1364": {
+  "id": 1364,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه للبيع"
+  },
+  "is_resale": {
+   "value": true,
+   "evidence": "أرخص من سعر الشركه"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "إستلام فوري"
+  },
+  "area_m2": {
+   "value": 111.0,
+   "evidence": "111 متر"
+  }
+ },
+ "3303": {
+  "id": 3303,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة 80 متر"
+  },
+  "area_m2": {
+   "value": 80.0,
+   "evidence": "شقة 80 متر"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "غرفتين"
+  },
+  "bathrooms": {
+   "value": 1,
+   "evidence": "وحمام"
+  }
+ },
+ "2864": {
+  "id": 2864,
+  "area_m2": {
+   "value": 160.0,
+   "evidence": "160 m Square"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "2 Bedrooms"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3 Bathrooms"
+  },
+  "compound": {
+   "value": "Palm Hills Badya",
+   "evidence": "at Palm Hills Badya"
+  }
+ },
+ "2685": {
+  "id": 2685,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه للبيع"
+  },
+  "area_m2": {
+   "value": 180.0,
+   "evidence": "مساحه 180م"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف نوم"
+  },
+  "bathrooms": {
+   "value": 2,
+   "evidence": "2 حمام"
+  }
+ },
+ "4183": {
+  "id": 4183,
+  "property_type": {
+   "value": "house",
+   "evidence": "منزل للبيع"
+  }
+ },
+ "1487": {
+  "id": 1487,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "2شقتين جنب بعض"
+  },
+  "is_multi_unit": {
+   "value": true,
+   "evidence": "2شقتين جنب بعض"
+  }
+ },
+ "2343": {
+  "id": 2343,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة فى كمبوند چوار التجمع السادس"
+  },
+  "area_m2": {
+   "value": 100.0,
+   "evidence": "شقة 100 م"
+  },
+  "is_resale": {
+   "value": true,
+   "evidence": "تكمله الاقساط مع الشركة"
+  },
+  "compound": {
+   "value": "چوار",
+   "evidence": "كمبوند چوار"
+  }
+ },
+ "1333": {
+  "id": 1333,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة 210م ببيت الوطن"
+  },
+  "area_m2": {
+   "value": 210.0,
+   "evidence": "شقة 210م"
+  }
+ },
+ "1821": {
+  "id": 1821,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقتك في أرقى مناطق المقطم"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "تسليم فوري"
+  }
+ },
+ "31564": {
+  "id": 31564,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "إعلان شقة العجوزة"
+  },
+  "area_m2": {
+   "value": 100.0,
+   "evidence": "المساحة: 100"
+  }
+ },
+ "4096": {
+  "id": 4096,
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا مودرن للبيع"
+  },
+  "area_m2": {
+   "value": 500.0,
+   "evidence": "الفيلا 500م"
+  }
+ },
+ "3124": {
+  "id": 3124,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع كمبوند كنز"
+  },
+  "area_m2": {
+   "value": 180.0,
+   "evidence": "مساحة 180 متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": 2,
+   "evidence": "2 حمام"
+  },
+  "finishing": {
+   "value": "super_lux",
+   "evidence": "تشطيب سوبر لوكس"
+  },
+  "compound": {
+   "value": "كنز",
+   "evidence": "كمبوند كنز"
+  }
+ },
+ "2266": {
+  "id": 2266,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه للبيع 200 متر"
+  },
+  "area_m2": {
+   "value": 200.0,
+   "evidence": "200متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3غرف"
+  },
+  "bathrooms": {
+   "value": 2,
+   "evidence": "2حمام"
+  },
+  "finishing": {
+   "value": "super_lux",
+   "evidence": "سوبر لوكس"
+  }
+ },
+ "2108": {
+  "id": 2108,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه فندقيه علي النيل"
+  }
+ },
+ "1042": {
+  "id": 1042,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه متشطبه بالكامل برايم لوكيشن"
+  },
+  "area_m2": {
+   "value": 136.0,
+   "evidence": "مساحه 136 متر"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "(2 غرف)"
+  },
+  "down_payment": {
+   "value": 2000000.0,
+   "evidence": "مقدم : 2,000,000 جنيه"
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "متشطبه بالكامل"
+  },
+  "compound": {
+   "value": "District 5",
+   "evidence": "في (District 5)"
+  }
+ },
+ "1600": {
+  "id": 1600,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة استلام فوري"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  }
+ },
+ "2642": {
+  "id": 2642,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه للبيع"
+  },
+  "area_m2": {
+   "value": 165.0,
+   "evidence": "مساحتها 165 متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "تتكون 3 غرف"
+  }
+ },
+ "3490": {
+  "id": 3490,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع كاش"
+  }
+ },
+ "31412": {
+  "id": 31412,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه استلام فوري"
+  },
+  "installment_months": {
+   "value": 36,
+   "evidence": "بالتقسيط علي 3 سنوات"
+  },
+  "area_m2": {
+   "value": 167.0,
+   "evidence": "بمساحه 167 متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف نوم"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3 تويليت"
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "متشطبه بالكامل"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  }
+ },
+ "3914": {
+  "id": 3914,
+  "property_type": {
+   "value": "townhouse",
+   "evidence": "تاون هاوس للبيع"
+  },
+  "area_m2": {
+   "value": 360.0,
+   "evidence": "مساحة المبانى 360م"
+  },
+  "compound": {
+   "value": "لاروزا",
+   "evidence": "كمبوند لاروزا"
+  }
+ },
+ "3862": {
+  "id": 3862,
+  "property_type": {
+   "value": "townhouse",
+   "evidence": "Town house only 11 million"
+  },
+  "price": {
+   "value": 11000000.0,
+   "evidence": "only 11 million"
+  }
+ },
+ "1870": {
+  "id": 1870,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه للبيع"
+  },
+  "area_m2": {
+   "value": 250.0,
+   "evidence": "شقه 250 م"
+  }
+ },
+ "3955": {
+  "id": 3955,
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا ستاند الون للبيع"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  },
+  "compound": {
+   "value": "لافيستا سيتي",
+   "evidence": "في لافيستا سيتي"
+  }
+ },
+ "1064": {
+  "id": 1064,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه للبيع"
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "متشطبه بالكامل"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "الشقه جاهزه للمعاينه"
+  }
+ },
+ "3344": {
+  "id": 3344,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة تمليك من المالك مباشر"
+  }
+ },
+ "1637": {
+  "id": 1637,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة استلام فوري"
+  },
+  "area_m2": {
+   "value": 161.0,
+   "evidence": "المساحة: 161 متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3حمام"
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "متشطبة بالكامل"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  },
+  "compound": {
+   "value": "District 5",
+   "evidence": "في District 5"
+  }
+ },
+ "3414": {
+  "id": 3414,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  },
+  "area_m2": {
+   "value": 80.0,
+   "evidence": "مساحتها 80 متر"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "غرفتين"
+  },
+  "bathrooms": {
+   "value": 1,
+   "evidence": "حمام"
+  },
+  "price": {
+   "value": 680000.0,
+   "evidence": "سعرها 680 الف كاش"
+  }
+ },
+ "1330": {
+  "id": 1330,
+  "down_payment": {
+   "value": 382950.0,
+   "evidence": "بمقدم 382,950 جنيه فقط"
+  },
+  "area_m2": {
+   "value": 115.0,
+   "evidence": "امتلك 115م"
+  }
+ },
+ "1905": {
+  "id": 1905,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه لقطه للبيع"
+  }
+ },
+ "3887": {
+  "id": 3887,
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا في سراي"
+  },
+  "area_m2": {
+   "value": 212.0,
+   "evidence": "بمساحة 212 متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": 4,
+   "evidence": "4 حمام"
+  },
+  "compound": {
+   "value": "سراي",
+   "evidence": "فيلا في سراي"
+  }
+ },
+ "31504": {
+  "id": 31504,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه للبيع"
+  },
+  "area_m2": {
+   "value": 200.0,
+   "evidence": "شقه للبيع 200 م"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرفه"
+  },
+  "bathrooms": {
+   "value": 2,
+   "evidence": "اثنين حمام"
+  }
+ },
+ "2959": {
+  "id": 2959,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه متشطبة"
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "شقه متشطبة"
+  }
+ },
+ "1511": {
+  "id": 1511,
+  "area_m2": {
+   "value": 185.0,
+   "evidence": "ارضي 185 م+20م جاردن"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  }
+ },
+ "2944": {
+  "id": 2944,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع فى الشيخ زايد"
+  }
+ },
+ "1534": {
+  "id": 1534,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "متاح شقتين للبيع"
+  },
+  "is_multi_unit": {
+   "value": true,
+   "evidence": "متاح شقتين للبيع"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": 2,
+   "evidence": "2 حمام"
+  }
+ },
+ "1257": {
+  "id": 1257,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف منهم واحدة ماستر"
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "متشطبة"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  }
+ },
+ "3849": {
+  "id": 3849,
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا للبيع"
+  },
+  "installment_months": {
+   "value": 84,
+   "evidence": "بقسط علي 7سنين"
+  },
+  "area_m2": {
+   "value": 245.0,
+   "evidence": "تقسيمه الفيلا 245م"
+  }
+ },
+ "1174": {
+  "id": 1174,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "هبيع شقه"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "أستلام فوري"
+  },
+  "area_m2": {
+   "value": 215.0,
+   "evidence": "215 متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  }
+ },
+ "4251": {
+  "id": 4251
+ },
+ "4224": {
+  "id": 4224,
+  "property_type": {
+   "value": "house",
+   "evidence": "منزل للبيع والاستثمار"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  }
+ },
+ "2865": {
+  "id": 2865,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "امتلك شقتك"
+  },
+  "compound": {
+   "value": "Beta Residence",
+   "evidence": "في Beta Residence"
+  },
+  "developer": {
+   "value": "Beta egypt",
+   "evidence": "مشروع شركه Beta egypt"
+  }
+ },
+ "1181": {
+  "id": 1181,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "شقة 3 غرف"
+  },
+  "finishing": {
+   "value": "super_lux",
+   "evidence": "تشطيب سوبر لوكس"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فورى"
+  },
+  "compound": {
+   "value": "ماونتن فيو",
+   "evidence": "فى ماونتن فيو التجمع الخامس"
+  }
+ },
+ "1576": {
+  "id": 1576,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة استلام فوري"
+  },
+  "down_payment": {
+   "value": 300000.0,
+   "evidence": "مقدم 300 ألف فقط"
+  },
+  "is_resale": {
+   "value": false,
+   "evidence": "سعر الطرح الأول"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  }
+ },
+ "2128": {
+  "id": 2128,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة ماستر للبيع"
+  },
+  "area_m2": {
+   "value": 130.0,
+   "evidence": "المساحة 130 م2"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "ثلاث غرف"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3 حمامات"
+  },
+  "finishing": {
+   "value": "super_lux",
+   "evidence": "تشطيب سوبر لوكس"
+  }
+ },
+ "3821": {
+  "id": 3821,
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا للبيع"
+  },
+  "price": {
+   "value": 3000000.0,
+   "evidence": "مطلوب 3,000,000 كاش"
+  }
+ },
+ "2495": {
+  "id": 2495,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه للبيع"
+  }
+ },
+ "1139": {
+  "id": 1139,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة متشطبة سوبر لوكس"
+  },
+  "area_m2": {
+   "value": 80.0,
+   "evidence": "مساحتها 80 م"
+  },
+  "finishing": {
+   "value": "super_lux",
+   "evidence": "شقة متشطبة سوبر لوكس"
+  }
+ },
+ "1813": {
+  "id": 1813,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة 191م"
+  },
+  "area_m2": {
+   "value": 191.0,
+   "evidence": "بمساحه 191م"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "مكونه من ( 3 غرف + 3 حمام )"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "مكونه من ( 3 غرف + 3 حمام )"
+  },
+  "finishing": {
+   "value": "extra_super_lux",
+   "evidence": "تشطيب كامل الترا سوبر"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فورى"
+  }
+ },
+ "3295": {
+  "id": 3295,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة مميزة للبيع"
+  },
+  "price": {
+   "value": 600000.0,
+   "evidence": "600الف"
+  },
+  "area_m2": {
+   "value": 80.0,
+   "evidence": "80 متر"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "فرصة ممتازة للسكن الفوري"
+  }
+ },
+ "1619": {
+  "id": 1619,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه بفيلا للبيع"
+  },
+  "area_m2": {
+   "value": 240.0,
+   "evidence": "شقه مساحة 240م متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 نوم"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3 حمام"
+  }
+ },
+ "3689": {
+  "id": 3689,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  },
+  "area_m2": {
+   "value": 100.0,
+   "evidence": "100 م"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "غرفتين"
+  }
+ },
+ "1592": {
+  "id": 1592,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه استـــــــــــــلام فـــــــــــــوري"
+  },
+  "down_payment": {
+   "value": 300000.0,
+   "evidence": "مطلوب مقدم 300الف فقط"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3غرف"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3 حمام"
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "تشطيــــــــــب كامل"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "شقه استـــــــــــــلام فـــــــــــــوري"
+  }
+ },
+ "1586": {
+  "id": 1586,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه للبيع"
+  }
+ },
+ "1482": {
+  "id": 1482,
+  "is_multi_unit": {
+   "value": true,
+   "evidence": "مساحات للغرفتين تبدأ من 102م والثلاث غرف"
+  }
+ },
+ "1949": {
+  "id": 1949,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه"
+  },
+  "down_payment": {
+   "value": 1500000.0,
+   "evidence": "مطلوب مقدم مليون و نصف"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3حمام"
+  },
+  "compound": {
+   "value": "هايد بارك",
+   "evidence": "الشقه في هايد بارك"
+  }
+ },
+ "1162": {
+  "id": 1162,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "شقة 3 غرف"
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "بتشطيب فندقي كامل"
+  }
+ },
+ "1214": {
+  "id": 1214,
+  "area_m2": {
+   "value": 190.0,
+   "evidence": "الدور الارضي 190 متر"
+  },
+  "down_payment": {
+   "value": 1750000.0,
+   "evidence": "المقدم 1750000"
+  },
+  "installment_months": {
+   "value": 60,
+   "evidence": "الباقي علي 60 شهر"
+  },
+  "delivery_status": {
+   "value": "under_construction",
+   "evidence": "الاستلام علي 24…"
+  }
+ },
+ "1710": {
+  "id": 1710,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "installment_months": {
+   "value": 96,
+   "evidence": "أقساط على 8 سنوات"
+  },
+  "area_m2": {
+   "value": 170.0,
+   "evidence": "شقة 170 متر"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "إستلام فوري"
+  }
+ },
+ "3847": {
+  "id": 3847,
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري جاهزة على المفتاح"
+  },
+  "compound": {
+   "value": "Mountain_View_1.1",
+   "evidence": "#Mountain_View_1.1"
+  }
+ },
+ "3443": {
+  "id": 3443,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  }
+ },
+ "1224": {
+  "id": 1224,
+  "property_type": {
+   "value": "duplex",
+   "evidence": "Ground Duplex"
+  },
+  "area_m2": {
+   "value": 220.0,
+   "evidence": "220 meter"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 Bedrooms"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3 Bathrooms"
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "fully finished"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "ready to move"
+  },
+  "compound": {
+   "value": "Trio gardens",
+   "evidence": "Trio gardens New Cairo"
+  }
+ },
+ "3794": {
+  "id": 3794,
+  "property_type": {
+   "value": "duplex",
+   "evidence": "دوبلكس بجاردن خاص"
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "متشطب بالفرش والأجهزة"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  }
+ },
+ "3069": {
+  "id": 3069,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه للبيع"
+  },
+  "area_m2": {
+   "value": 140.0,
+   "evidence": "140متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3غرف"
+  },
+  "finishing": {
+   "value": "core_shell",
+   "evidence": "طوب أحمر"
+  }
+ },
+ "1395": {
+  "id": 1395,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام_فوري"
+  },
+  "compound": {
+   "value": "Bloomfields",
+   "evidence": "في كمبوند #Bloomfields"
+  }
+ },
+ "3038": {
+  "id": 3038,
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا دوبليكس"
+  },
+  "compound": {
+   "value": "الكناريا",
+   "evidence": "داخل كمبوند الكناريا"
+  }
+ },
+ "3937": {
+  "id": 3937,
+  "property_type": {
+   "value": "villa",
+   "evidence": "الفيلا معروضة للبيع"
+  },
+  "finishing": {
+   "value": "extra_super_lux",
+   "evidence": "تشطيب الترا سوبر لوكس"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  },
+  "area_m2": {
+   "value": 210.0,
+   "evidence": "مساحتها 210 متر"
+  },
+  "compound": {
+   "value": "مونتن فيو",
+   "evidence": "في مونتن فيو"
+  }
+ },
+ "31399": {
+  "id": 31399,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع استلام فوري"
+  },
+  "area_m2": {
+   "value": 120.0,
+   "evidence": "120م"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "غرفتين"
+  },
+  "bathrooms": {
+   "value": 1,
+   "evidence": "حمام"
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "متشطبة"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "جاهزة للسكن"
+  }
+ },
+ "1165": {
+  "id": 1165,
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": 1,
+   "evidence": "حمام + مطبخ"
+  },
+  "price": {
+   "value": 2550000.0,
+   "evidence": "السعر: 2,550,000 جنيه"
+  }
+ },
+ "4027": {
+  "id": 4027,
+  "property_type": {
+   "value": "villa",
+   "evidence": "ڤيلا للبيع"
+  },
+  "price": {
+   "value": 4800000.0,
+   "evidence": "اجمالي سعرها 4 مليون و 800 الف"
+  }
+ },
+ "2330": {
+  "id": 2330,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  },
+  "down_payment": {
+   "value": 2500000.0,
+   "evidence": "مطلوب فيها 2 مليون ونص والباقي تسهيلات"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "الشقة 3 غرف"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3 حمام"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  },
+  "compound": {
+   "value": "ديستركت 5",
+   "evidence": "داخل كمبوند ديستركت 5"
+  }
+ },
+ "1337": {
+  "id": 1337,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه"
+  },
+  "price": {
+   "value": 2750000.0,
+   "evidence": "175م2 بسعر 2,750,000 جنيه فقط"
+  },
+  "area_m2": {
+   "value": 175.0,
+   "evidence": "175م2"
+  }
+ },
+ "1864": {
+  "id": 1864,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة لقطة للبيع"
+  },
+  "area_m2": {
+   "value": 80.0,
+   "evidence": "المساحة: 80 متر صافي"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "غرفتان"
+  }
+ },
+ "3112": {
+  "id": 3112,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه كامله التشطيب"
+  },
+  "bathrooms": {
+   "value": 2,
+   "evidence": "2حمام"
+  },
+  "finishing": {
+   "value": "super_lux",
+   "evidence": "تشطيب سوبر لوكس"
+  }
+ },
+ "3617": {
+  "id": 3617,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة متميزة"
+  },
+  "area_m2": {
+   "value": 170.0,
+   "evidence": "170 متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3 حمام"
+  }
+ },
+ "3460": {
+  "id": 3460,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع بقرية النخيل"
+  },
+  "compound": {
+   "value": "النخيل",
+   "evidence": "بقرية النخيل"
+  }
+ },
+ "1506": {
+  "id": 1506,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة في العاصمة الإدارية"
+  },
+  "down_payment": {
+   "value": 300000.0,
+   "evidence": "بمقدم 300الف"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  }
+ },
+ "1114": {
+  "id": 1114,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة فاخرة للبيع"
+  },
+  "finishing": {
+   "value": "extra_super_lux",
+   "evidence": "شقة ألترا لوكس"
+  }
+ },
+ "3383": {
+  "id": 3383,
+  "property_type": {
+   "value": "chalet",
+   "evidence": "شالية للبيع"
+  },
+  "area_m2": {
+   "value": 135.0,
+   "evidence": "مساحة 135 متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "مكون من 3 غرف"
+  },
+  "bathrooms": {
+   "value": 1,
+   "evidence": "ومطبخ وحمام"
+  }
+ },
+ "31478": {
+  "id": 31478,
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا للبيع"
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "متشطبة بالكامل"
+  }
+ },
+ "1890": {
+  "id": 1890,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه للبيع"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "غرفتين"
+  },
+  "bathrooms": {
+   "value": 1,
+   "evidence": "حمام"
+  }
+ },
+ "2036": {
+  "id": 2036,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه تشطيب سوبر لوكس"
+  },
+  "area_m2": {
+   "value": 80.0,
+   "evidence": "بمساحة 80 متر2"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "غرفتين"
+  },
+  "bathrooms": {
+   "value": 1,
+   "evidence": "حمام"
+  },
+  "finishing": {
+   "value": "super_lux",
+   "evidence": "تشطيب سوبر لوكس"
+  },
+  "compound": {
+   "value": "ميروسيتي",
+   "evidence": "ب كمبوند ميروسيتي"
+  }
+ },
+ "3237": {
+  "id": 3237,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه 250م2"
+  },
+  "area_m2": {
+   "value": 250.0,
+   "evidence": "شقه 250م2"
+  }
+ },
+ "3938": {
+  "id": 3938,
+  "property_type": {
+   "value": "villa",
+   "evidence": "آخر فيلا"
+  },
+  "area_m2": {
+   "value": 239.0,
+   "evidence": "مساحة 239 متر"
+  },
+  "bedrooms": {
+   "value": 4,
+   "evidence": "4 غرف منها ماستر"
+  }
+ },
+ "3235": {
+  "id": 3235,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه مرخصه"
+  },
+  "finishing": {
+   "value": "extra_super_lux",
+   "evidence": "الترا لوكس"
+  }
+ },
+ "23847": {
+  "id": 23847,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "area_m2": {
+   "value": 171.0,
+   "evidence": "مساحة 171"
+  },
+  "compound": {
+   "value": "لاكولينا",
+   "evidence": "العنوان: لاكولينا الشيخ زايد"
+  }
+ },
+ "54441": {
+  "id": 54441,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "العنوان: شقة"
+  },
+  "compound": {
+   "value": "الواحة ڤيو",
+   "evidence": "كمبوند الواحة ڤيو"
+  }
+ },
+ "43483": {
+  "id": 43483,
+  "property_type": {
+   "value": "villa",
+   "evidence": "العنوان: فيلا"
+  },
+  "area_m2": {
+   "value": 250.0,
+   "evidence": "250 متر مباني"
+  },
+  "compound": {
+   "value": "At east",
+   "evidence": "وحدة بكومبوند at east"
+  }
+ },
+ "22556": {
+  "id": 22556,
+  "property_type": {
+   "value": "townhouse",
+   "evidence": "تاون هاوس"
+  },
+  "compound": {
+   "value": "Creek Town",
+   "evidence": "العنوان: Creek Town"
+  }
+ },
+ "43752": {
+  "id": 43752,
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا"
+  },
+  "area_m2": {
+   "value": 239.0,
+   "evidence": "فيلا 239 متر"
+  },
+  "compound": {
+   "value": "سراى",
+   "evidence": "كمبوند سراى"
+  }
+ },
+ "22219": {
+  "id": 22219,
+  "property_type": {
+   "value": "twinhouse",
+   "evidence": "فيلا توين هاوس"
+  },
+  "price": {
+   "value": 19400000.0,
+   "evidence": "السعر الاجمالى ١٩،٤٠٠،٠٠٠"
+  },
+  "down_payment": {
+   "value": 7956000.0,
+   "evidence": "مقدم : ٧،٩٥٦،٠٠٠"
+  },
+  "installment_months": {
+   "value": 66,
+   "evidence": "ع ٥ سنين ونص"
+  },
+  "area_m2": {
+   "value": 227.0,
+   "evidence": "فيلا توين هاوس ٢٢٧ متر"
+  },
+  "bedrooms": {
+   "value": 4,
+   "evidence": "٤ غرف"
+  },
+  "bathrooms": {
+   "value": 4,
+   "evidence": "٤ حمام"
+  },
+  "delivery_status": {
+   "value": "under_construction",
+   "evidence": "استلام ٢٠٢٧"
+  },
+  "compound": {
+   "value": "Rivers",
+   "evidence": "العنوان: Rivers"
+  }
+ },
+ "27631": {
+  "id": 27631,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "العنوان: شقة"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "شقه غرفتين"
+  },
+  "bathrooms": {
+   "value": 2,
+   "evidence": "٢حمام"
+  },
+  "compound": {
+   "value": "ساويث ميد",
+   "evidence": "العنوان: ساويث ميد الساحل الشمالي"
+  }
+ },
+ "42475": {
+  "id": 42475,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "العنوان: شقة"
+  }
+ },
+ "53620": {
+  "id": 53620,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه فيو لاجون"
+  },
+  "area_m2": {
+   "value": 158.0,
+   "evidence": "158 متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3غرف"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3 حمام"
+  },
+  "compound": {
+   "value": "ايفوريا كوين لاند",
+   "evidence": "في كمبوند ايفوريا كوين لاند"
+  }
+ },
+ "43548": {
+  "id": 43548,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "Apartment"
+  },
+  "area_m2": {
+   "value": 171.0,
+   "evidence": "Bua 171 m²"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "2 bedrooms, can become 3 bedrooms"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "Ready to move"
+  },
+  "compound": {
+   "value": "W Signature",
+   "evidence": "Waterway - W Signature"
+  }
+ },
+ "21941": {
+  "id": 21941,
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3غرف وغرفه على الرووف"
+  },
+  "compound": {
+   "value": "كالى كوست",
+   "evidence": "كالى كوست الساحل الشمالي"
+  }
+ },
+ "21300": {
+  "id": 21300
+ },
+ "53898": {
+  "id": 53898,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "area_m2": {
+   "value": 154.0,
+   "evidence": "شقه 154 م"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3 حمام"
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "تشطيب كامل"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "جاهزه للسكن"
+  },
+  "compound": {
+   "value": "STODA",
+   "evidence": "STODA"
+  }
+ },
+ "21561": {
+  "id": 21561,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "compound": {
+   "value": "Badya",
+   "evidence": "Badya"
+  }
+ },
+ "26553": {
+  "id": 26553,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "compound": {
+   "value": "سولين",
+   "evidence": "سولين"
+  }
+ },
+ "31697": {
+  "id": 31697,
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا"
+  },
+  "compound": {
+   "value": "noi",
+   "evidence": "في مشروع noi"
+  }
+ },
+ "30814": {
+  "id": 30814,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "area_m2": {
+   "value": 115.0,
+   "evidence": "شقة 115 م"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 نوم"
+  },
+  "bathrooms": {
+   "value": 2,
+   "evidence": "2 حمام"
+  }
+ },
+ "25744": {
+  "id": 25744,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "is_resale": {
+   "value": true,
+   "evidence": "متنازل لانى متعثر فى السداد"
+  },
+  "compound": {
+   "value": "الفسطاط فيو",
+   "evidence": "الفسطاط فيو"
+  }
+ },
+ "52447": {
+  "id": 52447,
+  "finishing": {
+   "value": "semi_finished",
+   "evidence": "نصف تشطيب"
+  },
+  "compound": {
+   "value": "ديجويا 4",
+   "evidence": "ديجويا 4"
+  }
+ },
+ "42749": {
+  "id": 42749,
+  "property_type": {
+   "value": "chalet",
+   "evidence": "شاليه"
+  },
+  "area_m2": {
+   "value": 69.0,
+   "evidence": "مباني ٦٩ متر"
+  },
+  "compound": {
+   "value": "جيفيرا",
+   "evidence": "جيفيرا"
+  }
+ },
+ "31779": {
+  "id": 31779,
+  "property_type": {
+   "value": "office",
+   "evidence": "مكتب"
+  },
+  "area_m2": {
+   "value": 94.0,
+   "evidence": "94 متر"
+  },
+  "delivery_status": {
+   "value": "under_construction",
+   "evidence": "يتم الاستلام يناير 2027"
+  },
+  "compound": {
+   "value": "Isola",
+   "evidence": "مكتب — Isola"
+  }
+ },
+ "21250": {
+  "id": 21250,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "compound": {
+   "value": "اليفا",
+   "evidence": "شقة — اليفا مستقبل ستي"
+  }
+ },
+ "37673": {
+  "id": 37673,
+  "property_type": {
+   "value": "office",
+   "evidence": "مكتب"
+  },
+  "compound": {
+   "value": "Jazebya",
+   "evidence": "مكتب — Jazebya"
+  }
+ },
+ "53760": {
+  "id": 53760,
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا"
+  },
+  "compound": {
+   "value": "سراي",
+   "evidence": "فيلا — سراي"
+  }
+ },
+ "53926": {
+  "id": 53926,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "bedrooms": {
+   "value": 1,
+   "evidence": "شقة غرفه وصاله"
+  },
+  "compound": {
+   "value": "The mornings",
+   "evidence": "شقة — The mornings"
+  }
+ },
+ "4458": {
+  "id": 4458,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "compound": {
+   "value": "المقصد بارك",
+   "evidence": "شقة — المقصد بارك"
+  }
+ },
+ "21604": {
+  "id": 21604,
+  "property_type": {
+   "value": "chalet",
+   "evidence": "شاليه"
+  },
+  "area_m2": {
+   "value": 102.5,
+   "evidence": "102.5 م² + جاردن 33.5 م²"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "غرفتين"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "٣ حمامات"
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "تشطيب كامل"
+  },
+  "delivery_status": {
+   "value": "under_construction",
+   "evidence": "استلام 2029"
+  },
+  "compound": {
+   "value": "Hacienda waters",
+   "evidence": "شاليه — Hacienda waters"
+  }
+ },
+ "43593": {
+  "id": 43593,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "compound": {
+   "value": "Qamari",
+   "evidence": "شقة — Qamari"
+  }
+ },
+ "43589": {
+  "id": 43589,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "compound": {
+   "value": "Qamari",
+   "evidence": "شقة — Qamari"
+  }
+ },
+ "42951": {
+  "id": 42951,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "is_resale": {
+   "value": true,
+   "evidence": "سعر الوحدة بعد الخصم *6.660.000*؛ سعر الوحدة المماثلة الجديد في الشركة *9.100.000*"
+  },
+  "price": {
+   "value": 6660000.0,
+   "evidence": "سعر الوحدة بعد الخصم *6.660.000*"
+  },
+  "installment_months": {
+   "value": 96,
+   "evidence": "الأقساط لمدة *٨ سنوات*"
+  },
+  "area_m2": {
+   "value": 181.0,
+   "evidence": "المساحة *181* متر"
+  },
+  "finishing": {
+   "value": "semi_finished",
+   "evidence": "التشطيب *نصف تشطيب*"
+  },
+  "delivery_status": {
+   "value": "under_construction",
+   "evidence": "الاستلام نصف تشطيب 2028"
+  },
+  "compound": {
+   "value": "Silvia",
+   "evidence": "شقة — Silvia Compound"
+  }
+ },
+ "31086": {
+  "id": 31086,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "A 1 bedroom Apartment"
+  },
+  "area_m2": {
+   "value": 76.0,
+   "evidence": "The Apartment size is 76 m²"
+  },
+  "bedrooms": {
+   "value": 1,
+   "evidence": "A 1 bedroom Apartment"
+  },
+  "bathrooms": {
+   "value": 1,
+   "evidence": "with 1 bathrooms"
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "تتسلم متشطبة"
+  },
+  "delivery_status": {
+   "value": "under_construction",
+   "evidence": "ready for delivery ... by 2028"
+  },
+  "compound": {
+   "value": "Redwood Tower",
+   "evidence": "in Redwood Tower"
+  },
+  "developer": {
+   "value": "A Capital Holding",
+   "evidence": "Redwood Tower by A Capital Holding"
+  }
+ },
+ "48223": {
+  "id": 48223,
+  "property_type": {
+   "value": "townhouse",
+   "evidence": "Town house"
+  }
+ },
+ "52385": {
+  "id": 52385,
+  "property_type": {
+   "value": "office",
+   "evidence": "مكتب"
+  },
+  "compound": {
+   "value": "Seventy seven",
+   "evidence": "title: Seventy seven"
+  }
+ },
+ "38878": {
+  "id": 38878,
+  "area_m2": {
+   "value": 43.0,
+   "evidence": "مساحة 43م"
+  },
+  "delivery_status": {
+   "value": "under_construction",
+   "evidence": "معاد الاستلام 1/2027"
+  },
+  "compound": {
+   "value": "ايرس روزرت",
+   "evidence": "الفندق ايرس روزرت"
+  }
+ },
+ "31118": {
+  "id": 31118,
+  "property_type": {
+   "value": "duplex",
+   "evidence": "title: دوبلكس"
+  },
+  "area_m2": {
+   "value": 190.0,
+   "evidence": "190sqm"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 bedrooms"
+  },
+  "compound": {
+   "value": "Aliva",
+   "evidence": "title: Aliva - Al mostaqbal City"
+  }
+ },
+ "25405": {
+  "id": 25405,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "title: شقة"
+  },
+  "area_m2": {
+   "value": 104.0,
+   "evidence": "شقة 104"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "غرفتين"
+  },
+  "bathrooms": {
+   "value": 2,
+   "evidence": "حمامين"
+  },
+  "compound": {
+   "value": "لاند مارك",
+   "evidence": "title: لاند مارك"
+  }
+ },
+ "30476": {
+  "id": 30476,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "title: شقة"
+  },
+  "compound": {
+   "value": "جوميا لاجونز",
+   "evidence": "title: جوميا لاجونز"
+  }
+ },
+ "30811": {
+  "id": 30811,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "title: شقة"
+  },
+  "area_m2": {
+   "value": 115.0,
+   "evidence": "شقة 115 م"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 نوم"
+  },
+  "bathrooms": {
+   "value": 2,
+   "evidence": "2 حمام"
+  }
+ },
+ "54945": {
+  "id": 54945,
+  "property_type": {
+   "value": "villa",
+   "evidence": "title: فيلا"
+  },
+  "is_resale": {
+   "value": true,
+   "evidence": "المدفوع 6.6 مليون\nالمتبقى 8.4 مليون"
+  },
+  "area_m2": {
+   "value": 239.0,
+   "evidence": "مساحة 239م"
+  },
+  "bedrooms": {
+   "value": 5,
+   "evidence": "5 غرف نوم"
+  },
+  "bathrooms": {
+   "value": 5,
+   "evidence": "5 حمام"
+  },
+  "delivery_status": {
+   "value": "under_construction",
+   "evidence": "الأستلام ديسمبر 2028"
+  },
+  "compound": {
+   "value": "سراى",
+   "evidence": "كومبوند سراى"
+  }
+ },
+ "43354": {
+  "id": 43354,
+  "property_type": {
+   "value": "villa",
+   "evidence": "title: فيلا"
+  },
+  "compound": {
+   "value": "ماونت فيو كيان",
+   "evidence": "title: ماونت فيو كيان"
+  }
+ },
+ "20455": {
+  "id": 20455,
+  "property_type": {
+   "value": "factory",
+   "evidence": "مصنع للبيع"
+  },
+  "finishing": {
+   "value": "super_lux",
+   "evidence": "متشطب سوبر لوكس"
+  },
+  "price": {
+   "value": 20000000.0,
+   "evidence": "السعر 20,000,000 جنيه"
+  }
+ },
+ "54334": {
+  "id": 54334,
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا منفصلة"
+  },
+  "bedrooms": {
+   "value": 5,
+   "evidence": "5 غرف"
+  },
+  "area_m2": {
+   "value": 360.0,
+   "evidence": "360 م²"
+  },
+  "finishing": {
+   "value": "super_lux",
+   "evidence": "متشطب سوبر لوكس"
+  },
+  "price": {
+   "value": 45000000.0,
+   "evidence": "السعر 45,000,000 جنيه"
+  }
+ },
+ "20265": {
+  "id": 20265,
+  "area_m2": {
+   "value": 1080.0,
+   "evidence": "1,080 م²"
+  },
+  "finishing": {
+   "value": "core_shell",
+   "evidence": "بدون تشطيب"
+  }
+ },
+ "19900": {
+  "id": 19900,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "2 غرفة (غرفتين)"
+  },
+  "area_m2": {
+   "value": 138.0,
+   "evidence": "138 م²"
+  },
+  "finishing": {
+   "value": "semi_finished",
+   "evidence": "نصف تشطيب"
+  },
+  "price": {
+   "value": 5637500.0,
+   "evidence": "السعر 5,637,500 جنيه"
+  },
+  "compound": {
+   "value": "أريا",
+   "evidence": "كمبوند أريا مستقبل سيتي"
+  }
+ },
+ "54705": {
+  "id": 54705,
+  "property_type": {
+   "value": "shop",
+   "evidence": "محل أو تجاري للبيع"
+  },
+  "area_m2": {
+   "value": 69.0,
+   "evidence": "69 م²"
+  },
+  "down_payment": {
+   "value": 655000.0,
+   "evidence": "مقدم دفعة أولى 655,000 جنيه"
+  },
+  "installment_months": {
+   "value": 96,
+   "evidence": "أقساط على 96 شهر"
+  },
+  "finishing": {
+   "value": "core_shell",
+   "evidence": "بدون تشطيب"
+  },
+  "compound": {
+   "value": "بلو هب الجلالة",
+   "evidence": "في بلو هب الجلالة"
+  }
+ },
+ "54091": {
+  "id": 54091,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "area_m2": {
+   "value": 161.0,
+   "evidence": "161 م²"
+  },
+  "down_payment": {
+   "value": 1544544.0,
+   "evidence": "مقدم دفعة أولى 1,544,544 جنيه"
+  },
+  "installment_months": {
+   "value": 12,
+   "evidence": "أقساط على 12 شهر"
+  },
+  "finishing": {
+   "value": "semi_finished",
+   "evidence": "نصف تشطيب"
+  },
+  "compound": {
+   "value": "Sadan 1",
+   "evidence": "في Sadan 1"
+  }
+ },
+ "54638": {
+  "id": 54638,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة فندقية مفروش للبيع"
+  },
+  "bedrooms": {
+   "value": 4,
+   "evidence": "4 غرف"
+  },
+  "area_m2": {
+   "value": 420.0,
+   "evidence": "420 م²"
+  },
+  "finishing": {
+   "value": "extra_super_lux",
+   "evidence": "متشطب إكسترا سوبر لوكس"
+  },
+  "price": {
+   "value": 16000000.0,
+   "evidence": "السعر 16,000,000 جنيه"
+  }
+ },
+ "20039": {
+  "id": 20039,
+  "property_type": {
+   "value": "shop",
+   "evidence": "محل أو تجاري للبيع"
+  },
+  "area_m2": {
+   "value": 65.0,
+   "evidence": "65 م²"
+  },
+  "down_payment": {
+   "value": 700000.0,
+   "evidence": "مقدم دفعة أولى 700,000 جنيه"
+  },
+  "installment_months": {
+   "value": 96,
+   "evidence": "أقساط على 96 شهر"
+  },
+  "finishing": {
+   "value": "core_shell",
+   "evidence": "بدون تشطيب"
+  },
+  "compound": {
+   "value": "موفنبيك السخنة",
+   "evidence": "في موفنبيك السخنة"
+  }
+ },
+ "19760": {
+  "id": 19760,
+  "area_m2": {
+   "value": 3251.0,
+   "evidence": "3,251 م²"
+  },
+  "down_payment": {
+   "value": 50000000.0,
+   "evidence": "مقدم دفعة أولى 50,000,000 جنيه"
+  },
+  "installment_months": {
+   "value": 24,
+   "evidence": "أقساط على 24 شهر"
+  },
+  "finishing": {
+   "value": "core_shell",
+   "evidence": "طوب احمر"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  }
+ },
+ "54062": {
+  "id": 54062,
+  "bedrooms": {
+   "value": 4,
+   "evidence": "أربع غرف"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "ثلاثة حمام"
+  },
+  "area_m2": {
+   "value": 200.0,
+   "evidence": "مساحة 200م"
+  },
+  "finishing": {
+   "value": "extra_super_lux",
+   "evidence": "متشطب إكسترا سوبر لوكس"
+  },
+  "price": {
+   "value": 9000000.0,
+   "evidence": "السعر 9,000,000 جنيه"
+  }
+ },
+ "19634": {
+  "id": 19634,
+  "property_type": {
+   "value": "house",
+   "evidence": "منزل 3 ادوار"
+  },
+  "area_m2": {
+   "value": 150.0,
+   "evidence": "150 م²"
+  },
+  "finishing": {
+   "value": "semi_finished",
+   "evidence": "نصف تشطيب"
+  },
+  "price": {
+   "value": 3200000.0,
+   "evidence": "السعر 3,200,000 جنيه"
+  }
+ },
+ "20683": {
+  "id": 20683,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  },
+  "area_m2": {
+   "value": 152.0,
+   "evidence": "152 م²"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "finishing": {
+   "value": "semi_finished",
+   "evidence": "نصف تشطيب"
+  },
+  "price": {
+   "value": 2000000.0,
+   "evidence": "السعر 2,000,000 جنيه"
+  }
+ },
+ "54209": {
+  "id": 54209,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  },
+  "area_m2": {
+   "value": 165.0,
+   "evidence": "165 م²"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "finishing": {
+   "value": "semi_finished",
+   "evidence": "نصف تشطيب"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  },
+  "price": {
+   "value": 4500000.0,
+   "evidence": "السعر 4,500,000 جنيه"
+  }
+ },
+ "19631": {
+  "id": 19631,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة أرضي"
+  },
+  "area_m2": {
+   "value": 245.0,
+   "evidence": "245 م²"
+  },
+  "bedrooms": {
+   "value": 4,
+   "evidence": "4 غرف"
+  },
+  "finishing": {
+   "value": "extra_super_lux",
+   "evidence": "تشطيب الترا لوكس"
+  },
+  "compound": {
+   "value": "النخيل",
+   "evidence": "كمباوند النخيل"
+  },
+  "price": {
+   "value": 9000000.0,
+   "evidence": "السعر 9,000,000 جنيه"
+  }
+ },
+ "54294": {
+  "id": 54294,
+  "property_type": {
+   "value": "factory",
+   "evidence": "مصنع للإيجار"
+  },
+  "area_m2": {
+   "value": 300.0,
+   "evidence": "300 م²"
+  },
+  "finishing": {
+   "value": "super_lux",
+   "evidence": "متشطب سوبر لوكس"
+  }
+ },
+ "55142": {
+  "id": 55142,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  },
+  "area_m2": {
+   "value": 207.0,
+   "evidence": "207 م"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "finishing": {
+   "value": "semi_finished",
+   "evidence": "نصف تشطيب"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  }
+ },
+ "54314": {
+  "id": 54314,
+  "property_type": {
+   "value": "shop",
+   "evidence": "محل أو تجاري للبيع"
+  },
+  "area_m2": {
+   "value": 700.0,
+   "evidence": "700 م²"
+  },
+  "down_payment": {
+   "value": 19250000.0,
+   "evidence": "مقدم دفعة أولى 19,250,000 جنيه"
+  },
+  "installment_months": {
+   "value": 48,
+   "evidence": "أقساط على 48 شهر"
+  },
+  "finishing": {
+   "value": "semi_finished",
+   "evidence": "نصف تشطيب"
+  }
+ },
+ "54547": {
+  "id": 54547,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة بفيلا"
+  },
+  "area_m2": {
+   "value": 165.0,
+   "evidence": "165 م²"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "finishing": {
+   "value": "extra_super_lux",
+   "evidence": "متشطب إكسترا سوبر لوكس"
+  }
+ },
+ "54663": {
+  "id": 54663,
+  "property_type": {
+   "value": "factory",
+   "evidence": "مصنع للبيع"
+  },
+  "area_m2": {
+   "value": 25000.0,
+   "evidence": "مساحة 25000 م2"
+  },
+  "finishing": {
+   "value": "semi_finished",
+   "evidence": "نصف تشطيب"
+  },
+  "price": {
+   "value": 80000000.0,
+   "evidence": "السعر 80,000,000 جنيه"
+  }
+ },
+ "54059": {
+  "id": 54059,
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  },
+  "area_m2": {
+   "value": 350.0,
+   "evidence": "350 م²"
+  },
+  "bedrooms": {
+   "value": 4,
+   "evidence": "4 غرف"
+  },
+  "finishing": {
+   "value": "semi_finished",
+   "evidence": "نصف تشطيب"
+  },
+  "price": {
+   "value": 8500000.0,
+   "evidence": "السعر 8,500,000 جنيه"
+  }
+ }
+}

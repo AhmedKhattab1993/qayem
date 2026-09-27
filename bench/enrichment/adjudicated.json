@@ -1,0 +1,376 @@
+{
+ "1546|is_multi_unit": [
+  null,
+  false
+ ],
+ "1364|compound": [
+  null,
+  "مدينتي"
+ ],
+ "2343|purpose": [
+  null,
+  "sale"
+ ],
+ "1821|purpose": [
+  null,
+  "sale"
+ ],
+ "4096|area_m2": [
+  null,
+  500
+ ],
+ "4096|city": [
+  null,
+  "الإسكندرية",
+  "كينج مريوط"
+ ],
+ "2266|city": [
+  null,
+  "اثر النبي"
+ ],
+ "2108|is_multi_unit": [
+  null,
+  false
+ ],
+ "1042|purpose": [
+  null,
+  "sale"
+ ],
+ "2642|bedrooms": [
+  null,
+  3
+ ],
+ "3490|is_multi_unit": [
+  null,
+  false
+ ],
+ "3490|is_installment": [
+  null,
+  false
+ ],
+ "31412|purpose": [
+  null,
+  "sale"
+ ],
+ "3862|purpose": [
+  null,
+  "sale"
+ ],
+ "3862|is_multi_unit": [
+  null,
+  false
+ ],
+ "1637|purpose": [
+  null,
+  "sale"
+ ],
+ "1637|down_payment": [
+  2250000
+ ],
+ "3414|finishing": [
+  null,
+  "extra_super_lux"
+ ],
+ "1330|purpose": [
+  null,
+  "sale"
+ ],
+ "1330|is_multi_unit": [
+  null,
+  false
+ ],
+ "1330|is_installment": [
+  null,
+  true
+ ],
+ "1330|compound": [
+  null,
+  "الكوربة الجديدة"
+ ],
+ "3887|purpose": [
+  null,
+  "sale"
+ ],
+ "3887|is_multi_unit": [
+  null,
+  false
+ ],
+ "4251|purpose": [
+  null,
+  "sale"
+ ],
+ "4224|bedrooms": [
+  null,
+  3
+ ],
+ "4224|city": [
+  null,
+  "الطالبية"
+ ],
+ "2865|purpose": [
+  null,
+  "sale"
+ ],
+ "2865|is_multi_unit": [
+  null,
+  true
+ ],
+ "2865|city": [
+  null,
+  "غرب القاهرة"
+ ],
+ "1576|purpose": [
+  null,
+  "sale"
+ ],
+ "1576|is_multi_unit": [
+  null,
+  false
+ ],
+ "2495|city": [
+  null,
+  "المهندسين"
+ ],
+ "1139|city": [
+  null,
+  "عين شمس"
+ ],
+ "3295|city": [
+  null,
+  "العجمي"
+ ],
+ "3689|city": [
+  null,
+  "سبورتنج"
+ ],
+ "1592|purpose": [
+  null,
+  "sale"
+ ],
+ "1586|city": [
+  null,
+  "حدائق القبه"
+ ],
+ "1482|purpose": [
+  null,
+  "sale"
+ ],
+ "1949|purpose": [
+  null,
+  "sale"
+ ],
+ "1949|is_installment": [
+  null,
+  true
+ ],
+ "1214|purpose": [
+  null,
+  "sale"
+ ],
+ "1214|delivery_status": [
+  null,
+  "under_construction"
+ ],
+ "1214|compound": [
+  null,
+  "بيت الوطن"
+ ],
+ "1710|purpose": [
+  null,
+  "sale"
+ ],
+ "1710|city": [
+  null,
+  "شيراتون"
+ ],
+ "3847|finishing": [
+  null,
+  "finished"
+ ],
+ "3443|city": [
+  null,
+  "سيدى بشر"
+ ],
+ "3069|city": [
+  null,
+  "فيصل"
+ ],
+ "2330|compound": [
+  "ديستركت ڤايف",
+  "ديستركت 5",
+  "District 5"
+ ],
+ "1337|compound": [
+  null,
+  "بيت الوطن"
+ ],
+ "3617|city": [
+  null,
+  "زيزينيا"
+ ],
+ "3460|city": [
+  null,
+  "الإسكندرية",
+  "العجمي"
+ ],
+ "1506|purpose": [
+  null,
+  "sale"
+ ],
+ "1114|finishing": [
+  null,
+  "extra_super_lux"
+ ],
+ "1114|city": [
+  null,
+  "النزهة الجديدة"
+ ],
+ "1890|city": [
+  null,
+  "مصر الجديده"
+ ],
+ "2036|seller_type": [
+  null,
+  "owner"
+ ],
+ "3237|city": [
+  null,
+  "زيزينيا"
+ ],
+ "3235|finishing": [
+  null,
+  "extra_super_lux"
+ ],
+ "3235|city": [
+  null,
+  "ميامي"
+ ],
+ "54441|is_multi_unit": [
+  null,
+  false
+ ],
+ "22219|purpose": [
+  null,
+  "sale"
+ ],
+ "42475|city": [
+  null,
+  "زايد"
+ ],
+ "21941|bedrooms": [
+  null,
+  4
+ ],
+ "21300|compound": [
+  "ويست كورت west courts",
+  "ويست كورت"
+ ],
+ "53898|compound": [
+  "ستوده",
+  "STODA"
+ ],
+ "31697|is_multi_unit": [
+  null,
+  false
+ ],
+ "30814|is_multi_unit": [
+  null,
+  false
+ ],
+ "30814|compound": [
+  null,
+  "مدينتى"
+ ],
+ "4458|delivery_status": [
+  null,
+  "under_construction"
+ ],
+ "21604|compound": [
+  "هاسيندا ووترز",
+  "Hacienda waters"
+ ],
+ "43593|city": [
+  null,
+  "العاصمه الاداريه الحديده",
+  "العاصمه الاداريه"
+ ],
+ "42951|purpose": [
+  null,
+  "sale"
+ ],
+ "42951|installment_months": [
+  null,
+  96
+ ],
+ "31086|purpose": [
+  null,
+  "sale"
+ ],
+ "31086|is_resale": [
+  null,
+  true
+ ],
+ "31086|compound": [
+  null,
+  "Marriott Residence Heliopolis"
+ ],
+ "31086|city": [
+  null,
+  "Heliopolis"
+ ],
+ "38878|seller_type": [
+  null,
+  "owner"
+ ],
+ "30811|compound": [
+  null,
+  "مدينتى"
+ ],
+ "54945|purpose": [
+  null,
+  "sale"
+ ],
+ "54945|is_resale": [
+  true
+ ],
+ "43354|is_multi_unit": [
+  null,
+  false
+ ],
+ "20265|property_type": [
+  null,
+  "building"
+ ],
+ "54705|compound": [
+  null,
+  "بلو هب الجلالة"
+ ],
+ "54091|compound": [
+  null,
+  "Sadan 1"
+ ],
+ "20039|is_multi_unit": [
+  null,
+  false
+ ],
+ "20039|compound": [
+  null,
+  "موفنبيك السخنة"
+ ],
+ "19634|property_type": [
+  null,
+  "house"
+ ],
+ "19634|area_m2": [
+  null,
+  150
+ ],
+ "54059|is_multi_unit": [
+  null,
+  true
+ ],
+ "22219|is_resale": [
+  null,
+  true
+ ]
+}

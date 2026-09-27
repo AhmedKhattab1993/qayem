@@ -1,0 +1,234 @@
+{
+ "3874|finishing": [
+  null,
+  "finished"
+ ],
+ "2137|compound": [
+  null,
+  "سكن مصر الأندلس"
+ ],
+ "31376|compound": [
+  null,
+  "Al Jar"
+ ],
+ "3559|bedrooms": [
+  null,
+  2
+ ],
+ "1432|price": [
+  null,
+  1000000
+ ],
+ "2990|developer": [
+  null,
+  "نوفارا"
+ ],
+ "3935|bedrooms": [
+  null,
+  4
+ ],
+ "4179|area_m2": [
+  null,
+  110
+ ],
+ "4179|finishing": [
+  null,
+  "finished"
+ ],
+ "2638|price": [
+  null,
+  1000000
+ ],
+ "4259|area_m2": [
+  null,
+  100
+ ],
+ "3641|finishing": [
+  null,
+  "super_lux"
+ ],
+ "3005|compound": [
+  null,
+  "تعاونيات مشروع 164"
+ ],
+ "1394|is_multi_unit": [
+  null,
+  true
+ ],
+ "3475|compound": [
+  null,
+  "أبراج المصرية السعودية"
+ ],
+ "31722|finishing": [
+  null,
+  "finished"
+ ],
+ "1823|developer": [
+  null,
+  "مونتن فيو"
+ ],
+ "4178|property_type": [
+  null,
+  "building"
+ ],
+ "1522|finishing": [
+  null,
+  "finished"
+ ],
+ "1793|is_multi_unit": [
+  null,
+  true
+ ],
+ "4286|compound": [
+  "D-Bay",
+  "دي باي"
+ ],
+ "2977|finishing": [
+  null,
+  "super_lux"
+ ],
+ "1416|finishing": [
+  null,
+  "super_lux"
+ ],
+ "2816|finishing": [
+  null,
+  "lux"
+ ],
+ "2600|is_multi_unit": [
+  null,
+  true
+ ],
+ "1617|compound": [
+  null,
+  "هرم سيتي"
+ ],
+ "31491|area_m2": [
+  null,
+  640
+ ],
+ "1702|finishing": [
+  null,
+  "finished"
+ ],
+ "2931|area_m2": [
+  null,
+  270
+ ],
+ "2931|finishing": [
+  null,
+  "finished"
+ ],
+ "1256|delivery_status": [
+  null,
+  "under_construction"
+ ],
+ "1256|compound": [
+  "سراي",
+  "Sarai"
+ ],
+ "1599|price": null,
+ "1599|finishing": [
+  null,
+  "finished"
+ ],
+ "1386|compound": [
+  null,
+  "North House"
+ ],
+ "1387|compound": [
+  null,
+  "North House"
+ ],
+ "2236|compound": [
+  null,
+  "مايان"
+ ],
+ "1514|compound": [
+  null,
+  "النورث هاوس"
+ ],
+ "1807|finishing": [
+  null,
+  "finished",
+  "extra_super_lux"
+ ],
+ "3784|is_resale": [
+  null,
+  true
+ ],
+ "1569|is_multi_unit": [
+  null,
+  true
+ ],
+ "1022|compound": [
+  null,
+  "QAMARI"
+ ],
+ "1119|is_resale": [
+  null,
+  true
+ ],
+ "1731|is_resale": [
+  null,
+  true
+ ],
+ "1731|delivery_status": [
+  null,
+  "under_construction"
+ ],
+ "1853|delivery_status": [
+  null,
+  "ready_to_move"
+ ],
+ "4264|down_payment": [
+  null,
+  0
+ ],
+ "43209|compound": [
+  "بالم هيلز القاهرة الجديدة",
+  "Palm Hills New Cairo"
+ ],
+ "47488|compound": [
+  null,
+  "الدون تاون اكستنشن"
+ ],
+ "47395|compound": [
+  null,
+  "Cred"
+ ],
+ "42235|is_multi_unit": [
+  null,
+  true
+ ],
+ "54658|is_resale": [
+  null,
+  true
+ ],
+ "31698|price": null,
+ "31698|compound": null,
+ "53767|is_multi_unit": [
+  null,
+  true
+ ],
+ "53967|property_type": [
+  null,
+  "villa"
+ ],
+ "42556|delivery_status": [
+  null,
+  "under_construction"
+ ],
+ "22067|developer": [
+  null,
+  "TATWEER MASR"
+ ],
+ "42719|is_resale": [
+  null,
+  true
+ ],
+ "42719|compound": [
+  "Hidepark",
+  "هايد بارك"
+ ]
+}

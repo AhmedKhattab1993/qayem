@@ -1,0 +1,22 @@
+.venv/
+__pycache__/
+*.pyc
+qayem.db
+.pytest_cache/
+
+# Website build and local tooling
+web/node_modules/
+web/dist/
+web/*.tsbuildinfo
+web/test-results/
+.artifacts/
+
+# Crawl logs and health reports
+logs/
+.qayem-locks/
+backups/
+
+# SQLite write-ahead files next to the database
+qayem.db-*
+# Benchmark run logs
+bench/enrichment/*.log

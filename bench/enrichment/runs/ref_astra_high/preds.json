@@ -1,0 +1,10652 @@
+{
+ "2046": {
+  "id": 2046,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة للبيع 120 متر صافي"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 120,
+   "evidence": "120 متر صافي"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "super_lux",
+   "evidence": "سوبر لوكس"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "مصر الجديدة",
+   "evidence": "بمصر الجديدة"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "3266": {
+  "id": 3266,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقه للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقه للبيع في الاسكندريه خورشيد شارع السوق بها عدد 3 اوض"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "عدد 3 اوض"
+  },
+  "bathrooms": {
+   "value": 1,
+   "evidence": "ومطبخ وحمام"
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "الاسكندريه",
+   "evidence": "في الاسكندريه"
+  },
+  "seller_type": {
+   "value": "owner",
+   "evidence": "من المالك مباشره"
+  }
+ },
+ "2479": {
+  "id": 2479,
+  "purpose": {
+   "value": "sale",
+   "evidence": "فرصة مميزة للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة تحت الإنشاء"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة تحت الإنشاء للتنازل مطلوب المدفوع فقط"
+  },
+  "is_resale": {
+   "value": true,
+   "evidence": "للتنازل"
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": "under_construction",
+   "evidence": "تحت الإنشاء"
+  },
+  "compound": {
+   "value": "Vida Residence",
+   "evidence": "كمبوند Vida Residence"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1546": {
+  "id": 1546,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه استلام فوري"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقه استلام فوري بالR7"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "العاصمة الإدارية",
+   "evidence": "في قلب العاصمة الإدارية"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1336": {
+  "id": 1336,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقه للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقه 106 متر ب سكن مصر الدور الأرضي مرتفع"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 106,
+   "evidence": "106 متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف نوم"
+  },
+  "bathrooms": {
+   "value": 1,
+   "evidence": "و حمام"
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "سكن مصر",
+   "evidence": "ب سكن مصر"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1364": {
+  "id": 1364,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقه للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقه للبيع بمدينتي B15 تخصيص شرطه 111 متر دور أرضي"
+  },
+  "is_resale": {
+   "value": true,
+   "evidence": "أرخص من سعر الشركه"
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 111,
+   "evidence": "111 متر"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "إستلام فوري"
+  },
+  "compound": {
+   "value": "مدينتي",
+   "evidence": "بمدينتي B15"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "مدينتي",
+   "evidence": "بمدينتي"
+  },
+  "seller_type": {
+   "value": "owner",
+   "evidence": "من المالك"
+  }
+ },
+ "3303": {
+  "id": 3303,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة 80 متر عبارة عن غرفتين وصالة وحمام ومطبخ دور ثالث"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 80,
+   "evidence": "80 متر"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "غرفتين"
+  },
+  "bathrooms": {
+   "value": 1,
+   "evidence": "وحمام"
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "برج العرب الجديدة",
+   "evidence": "في مدينة برج العرب الجديدة"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "2864": {
+  "id": 2864,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "penthouse",
+   "evidence": "Benthouse"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "160 m Square, 100 m Square roof, at 10th floor"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 160,
+   "evidence": "160 m Square, 100 m Square roof"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "2 Bedrooms"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3 Bathrooms"
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "Palm Hills Badya",
+   "evidence": "at Palm Hills Badya"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "2685": {
+  "id": 2685,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقه للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقه للبيع بين فيصل والهرم امام محطه المستقبل وقرب شارع المستشفى وسهل حمزه  مساحه 180م"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 180,
+   "evidence": "مساحه 180م"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف نوم"
+  },
+  "bathrooms": {
+   "value": 2,
+   "evidence": "2 حمام"
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "4183": {
+  "id": 4183,
+  "purpose": {
+   "value": "sale",
+   "evidence": "منزل للبيع"
+  },
+  "property_type": {
+   "value": "house",
+   "evidence": "منزل"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "منزل للبيع في ارقي مكان في امبابة"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "امبابة",
+   "evidence": "في امبابة"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1487": {
+  "id": 1487,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "2شقتين جنب بعض"
+  },
+  "is_multi_unit": {
+   "value": true,
+   "evidence": "2شقتين جنب بعض"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "2343": {
+  "id": 2343,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة 100 م"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة 100 م كمبوند چوار"
+  },
+  "is_resale": {
+   "value": true,
+   "evidence": "مطلوب المدفوع فقط بدون اوفر و تكمله الاقساط مع الشركة"
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "تكمله الاقساط مع الشركة"
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 100,
+   "evidence": "شقة 100 م"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "چوار",
+   "evidence": "كمبوند چوار"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "التجمع السادس",
+   "evidence": "التجمع السادس"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1333": {
+  "id": 1333,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة 210م"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة 210م ببيت الوطن الحي الثاني"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 210,
+   "evidence": "شقة 210م"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "التجمع الخامس",
+   "evidence": "في قلب التجمع الخامس"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1821": {
+  "id": 1821,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقتك في أرقى مناطق المقطم"
+  },
+  "is_multi_unit": {
+   "value": null,
+   "evidence": null
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "كاش أو قسط"
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "تسليم فوري"
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "المقطم",
+   "evidence": "شقتك في أرقى مناطق المقطم"
+  },
+  "seller_type": {
+   "value": "owner",
+   "evidence": "من المالك مباشره بدون وسيط"
+  }
+ },
+ "31564": {
+  "id": 31564,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة لقطة للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة لقطة للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة لقطة للبيع – العجوزة"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 100,
+   "evidence": "المساحة: 100"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "العجوزة",
+   "evidence": "الموقع: العجوزة"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "4096": {
+  "id": 4096,
+  "purpose": {
+   "value": "sale",
+   "evidence": "فيلا مودرن للبيع"
+  },
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا مودرن للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "الفيلا 500م مسجلة نهائي"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 500,
+   "evidence": "الفيلا 500م"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "الإسكندرية",
+   "evidence": "كينج مريوط الإسكندرية"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "3124": {
+  "id": 3124,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة للبيع.... كمبوند كنز  دور أول"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 180,
+   "evidence": "مساحة 180 متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": 2,
+   "evidence": "2 حمام"
+  },
+  "finishing": {
+   "value": "super_lux",
+   "evidence": "تشطيب سوبر لوكس"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "كنز",
+   "evidence": "كمبوند كنز"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "2266": {
+  "id": 2266,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقه للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقه للبيع 200متر سوبر لوكس الدور الاول"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 200,
+   "evidence": "200متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3غرف"
+  },
+  "bathrooms": {
+   "value": 2,
+   "evidence": "2حمام"
+  },
+  "finishing": {
+   "value": "super_lux",
+   "evidence": "سوبر لوكس"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "2108": {
+  "id": 2108,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه فندقيه"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقه فندقيه علي النيل بأميز اطلاله"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "المعادي",
+   "evidence": "بكورنيش المعادي"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1042": {
+  "id": 1042,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه متشطبه بالكامل"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "مساحه 136 متر (2 غرف )"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "والباقي بالتقسيط"
+  },
+  "down_payment": {
+   "value": 2000000,
+   "evidence": "مقدم : 2,000,000 جنيه"
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 136,
+   "evidence": "مساحه 136 متر"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "2 غرف"
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "متشطبه بالكامل"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "District 5",
+   "evidence": "في (District 5)"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "التجمع الخامس",
+   "evidence": "التجمع الخامس"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1600": {
+  "id": 1600,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة استلام فوري"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "مساحة الوحدة: 145 متر"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 145,
+   "evidence": "مساحة الوحدة: 145 متر"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "التجمع الخامس",
+   "evidence": "في التجمع الخامس"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "2642": {
+  "id": 2642,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقه للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "مساحتها 165 متر الدور التاني"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 165,
+   "evidence": "مساحتها 165 متر"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "الشيخ زايد",
+   "evidence": "في الحي السابع الشيخ زايد"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "3490": {
+  "id": 3490,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة للبيع كاش"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع كاش"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة للبيع كاش"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "31412": {
+  "id": 31412,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه بمساحه 167 متر"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقه بمساحه 167 متر"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "بالتقسيط علي 3 سنوات بدون فوائد"
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": 36,
+   "evidence": "بالتقسيط علي 3 سنوات"
+  },
+  "area_m2": {
+   "value": 167,
+   "evidence": "شقه بمساحه 167 متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف نوم"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3 تويليت"
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "متشطبه بالكامل"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "3914": {
+  "id": 3914,
+  "purpose": {
+   "value": "sale",
+   "evidence": "تاون هاوس للبيع"
+  },
+  "property_type": {
+   "value": "townhouse",
+   "evidence": "تاون هاوس"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "مساحة الأرض 220م. - مساحة المبانى 360م."
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 360,
+   "evidence": "مساحة المبانى 360م."
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "لاروزا",
+   "evidence": "كمبوند لاروزا"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "القاهرة الجديدة",
+   "evidence": "القاهرة الجديدة خلف واتر واى والرحاب"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "3862": {
+  "id": 3862,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "townhouse",
+   "evidence": "Town house"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "Town house only 11 million"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": 11000000,
+   "evidence": "Town house only 11 million"
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "العاصمه الاداريه الجديده",
+   "evidence": "في العاصمه الاداريه الجديده"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1870": {
+  "id": 1870,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقه للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه 250 م"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقه 250 م واجهه حصه في الارض"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 250,
+   "evidence": "شقه 250 م"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "جسر السويس",
+   "evidence": "شقه للبيع في جسر السويس"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "3955": {
+  "id": 3955,
+  "purpose": {
+   "value": "sale",
+   "evidence": "فيلا ستاند الون للبيع"
+  },
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا مستقلة"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "فيلا مستقلة بسعر مش موجود لدواعي السفر"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "للبيع بالتقسيط"
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  },
+  "compound": {
+   "value": "لافيستا سيتي",
+   "evidence": "في لافيستا سيتي"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1064": {
+  "id": 1064,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقه للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "الشقه جاهزه للمعاينه في اي وقت معاه جاردن خاص"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "متشطبه بالكامل full finished"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوررري"
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "الشروق",
+   "evidence": "فيً الشروق قريبه من التجمع"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "3344": {
+  "id": 3344,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة تمليك من المالك مباشر"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة تمليك"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة تمليك من المالك مباشر"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": "owner",
+   "evidence": "من المالك مباشر بدون سمسار"
+  }
+ },
+ "1637": {
+  "id": 1637,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة متشطبة بالكامل في #District_5    المساحة: 161 متر"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "تقسيط باقي"
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 161,
+   "evidence": "المساحة: 161 متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3حمام"
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "متشطبة بالكامل"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  },
+  "compound": {
+   "value": "District_5",
+   "evidence": "في #District_5"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "3414": {
+  "id": 3414,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة للبيع شارع الحنفية الرئيسى  مساحتها 80 متر"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": 680000,
+   "evidence": "سعرها 680 الف"
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 80,
+   "evidence": "مساحتها 80 متر"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "غرفتين"
+  },
+  "bathrooms": {
+   "value": 1,
+   "evidence": "حمام ومطبخ"
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1330": {
+  "id": 1330,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": null,
+   "evidence": null
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "بمقدم 382,950 جنيه فقط — امتلك 115م في الكوربة الجديدة بأكتوبر!"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": 382950,
+   "evidence": "بمقدم 382,950 جنيه فقط"
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 115,
+   "evidence": "امتلك 115م"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "الكوربة الجديدة",
+   "evidence": "في الكوربة الجديدة بأكتوبر!  فرصة مميزة للسكن والاستثمار داخل كمبوند"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "أكتوبر",
+   "evidence": "بأكتوبر"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "2224": {
+  "id": 2224,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": null,
+   "evidence": null
+  },
+  "is_multi_unit": {
+   "value": null,
+   "evidence": null
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "مصر الجديده",
+   "evidence": "72شارع بيروت مصر الجديده"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1905": {
+  "id": 1905,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقه للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقه للبيع بالمقطم شارع 9 بجوار بنزينه توتل من المالك"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "المقطم",
+   "evidence": "المقطم شارع 9"
+  },
+  "seller_type": {
+   "value": "owner",
+   "evidence": "من المالك مباشره"
+  }
+ },
+ "3887": {
+  "id": 3887,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا في سراي ( S Villa )"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "فيلا في سراي ( S Villa ) بإطلالة مباشرة على لاند سكيب في  ELM TREE PARK   - بمساحة 212 متر"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 212,
+   "evidence": "بمساحة 212 متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": 4,
+   "evidence": "4 حمام"
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "سراي",
+   "evidence": "فيلا في سراي"
+  },
+  "developer": {
+   "value": "مدينة مصر",
+   "evidence": "شركة مدينة مصر"
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "31504": {
+  "id": 31504,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقه للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقه للبيع 200 م 3 غرفه واثنين حمام دور اول"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 200,
+   "evidence": "شقه للبيع 200 م"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرفه"
+  },
+  "bathrooms": {
+   "value": 2,
+   "evidence": "اثنين حمام"
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "حدائق الاهرام",
+   "evidence": "في حدائق الاهرام"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "2959": {
+  "id": 2959,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه متشطبة"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقه متشطبة وبها عفش مش هشيله"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "متشطبة"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1511": {
+  "id": 1511,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": null,
+   "evidence": null
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "ارضي 185 م+20م جاردن واجهه اماميه بحري"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 185,
+   "evidence": "ارضي 185 م+20م جاردن"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "التجمع الخامس",
+   "evidence": "في اميز احياء التجمع الخامس"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "2944": {
+  "id": 2944,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة مميزة جداً بموقع استراتيجي بجوار بيل فيل وجرين ريزيدنس"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "الشيخ زايد",
+   "evidence": "في الشيخ زايد – الحي السابع"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1534": {
+  "id": 1534,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقق للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "متاح شقتين للبيع"
+  },
+  "is_multi_unit": {
+   "value": true,
+   "evidence": "متاح شقتين للبيع"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": 2,
+   "evidence": "2 حمام"
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "مدينة بدر",
+   "evidence": "بمدينة بدر"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1257": {
+  "id": 1257,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة بنص سعرها لسرعة البيع"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف منهم واحدة ماستر"
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "متشطبة بالتكييفات"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "3849": {
+  "id": 3849,
+  "purpose": {
+   "value": "sale",
+   "evidence": "فيلا للبيع"
+  },
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "تقسيمه الفيلا 245م"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "بقسط علي 7سنين"
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": 84,
+   "evidence": "بقسط علي 7سنين"
+  },
+  "area_m2": {
+   "value": 245,
+   "evidence": "تقسيمه الفيلا 245م"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "العبور",
+   "evidence": "في العبور"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1174": {
+  "id": 1174,
+  "purpose": {
+   "value": "sale",
+   "evidence": "هبيع شقه"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "هبيع شقه"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "هبيع شقه ف القاهره الجديده"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 215,
+   "evidence": "215 متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": 2,
+   "evidence": "2 تويلت"
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "أستلام فوري"
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "القاهره الجديده",
+   "evidence": "ف القاهره الجديده"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "4251": {
+  "id": 4251,
+  "purpose": {
+   "value": "sale",
+   "evidence": "للبيع دربزين سلم استانلس ستيل"
+  },
+  "property_type": {
+   "value": null,
+   "evidence": null
+  },
+  "is_multi_unit": {
+   "value": null,
+   "evidence": null
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "4224": {
+  "id": 4224,
+  "purpose": {
+   "value": "sale",
+   "evidence": "منزل للبيع والاستثمار"
+  },
+  "property_type": {
+   "value": "house",
+   "evidence": "منزل للبيع والاستثمار"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "عقار كامل على ناصية 100م - أرضي و3 أدوار - للبيع"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 100,
+   "evidence": "المساحة 100 متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "2865": {
+  "id": 2865,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "امتلك شقتك"
+  },
+  "is_multi_unit": {
+   "value": null,
+   "evidence": null
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "Beta Residence",
+   "evidence": "في Beta Residence"
+  },
+  "developer": {
+   "value": "Beta egypt",
+   "evidence": "مشروع شركه Beta egypt"
+  },
+  "city": {
+   "value": "غرب القاهرة",
+   "evidence": "في قلب غرب القاهرة"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1181": {
+  "id": 1181,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة 3 غرف بتقسيمة مميزة"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "شقة 3 غرف"
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "super_lux",
+   "evidence": "تشطيب سوبر لوكس"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  },
+  "compound": {
+   "value": "ماونتن فيو",
+   "evidence": "فى ماونتن فيو التجمع الخامس"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "التجمع الخامس",
+   "evidence": "في التجمع الخامس"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1576": {
+  "id": 1576,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة استلام فوري"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة استلام فوري في العاصمة الإدارية الجديدة"
+  },
+  "is_resale": {
+   "value": false,
+   "evidence": "بسعر الطرح الأول"
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "وأقساط مريحة حتى 10 سنوات"
+  },
+  "down_payment": {
+   "value": 300000,
+   "evidence": "مقدم 300 ألف فقط"
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "العاصمة الإدارية الجديدة",
+   "evidence": "في العاصمة الإدارية الجديدة"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "2128": {
+  "id": 2128,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة ماستر للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة ماستر للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "الشقة بالدور 12"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 130,
+   "evidence": "المساحة 130 م2"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "ثلاث غرف"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3 حمامات"
+  },
+  "finishing": {
+   "value": "super_lux",
+   "evidence": "تشطيب سوبر لوكس"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "3821": {
+  "id": 3821,
+  "purpose": {
+   "value": "sale",
+   "evidence": "فيلا للبيع"
+  },
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "فيلا للبيع كورنر"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": 3000000,
+   "evidence": "مطلوب 3,000,000 كاش"
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "التجمع الخامس",
+   "evidence": "بالتجمع الخامس"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "2495": {
+  "id": 2495,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقه للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقه للبيع بالفرش و الاجهزه بالمهندسين"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1139": {
+  "id": 1139,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة متشطبة سوبر لوكس"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة بشارع متفرع من شارع عين شمس الرئيسي"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 80,
+   "evidence": "مساحتها 80 م"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "super_lux",
+   "evidence": "متشطبة سوبر لوكس"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1813": {
+  "id": 1813,
+  "purpose": {
+   "value": "sale",
+   "evidence": "استلام فورى للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة 191م"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "بمساحه 191م مكونه من ( 3 غرف + 3 حمام )"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 191,
+   "evidence": "بمساحه 191م"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3 حمام"
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "تشطيب كامل"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فورى"
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "التجمع الخامس",
+   "evidence": "بالتجمع الخامس"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "3295": {
+  "id": 3295,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة مميزة للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة مميزة للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة مميزة للبيع في العجمي – الهانوفيل"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": 600000,
+   "evidence": "600الف"
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 80,
+   "evidence": "80 متر بتقسيم عملي"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "فرصة ممتازة للسكن الفوري"
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1619": {
+  "id": 1619,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقه بفيلا للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه بفيلا"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقه مساحة 240م متر"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 240,
+   "evidence": "شقه مساحة 240م متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 نوم"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3 حمام"
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "3689": {
+  "id": 3689,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة للبيع - 100 م - سبورتنج"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 100,
+   "evidence": "شقة للبيع - 100 م"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "غرفتين"
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1592": {
+  "id": 1592,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "فيو مفتوح 3غرف 3 حمام مطلوب مقدم 300الف فقط"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "هتقسط الباقي"
+  },
+  "down_payment": {
+   "value": 300000,
+   "evidence": "مطلوب مقدم 300الف فقط"
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3غرف"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3 حمام"
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "متشطبه بالكامل"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1586": {
+  "id": 1586,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقه للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقه للبيع بقلب حدائق القبه"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1482": {
+  "id": 1482,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": null,
+   "evidence": null
+  },
+  "is_multi_unit": {
+   "value": true,
+   "evidence": "مساحات للغرفتين تبدأ من 102م والثلاث غرف"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "تقسيط يصل حتي 7 سنوات"
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "القاهرة الجديدة",
+   "evidence": "في ارقي مواقع القاهرة الجديدة"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1949": {
+  "id": 1949,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه 3 غرف"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "الشقه عباره عن  3 غرف 3حمام"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": 1500000,
+   "evidence": "مطلوب مقدم مليون و نصف"
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3حمام"
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "هايد بارك",
+   "evidence": "الشقه في هايد بارك"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "التجمع الخامس",
+   "evidence": "هايد بارك التجمع الخامس"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1162": {
+  "id": 1162,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقه تشطيب فندقي للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة 3 غرف"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة 3 غرف بتشطيب فندقي كامل"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "بتشطيب فندقي كامل"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1214": {
+  "id": 1214,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": null,
+   "evidence": null
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "متوفر الدور الارضي 190 متر ب جنينة 150 متر"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "و الباقي علي 60 شهر"
+  },
+  "down_payment": {
+   "value": 1750000,
+   "evidence": "المقدم 1750000"
+  },
+  "installment_months": {
+   "value": 60,
+   "evidence": "و الباقي علي 60 شهر"
+  },
+  "area_m2": {
+   "value": 190,
+   "evidence": "الدور الارضي 190 متر ب جنينة 150 متر"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1710": {
+  "id": 1710,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة 170 متر"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة 170 متر + جاردن 73 متر"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "أقساط على 8 سنوات"
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": 96,
+   "evidence": "أقساط على 8 سنوات"
+  },
+  "area_m2": {
+   "value": 170,
+   "evidence": "شقة 170 متر + جاردن 73 متر"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "إستلام فوري"
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "3847": {
+  "id": 3847,
+  "purpose": {
+   "value": "sale",
+   "evidence": "للبيع بسعر مميز"
+  },
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا استلام فوري"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "فيلا استلام فوري جاهزة على المفتاح"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "جاهزة على المفتاح"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  },
+  "compound": {
+   "value": "Mountain_View_1.1",
+   "evidence": "#Mountain_View_1.1"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "التجمع_الخامس",
+   "evidence": "في قلب #التجمع_الخامس"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "3443": {
+  "id": 3443,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة للبيع سيدى بشّر بحرى شارع احمد بركات مقابل كافيتريا بح بح الدور 14"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1224": {
+  "id": 1224,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "duplex",
+   "evidence": "Ground Duplex"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "Ground Duplex: 220 meter Garden: 48 meter"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 220,
+   "evidence": "Ground Duplex: 220 meter"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 Bedrooms (One Master)"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3 Bathrooms"
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "fully finished"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "ready to move"
+  },
+  "compound": {
+   "value": "Trio gardens",
+   "evidence": "*Trio gardens New Cairo*"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "New Cairo",
+   "evidence": "*Trio gardens New Cairo*"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "3794": {
+  "id": 3794,
+  "purpose": {
+   "value": "sale",
+   "evidence": "للبيع في التجمع"
+  },
+  "property_type": {
+   "value": "duplex",
+   "evidence": "دوبلكس بجاردن خاص"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "دوبلكس أرضي بجاردن + أول"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "متشطب بالفرش والأجهزة"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "جاهز للسكن"
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "التجمع",
+   "evidence": "للبيع في التجمع"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "3069": {
+  "id": 3069,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقه للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقه للبيع طوب أحمر 140متر أول بلكونه"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 140,
+   "evidence": "140متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3غرف"
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "core_shell",
+   "evidence": "طوب أحمر"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1395": {
+  "id": 1395,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة بمدينة المستقبل"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقه استلام فوررري 3 غرف"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "#استلام_فوري"
+  },
+  "compound": {
+   "value": "Bloomfields",
+   "evidence": "كمبوند #Bloomfields"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "مدينة المستقبل",
+   "evidence": "لوكيشن مميز في مدينة المستقبل"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "3038": {
+  "id": 3038,
+  "purpose": {
+   "value": "sale",
+   "evidence": "للبيع"
+  },
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا دوبلكس"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "فيلا دوبلكس فاخرة بموقع استثنائي"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "الكناريا",
+   "evidence": "كمبوند الكناريا"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "3937": {
+  "id": 3937,
+  "purpose": {
+   "value": "sale",
+   "evidence": "الفيلا معروضة للبيع"
+  },
+  "property_type": {
+   "value": "villa",
+   "evidence": "الفيلا معروضة للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "الفيلا معروضة للبيع"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 210,
+   "evidence": "مساحتها 210 متر"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "extra_super_lux",
+   "evidence": "تشطيب الترا سوبر لوكس"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  },
+  "compound": {
+   "value": "مونتن فيو",
+   "evidence": "في مونتن فيو"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "31399": {
+  "id": 31399,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقتك جاهزة للسكن فورًا!  120م  دور تالت  غرفتين"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 120,
+   "evidence": "120م"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "غرفتين"
+  },
+  "bathrooms": {
+   "value": 1,
+   "evidence": "مطبخ  حمام  بلكونة"
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "متشطبة"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "جاهزة للسكن فورًا"
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1165": {
+  "id": 1165,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": null,
+   "evidence": null
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "3 غرف + ريسبشن  حمام + مطبخ    فيو حمام سباحة   السعر: 2,550,000 جنيه"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": 2550000,
+   "evidence": "السعر: 2,550,000 جنيه"
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": 1,
+   "evidence": "حمام + مطبخ"
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "لاند مارك",
+   "evidence": "لاند مارك"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "4027": {
+  "id": 4027,
+  "purpose": {
+   "value": "sale",
+   "evidence": "للبيع ڤيلا ستاند الون"
+  },
+  "property_type": {
+   "value": "villa",
+   "evidence": "ڤيلا ستاند الون"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "معايا ڤيلا للبيع"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": 4800000,
+   "evidence": "اجمالي سعرها 4 مليون و 800 الف فقط"
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "الشيخ زايد",
+   "evidence": "في الشيخ زايد"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "2330": {
+  "id": 2330,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "الشقة 3 غرف /3 حمام"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3 حمام"
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  },
+  "compound": {
+   "value": "ديستركت ڤايف",
+   "evidence": "كمبوند ديستركت ڤايف"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1337": {
+  "id": 1337,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه 175م"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقه 175م في القاهرة الجديدة"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": 2750000,
+   "evidence": "بسعر 2,750,000 جنيه فقط"
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 175,
+   "evidence": "175م2"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "القاهرة الجديدة",
+   "evidence": "في القاهرة الجديدة"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1864": {
+  "id": 1864,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة لقطة للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة لقطة للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة لقطة للبيع – المهندسين  المساحة: 80 متر صافي"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 80,
+   "evidence": "المساحة: 80 متر صافي"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "غرفتان"
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "المهندسين",
+   "evidence": "شقة لقطة للبيع – المهندسين"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "3112": {
+  "id": 3112,
+  "purpose": {
+   "value": "sale",
+   "evidence": "للبيع وقابل التفاوض البسيط"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه كامله التشطيب"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقه كامله التشطيب تصلح تمويل عقاري"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": 2,
+   "evidence": "2حمام"
+  },
+  "finishing": {
+   "value": "super_lux",
+   "evidence": "تشطيب سوبر لوكس"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": "owner",
+   "evidence": "بدون وسيط من المالك مباشر"
+  }
+ },
+ "3617": {
+  "id": 3617,
+  "purpose": {
+   "value": "sale",
+   "evidence": "للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة متميزة"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة متميزة في زيزينيا بحري للبيع 170 متر"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 170,
+   "evidence": "170 متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3 حمام"
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "3460": {
+  "id": 3460,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة للبيع بقرية النخيل"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "قرية النخيل",
+   "evidence": "بقرية النخيل"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "الإسكندرية",
+   "evidence": "العجمي، الإسكندرية"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1506": {
+  "id": 1506,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة في العاصمة الإدارية"
+  },
+  "is_multi_unit": {
+   "value": null,
+   "evidence": null
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "واقساط تصل الي 10سنوات"
+  },
+  "down_payment": {
+   "value": 300000,
+   "evidence": "بمقدم 300الف"
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "العاصمة الإدارية",
+   "evidence": "في العاصمة الإدارية"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1114": {
+  "id": 1114,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة ألترا لوكس للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة ألترا لوكس"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة فاخرة للبيع في موقع حيوي بالنزهة الجديدة"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "extra_super_lux",
+   "evidence": "ألترا لوكس"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "3383": {
+  "id": 3383,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شالية للبيع"
+  },
+  "property_type": {
+   "value": "chalet",
+   "evidence": "شالية للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شالية مكون من 3 غرف وريسيبشن ومطبخ وحمام"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 135,
+   "evidence": "شالية للبيع مساحة 135 متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "شالية مكون من 3 غرف"
+  },
+  "bathrooms": {
+   "value": 1,
+   "evidence": "ومطبخ وحمام"
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "31478": {
+  "id": 31478,
+  "purpose": {
+   "value": "sale",
+   "evidence": "فيلا للبيع"
+  },
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "فيلا للبيع متشطبة بالكامل بجوار المركز الطبي العالمي"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "متشطبة بالكامل"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "الشروق",
+   "evidence": "في ارقي مناطق الشروق"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "1890": {
+  "id": 1890,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقه للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "دور تالت اسانسير غرفتين رسيبشن حمام مطبخ"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": 2900000,
+   "evidence": "شقه للبيع مصر الجديده 2.900,000"
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "غرفتين"
+  },
+  "bathrooms": {
+   "value": 1,
+   "evidence": "حمام"
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "2036": {
+  "id": 2036,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه تشطيب سوبر لوكس"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "بمساحة 80 متر2 تطل على شارع رئيسي موقع مميز دور اول بعد الارضي باسمي"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 80,
+   "evidence": "بمساحة 80 متر2"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "غرفتين"
+  },
+  "bathrooms": {
+   "value": 1,
+   "evidence": "حمام"
+  },
+  "finishing": {
+   "value": "super_lux",
+   "evidence": "تشطيب سوبر لوكس"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "ميرو سيتي",
+   "evidence": "كمبوند ميرو سيتي"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "3237": {
+  "id": 3237,
+  "purpose": {
+   "value": "sale",
+   "evidence": "للبيع فى زيزينيا"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه 250م2"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقه 250م2 بجوار قصر الصفا"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 250,
+   "evidence": "شقه 250م2"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "3938": {
+  "id": 3938,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "villa",
+   "evidence": "آخر فيلا ((كورنر))"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "آخر فيلا ((كورنر))"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 239,
+   "evidence": "مساحة 239 متر"
+  },
+  "bedrooms": {
+   "value": 4,
+   "evidence": "4 غرف منها ماستر"
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "3235": {
+  "id": 3235,
+  "purpose": {
+   "value": "sale",
+   "evidence": "للبيع شقه مرخصه"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه مرخصه"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "للبيع شقه مرخصه الترا لوكس في ميامي بحري امام مستشفي جيهان"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "extra_super_lux",
+   "evidence": "الترا لوكس"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "23847": {
+  "id": 23847,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة الشيخ زايد اعلي تبة مساحة 171"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 171,
+   "evidence": "مساحة 171"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "لاكولينا",
+   "evidence": "لاكولينا الشيخ زايد"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "الشيخ زايد",
+   "evidence": "شقة الشيخ زايد"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "54441": {
+  "id": 54441,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "is_multi_unit": {
+   "value": null,
+   "evidence": null
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "الواحة ڤيو",
+   "evidence": "كمبوند الواحة ڤيو"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "43483": {
+  "id": 43483,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "وحدة بكومبوند at east\n250 متر مباني \n463 ارض"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 250,
+   "evidence": "250 متر مباني"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "at east",
+   "evidence": "بكومبوند at east"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "22556": {
+  "id": 22556,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "townhouse",
+   "evidence": "تاون هاوس ميديل"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "تاون هاوس ميديل \nمكان مميز قرب البوابه"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "تم الاستلام"
+  },
+  "compound": {
+   "value": "Creek Town",
+   "evidence": "تاون هاوس — Creek Town"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "43752": {
+  "id": 43752,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا 239 متر"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "فيلا 239 متر كورنر مميزه جدا"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 239,
+   "evidence": "فيلا 239 متر"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "سراى",
+   "evidence": "كمبوند سراى مرحله كلوب فيو"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "22219": {
+  "id": 22219,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "twinhouse",
+   "evidence": "فيلا توين هاوس"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "فيلا توين هاوس ٢٢٧ متر ع ارض ٣١٥ م"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": 19400000,
+   "evidence": "السعر الاجمالى ١٩،٤٠٠،٠٠٠( شامل نص الصيانه )"
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "والمتبقى : ١١،٧٤٤،٠٠٠ ع ٥ سنين ونص"
+  },
+  "down_payment": {
+   "value": 7956000,
+   "evidence": "مقدم : ٧،٩٥٦،٠٠٠"
+  },
+  "installment_months": {
+   "value": 66,
+   "evidence": "والمتبقى : ١١،٧٤٤،٠٠٠ ع ٥ سنين ونص"
+  },
+  "area_m2": {
+   "value": 227,
+   "evidence": "فيلا توين هاوس ٢٢٧ متر ع ارض ٣١٥ م"
+  },
+  "bedrooms": {
+   "value": 4,
+   "evidence": "٤ غرف"
+  },
+  "bathrooms": {
+   "value": 4,
+   "evidence": "٤ حمام"
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": "under_construction",
+   "evidence": "استلام ٢٠٢٧"
+  },
+  "compound": {
+   "value": "Rivers",
+   "evidence": "توين هاوس — Rivers"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "27631": {
+  "id": 27631,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه غرفتين"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقه غرفتين ومطبخ وصاله و٢حمام"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "غرفتين"
+  },
+  "bathrooms": {
+   "value": 2,
+   "evidence": "٢حمام"
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "ساويث ميد",
+   "evidence": "ساويث ميد الساحل الشمالي"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "الساحل الشمالي",
+   "evidence": "ساويث ميد الساحل الشمالي"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "42475": {
+  "id": 42475,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "فيو الوحدة  لاجون مباشر + وايت جارد"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "زايد",
+   "evidence": "مارفيل زايد"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "53620": {
+  "id": 53620,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه فيو لاجون"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "والدور التاني 3غرف 3 حمام 158 متر"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 158,
+   "evidence": "158 متر"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3غرف"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3 حمام"
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "ايفوريا كوين لاند",
+   "evidence": "كمبوند ايفوريا كوين لاند"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "العاصمه الادارية",
+   "evidence": "العاصمه الادارية R8"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "43548": {
+  "id": 43548,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "Apartment"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "Apartment - Bua 171 m²\n2 bedrooms, can become 3 bedrooms \nFirst floor"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 171,
+   "evidence": "Bua 171 m²"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "2 bedrooms, can become 3 bedrooms"
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "Ready to move"
+  },
+  "compound": {
+   "value": "W Signature",
+   "evidence": "Waterway - W Signature"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "21941": {
+  "id": 21941,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": null,
+   "evidence": "شاليه — كالى كوست الساحل الشمالي؛ بنتاهاوس على اللاجون"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "بنتاهاوس على اللاجون دايركت"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": 4,
+   "evidence": "3غرف وغرفه على الرووف"
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "كالى كوست",
+   "evidence": "فى كالى كوست الساحل الشمالي"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "الساحل الشمالي",
+   "evidence": "فى كالى كوست الساحل الشمالي"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "21300": {
+  "id": 21300,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة — ويست كورت west courts"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "وحده استثماريه"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "ويست كورت west courts",
+   "evidence": "شقة — ويست كورت west courts"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "53898": {
+  "id": 53898,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقه 154 م"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقه 154 م في كمبوند ستوده"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 154,
+   "evidence": "شقه 154 م"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "3 حمام"
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "تشطيب كامل"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "جاهزه للسكن"
+  },
+  "compound": {
+   "value": "ستوده",
+   "evidence": "في كمبوند ستوده"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "21561": {
+  "id": 21561,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة — Badya"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة — Badya"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "Badya",
+   "evidence": "شقة — Badya"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "26553": {
+  "id": 26553,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة — سولين"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة — سولين؛ تانى بلكونه خلفى"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "سولين",
+   "evidence": "شقة — سولين"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "31697": {
+  "id": 31697,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا — Noi"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "S vill في مشروع noi التجمع الخامس موقع مميز جدا"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "noi",
+   "evidence": "في مشروع noi"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "التجمع الخامس",
+   "evidence": "في مشروع noi التجمع الخامس"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "30814": {
+  "id": 30814,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة فى مدينتى"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة 115 م تتكون من 3 نوم و 2 حمام"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 115,
+   "evidence": "شقة 115 م"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 نوم"
+  },
+  "bathrooms": {
+   "value": 2,
+   "evidence": "2 حمام"
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "مدينتى",
+   "evidence": "شقة فى مدينتى"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "مدينتى",
+   "evidence": "شقة فى مدينتى"
+  },
+  "seller_type": {
+   "value": "owner",
+   "evidence": "من المالك مباشرة"
+  }
+ },
+ "25744": {
+  "id": 25744,
+  "purpose": {
+   "value": "sale",
+   "evidence": "وانا ببيعها"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة — الفسطاط فيو"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "الوحده مميزه جدا وانا ببيعها"
+  },
+  "is_resale": {
+   "value": true,
+   "evidence": "وانا ببيعها متنازل لانى متعثر فى السداد انا واخدها من سنتين"
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "الفسطاط فيو",
+   "evidence": "شقة — الفسطاط فيو"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": "owner",
+   "evidence": "وانا ببيعها متنازل لانى متعثر فى السداد انا واخدها من سنتين"
+  }
+ },
+ "52447": {
+  "id": 52447,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": null,
+   "evidence": "دوبلكس — ديجويا 4؛ فيلا لاكشري دوبلكس"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "فيلا لاكشري دوبلكس كورنر دور ثالث ورابع"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "semi_finished",
+   "evidence": "نصف تشطيب"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "ديجويا 4",
+   "evidence": "دوبلكس — ديجويا 4"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "42749": {
+  "id": 42749,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "chalet",
+   "evidence": "شاليه — جيفيرا"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شاليه — جيفيرا؛ مباني ٦٩ متر و تراسات ٤٠ متر"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 69,
+   "evidence": "مباني ٦٩ متر"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "جيفيرا",
+   "evidence": "شاليه — جيفيرا"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "31779": {
+  "id": 31779,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "office",
+   "evidence": "مكتب"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "94 متر في الدور التاني"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 94,
+   "evidence": "94 متر"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": "under_construction",
+   "evidence": "يتم الاستلام يناير 2027"
+  },
+  "compound": {
+   "value": "Isola",
+   "evidence": "مكتب — Isola"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "21250": {
+  "id": 21250,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "الوحده في افضل مرحله في المشروع"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "اليفا",
+   "evidence": "شقة — اليفا مستقبل ستي"
+  },
+  "developer": {
+   "value": "ماوتن فيو",
+   "evidence": "ماوتن فيو من افضل المطورين"
+  },
+  "city": {
+   "value": "مستقبل ستي",
+   "evidence": "اليفا مستقبل ستي"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "37673": {
+  "id": 37673,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "office",
+   "evidence": "Office"
+  },
+  "is_multi_unit": {
+   "value": null,
+   "evidence": null
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "Jazebya",
+   "evidence": "مكتب — Jazebya"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "53760": {
+  "id": 53760,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا — سراي"
+  },
+  "is_multi_unit": {
+   "value": null,
+   "evidence": null
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "سراي",
+   "evidence": "فيلا — سراي"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "53926": {
+  "id": 53926,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة غرفه وصاله"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة غرفه وصاله في كومباوند متكامل في قلب التجمع الاول"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": 1,
+   "evidence": "غرفه وصاله"
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "The mornings",
+   "evidence": "شقة — The mornings"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "التجمع الاول",
+   "evidence": "في قلب التجمع الاول"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "4458": {
+  "id": 4458,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "is_multi_unit": {
+   "value": null,
+   "evidence": null
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "المقصد بارك",
+   "evidence": "شقة — المقصد بارك"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "21604": {
+  "id": 21604,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شاليه للبيع"
+  },
+  "property_type": {
+   "value": "chalet",
+   "evidence": "شاليه للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شاليه للبيع في هاسيندا ووترز – رأس الحكمة 🌊\n\n📐 102.5 م² + جاردن 33.5 م²"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 102.5,
+   "evidence": "102.5 م² + جاردن 33.5 م²"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "غرفتين"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "٣ حمامات"
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "تشطيب كامل"
+  },
+  "delivery_status": {
+   "value": "under_construction",
+   "evidence": "استلام 2029"
+  },
+  "compound": {
+   "value": "هاسيندا ووترز",
+   "evidence": "شاليه للبيع في هاسيندا ووترز"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "رأس الحكمة",
+   "evidence": "هاسيندا ووترز – رأس الحكمة"
+  },
+  "seller_type": {
+   "value": "owner",
+   "evidence": "من المالك مباشرة"
+  }
+ },
+ "43593": {
+  "id": 43593,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "is_multi_unit": {
+   "value": null,
+   "evidence": null
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "Qamari",
+   "evidence": "شقة — Qamari"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "العاصمه الاداريه الحديده",
+   "evidence": "المشروع بمنطقه R8 بالعاصمه الاداريه الحديده"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "43589": {
+  "id": 43589,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "بحري دور ثالث"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "Qamari",
+   "evidence": "شقة — Qamari"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "42951": {
+  "id": 42951,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "الدور *الأول* \nالمساحة *181* متر"
+  },
+  "is_resale": {
+   "value": true,
+   "evidence": "سعر الوحدة بعد الخصم *6.660.000*\nمصاريف *نقل عقد ملكية* 50000\nسعر الوحدة المماثلة الجديد في الشركة *9.100.000*"
+  },
+  "price": {
+   "value": 6660000,
+   "evidence": "سعر الوحدة بعد الخصم *6.660.000*"
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "الاقساط *ربع سنوية*"
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": 96,
+   "evidence": "الأقساط لمدة *٨ سنوات*"
+  },
+  "area_m2": {
+   "value": 181,
+   "evidence": "المساحة *181* متر"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "semi_finished",
+   "evidence": "التشطيب *نصف تشطيب*"
+  },
+  "delivery_status": {
+   "value": "under_construction",
+   "evidence": "الاستلام نصف تشطيب 2028"
+  },
+  "compound": {
+   "value": "Silvia",
+   "evidence": "شقة — Silvia Compound"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "31086": {
+  "id": 31086,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "A 1 bedroom Apartment"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "The Apartment size is 76 m² with 1 bathrooms."
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": 10516000,
+   "evidence": "اجمالي عقد ١٠ مليون ٥١٦ ألف"
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "قسط نصف سنوي ٧٨٩ الف"
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 76,
+   "evidence": "The Apartment size is 76 m²"
+  },
+  "bedrooms": {
+   "value": 1,
+   "evidence": "A 1 bedroom Apartment"
+  },
+  "bathrooms": {
+   "value": 1,
+   "evidence": "with 1 bathrooms"
+  },
+  "finishing": {
+   "value": "finished",
+   "evidence": "تتسلم متشطبة بالتكييفات"
+  },
+  "delivery_status": {
+   "value": "under_construction",
+   "evidence": "This property will be ready for delivery finished by 2028"
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": "A Capital Holding",
+   "evidence": "Redwood Tower by A Capital Holding"
+  },
+  "city": {
+   "value": "Heliopolis",
+   "evidence": "Marriott Residence Heliopolis"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "48223": {
+  "id": 48223,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "townhouse",
+   "evidence": "تاون هاوس"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "Town house الأرض ١١٦ م ويشمل مساحة الحديقة ٦٠ متر"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "Notion",
+   "evidence": "تاون هاوس — Notion"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "52385": {
+  "id": 52385,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "office",
+   "evidence": "مكتب"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "تقع الوحده فى منطقه Down town"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "Seventy seven",
+   "evidence": "مكتب — Seventy seven"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "38878": {
+  "id": 38878,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": null,
+   "evidence": null
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "غرفه فندقية مساحة 43م"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 43,
+   "evidence": "غرفه فندقية مساحة 43م"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": "under_construction",
+   "evidence": "معاد الاستلام 1/2027"
+  },
+  "compound": {
+   "value": "ايرس روزرت",
+   "evidence": "الفندق ايرس روزرت"
+  },
+  "developer": {
+   "value": "الوفاء للاستسمار السياحي",
+   "evidence": "إسم الشركة الوفاء للاستسمار السياحي"
+  },
+  "city": {
+   "value": "العين السخنه",
+   "evidence": "لافستا7 العين السخنه"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "31118": {
+  "id": 31118,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "duplex",
+   "evidence": "دوبلكس"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "Ivilla ground + first floor. 190sqm. 3 bedrooms + maid."
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 190,
+   "evidence": "190sqm."
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 bedrooms + maid"
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "Aliva",
+   "evidence": "Aliva - Al mostaqbal City"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "Al mostaqbal City",
+   "evidence": "Aliva - Al mostaqbal City"
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "25405": {
+  "id": 25405,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "غرفتين وحمامين وريسيبشن ومطبخ\nاخر دور امامي"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "غرفتين"
+  },
+  "bathrooms": {
+   "value": 2,
+   "evidence": "حمامين"
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "لاند مارك",
+   "evidence": "شقة — لاند مارك"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "30476": {
+  "id": 30476,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة — جوميا لاجونز\nتطل علي البوليفار واللاجونز . بحري غربي"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "جوميا لاجونز",
+   "evidence": "شقة — جوميا لاجونز"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "30811": {
+  "id": 30811,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة فى مدينتى"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة 115 م تتكون من 3 نوم و 2 حمام"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 115,
+   "evidence": "شقة 115 م"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 نوم"
+  },
+  "bathrooms": {
+   "value": 2,
+   "evidence": "2 حمام"
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "مدينتى",
+   "evidence": "شقة — مدينتى"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "مدينتى",
+   "evidence": "شقة فى مدينتى"
+  },
+  "seller_type": {
+   "value": "owner",
+   "evidence": "من المالك مباشرة"
+  }
+ },
+ "54945": {
+  "id": 54945,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا — سراى"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "مساحة 239م – كورنر - بحرى – موقع مميز جدا"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "القسط الربع سنوى 595 ألف"
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 239,
+   "evidence": "مساحة 239م"
+  },
+  "bedrooms": {
+   "value": 5,
+   "evidence": "5 غرف نوم"
+  },
+  "bathrooms": {
+   "value": 5,
+   "evidence": "5 حمام"
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": "under_construction",
+   "evidence": "الأستلام ديسمبر 2028"
+  },
+  "compound": {
+   "value": "سراى",
+   "evidence": "كومبوند سراى"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "43354": {
+  "id": 43354,
+  "purpose": {
+   "value": null,
+   "evidence": null
+  },
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "فيلا — ماونت فيو كيان\nجاهزة"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": null
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": null,
+   "evidence": null
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "جاهزة"
+  },
+  "compound": {
+   "value": "ماونت فيو كيان",
+   "evidence": "فيلا — ماونت فيو كيان"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": null
+  },
+  "seller_type": {
+   "value": null,
+   "evidence": null
+  }
+ },
+ "20455": {
+  "id": 20455,
+  "purpose": {
+   "value": "sale",
+   "evidence": "مصنع للبيع"
+  },
+  "property_type": {
+   "value": "factory",
+   "evidence": "مصنع للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "مصنع للبيع (تمليك)"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": 20000000,
+   "evidence": "السعر 20,000,000 جنيه"
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "بالتقسيط"
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": null,
+   "evidence": "العنوان: 1350 م؛ الوصف: 1,365 م²"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "super_lux",
+   "evidence": "متشطب سوبر لوكس"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "برج العرب",
+   "evidence": "في برج العرب الإسكندرية مصر"
+  },
+  "seller_type": {
+   "value": "owner",
+   "evidence": "بدون وسيط من المالك مباشرة"
+  }
+ },
+ "54334": {
+  "id": 54334,
+  "purpose": {
+   "value": "sale",
+   "evidence": "فيلا مستقلة للبيع"
+  },
+  "property_type": {
+   "value": "villa",
+   "evidence": "فيلا مستقلة"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "فيلا منفصلة في مدينتي نموذج f"
+  },
+  "is_resale": {
+   "value": true,
+   "evidence": "خالصة السداد بالكامل"
+  },
+  "price": {
+   "value": 45000000,
+   "evidence": "السعر 45,000,000 جنيه"
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 360,
+   "evidence": "360 م²"
+  },
+  "bedrooms": {
+   "value": 5,
+   "evidence": "5 غرف"
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "super_lux",
+   "evidence": "متشطب سوبر لوكس"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": null,
+   "evidence": "العنوان: في مدينتي؛ الوصف: في التجمع الخامس"
+  },
+  "seller_type": {
+   "value": "broker",
+   "evidence": "بواسطة سمسار"
+  }
+ },
+ "20265": {
+  "id": 20265,
+  "purpose": {
+   "value": "rent",
+   "evidence": "عمارة للإيجار بالكامل"
+  },
+  "property_type": {
+   "value": null,
+   "evidence": "عمارة أو منزل"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "عمارة للإيجار بالكامل"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 1080,
+   "evidence": "1,080 م²"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "core_shell",
+   "evidence": "بدون تشطيب"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "التجمع الخامس",
+   "evidence": "في التجمع الخامس القاهرة مصر"
+  },
+  "seller_type": {
+   "value": "owner",
+   "evidence": "بدون وسيط من المالك مباشرة"
+  }
+ },
+ "19900": {
+  "id": 19900,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة 138 متر للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة 138 متر"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة 138 متر للبيع"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": 5637500,
+   "evidence": "السعر 5,637,500 جنيه"
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 138,
+   "evidence": "138 م²"
+  },
+  "bedrooms": {
+   "value": 2,
+   "evidence": "2 غرفة (غرفتين)"
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "semi_finished",
+   "evidence": "نصف تشطيب"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "أريا",
+   "evidence": "كمبوند أريا"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "مدينة المستقبل",
+   "evidence": "في مدينة المستقبل القاهرة مصر"
+  },
+  "seller_type": {
+   "value": "broker",
+   "evidence": "بواسطة سمسار"
+  }
+ },
+ "54705": {
+  "id": 54705,
+  "purpose": {
+   "value": "sale",
+   "evidence": "محل أو تجاري للبيع"
+  },
+  "property_type": {
+   "value": "shop",
+   "evidence": "محل أو تجاري"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "محل أو تجاري للبيع (تمليك) في بلو هب الجلالة العين السخنة مصر، 69 م²"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "بالتقسيط"
+  },
+  "down_payment": {
+   "value": 655000,
+   "evidence": "مقدم دفعة أولى 655,000 جنيه"
+  },
+  "installment_months": {
+   "value": 96,
+   "evidence": "والباقي أٌقساط على 96 شهر"
+  },
+  "area_m2": {
+   "value": 69,
+   "evidence": "69 م²"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "core_shell",
+   "evidence": "بدون تشطيب"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "بلو هب الجلالة",
+   "evidence": "في بلو هب الجلالة العين السخنة"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "العين السخنة",
+   "evidence": "العين السخنة مصر"
+  },
+  "seller_type": {
+   "value": "owner",
+   "evidence": "بدون وسيط من المالك مباشرة"
+  }
+ },
+ "54091": {
+  "id": 54091,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة للبيع 161 م²"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "بالتقسيط"
+  },
+  "down_payment": {
+   "value": 1544544,
+   "evidence": "مقدم دفعة أولى 1,544,544 جنيه"
+  },
+  "installment_months": {
+   "value": 12,
+   "evidence": "والباقي أٌقساط على 12 شهر"
+  },
+  "area_m2": {
+   "value": 161,
+   "evidence": "161 م²"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "semi_finished",
+   "evidence": "نصف تشطيب"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "Sadan 1",
+   "evidence": "في Sadan 1 غرب حورس دمياط الجديدة"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "دمياط الجديدة",
+   "evidence": "في دمياط الجديدة دمياط مصر"
+  },
+  "seller_type": {
+   "value": "owner",
+   "evidence": "بدون وسيط من المالك مباشرة"
+  }
+ },
+ "54638": {
+  "id": 54638,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة مفروش للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة فندقية"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة مفروش للبيع (تمليك) في الشيخ زايد 6 أكتوبر مصر، 4 غرف، 420 م²"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": 16000000,
+   "evidence": "السعر 16,000,000 جنيه"
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 420,
+   "evidence": "420 م²"
+  },
+  "bedrooms": {
+   "value": 4,
+   "evidence": "4 غرف"
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "extra_super_lux",
+   "evidence": "متشطب إكسترا سوبر لوكس"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "الشيخ زايد",
+   "evidence": "في الشيخ زايد 6 أكتوبر مصر"
+  },
+  "seller_type": {
+   "value": "broker",
+   "evidence": "بواسطة سمسار"
+  }
+ },
+ "20039": {
+  "id": 20039,
+  "purpose": {
+   "value": "sale",
+   "evidence": "محل أو تجاري للبيع"
+  },
+  "property_type": {
+   "value": "shop",
+   "evidence": "محل أو تجاري"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "محل أو تجاري للبيع (تمليك) في موفنبيك السخنة العين السخنة مصر، 65 م²"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "بالتقسيط"
+  },
+  "down_payment": {
+   "value": 700000,
+   "evidence": "مقدم دفعة أولى 700,000 جنيه"
+  },
+  "installment_months": {
+   "value": 96,
+   "evidence": "والباقي أٌقساط على 96 شهر"
+  },
+  "area_m2": {
+   "value": 65,
+   "evidence": "65 م²"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "core_shell",
+   "evidence": "بدون تشطيب"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "موفنبيك السخنة",
+   "evidence": "في موفنبيك السخنة العين السخنة"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "العين السخنة",
+   "evidence": "العين السخنة مصر"
+  },
+  "seller_type": {
+   "value": "owner",
+   "evidence": "بدون وسيط من المالك مباشرة"
+  }
+ },
+ "19760": {
+  "id": 19760,
+  "purpose": {
+   "value": "sale",
+   "evidence": "بناية تجارية أو مول للبيع"
+  },
+  "property_type": {
+   "value": "building",
+   "evidence": "بناية تجارية أو مول"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "بناية تجارية أو مول للبيع (تمليك) في حدائق أكتوبر 6 أكتوبر مصر، 3,251 م²"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "بالتقسيط"
+  },
+  "down_payment": {
+   "value": 50000000,
+   "evidence": "مقدم دفعة أولى 50,000,000 جنيه"
+  },
+  "installment_months": {
+   "value": 24,
+   "evidence": "والباقي أٌقساط على 24 شهر"
+  },
+  "area_m2": {
+   "value": 3251,
+   "evidence": "3,251 م²"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "core_shell",
+   "evidence": "بدون تشطيب"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "حدائق أكتوبر",
+   "evidence": "في حدائق أكتوبر 6 أكتوبر مصر"
+  },
+  "seller_type": {
+   "value": "broker",
+   "evidence": "بواسطة سمسار"
+  }
+ },
+ "54062": {
+  "id": 54062,
+  "purpose": {
+   "value": "sale",
+   "evidence": "للبيع مفروش ومكيف بالكامل"
+  },
+  "property_type": {
+   "value": null,
+   "evidence": "العنوان: تون هاوس؛ الوصف: فيلا توين هاوس"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "مساحة 200م وحديقة خاصة 160م"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": 9000000,
+   "evidence": "السعر 9,000,000 جنيه"
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 200,
+   "evidence": "مساحة 200م وحديقة خاصة 160م"
+  },
+  "bedrooms": {
+   "value": 4,
+   "evidence": "أربع غرف"
+  },
+  "bathrooms": {
+   "value": 3,
+   "evidence": "ثلاثة حمام"
+  },
+  "finishing": {
+   "value": "extra_super_lux",
+   "evidence": "متشطب إكسترا سوبر لوكس"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "الشيخ زايد",
+   "evidence": "في الشيخ زايد 6 أكتوبر مصر"
+  },
+  "seller_type": {
+   "value": "owner",
+   "evidence": "بدون وسيط من المالك مباشرة"
+  }
+ },
+ "19634": {
+  "id": 19634,
+  "purpose": {
+   "value": "sale",
+   "evidence": "للبيع (تمليك)"
+  },
+  "property_type": {
+   "value": null,
+   "evidence": null
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "منزل 3 ادوار"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": 3200000,
+   "evidence": "السعر 3,200,000 جنيه"
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 150,
+   "evidence": "150 م²"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "semi_finished",
+   "evidence": "نصف تشطيب"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "حدائق أكتوبر",
+   "evidence": "في حدائق أكتوبر"
+  },
+  "seller_type": {
+   "value": "owner",
+   "evidence": "بدون وسيط من المالك مباشرة"
+  }
+ },
+ "20683": {
+  "id": 20683,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة للبيع 152م نصف تشطيب"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": 2000000,
+   "evidence": "السعر 2,000,000 جنيه"
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "بالتقسيط"
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 152,
+   "evidence": "152 م²"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "semi_finished",
+   "evidence": "نصف تشطيب"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "مدينة بدر",
+   "evidence": "في مدينة بدر"
+  },
+  "seller_type": {
+   "value": "owner",
+   "evidence": "بدون وسيط من المالك مباشرة"
+  }
+ },
+ "54209": {
+  "id": 54209,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة لقطة 165م"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة لقطة 165م"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": 4500000,
+   "evidence": "السعر 4,500,000 جنيه"
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 165,
+   "evidence": "165 م²"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "semi_finished",
+   "evidence": "نصف تشطيب"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "التجمع الخامس",
+   "evidence": "في التجمع الخامس"
+  },
+  "seller_type": {
+   "value": "broker",
+   "evidence": "بواسطة سمسار"
+  }
+ },
+ "19631": {
+  "id": 19631,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة أرضي مدخل خاص"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة أرضي مدخل خاص مع حديقة كبيرة"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": 9000000,
+   "evidence": "السعر 9,000,000 جنيه"
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 245,
+   "evidence": "245 م²"
+  },
+  "bedrooms": {
+   "value": 4,
+   "evidence": "4 غرف"
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "extra_super_lux",
+   "evidence": "متشطب إكسترا سوبر لوكس"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": "النخيل",
+   "evidence": "كمباوند النخيل"
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "التجمع الأول",
+   "evidence": "في التجمع الأول"
+  },
+  "seller_type": {
+   "value": "broker",
+   "evidence": "بواسطة سمسار"
+  }
+ },
+ "54294": {
+  "id": 54294,
+  "purpose": {
+   "value": "rent",
+   "evidence": "مصنع للإيجار"
+  },
+  "property_type": {
+   "value": "factory",
+   "evidence": "مصنع للإيجار"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "مصنع للإيجار الشهري في المنطقة الصناعية 6 أكتوبر مصر، 300 م²"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 300,
+   "evidence": "300 م²"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "super_lux",
+   "evidence": "متشطب سوبر لوكس"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "6 أكتوبر",
+   "evidence": "المنطقة الصناعية 6 أكتوبر"
+  },
+  "seller_type": {
+   "value": "broker",
+   "evidence": "بواسطة سمسار"
+  }
+ },
+ "55142": {
+  "id": 55142,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقة فاخرة للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة فاخرة للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة فاخرة للبيع بالحي التاسع 6 أكتوبر أمام الجماعة و الحصري 207 م"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "بالتقسيط"
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 207,
+   "evidence": "207 م²"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "semi_finished",
+   "evidence": "نصف تشطيب"
+  },
+  "delivery_status": {
+   "value": "ready_to_move",
+   "evidence": "استلام فوري"
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "6 أكتوبر",
+   "evidence": "بالحي التاسع 6 أكتوبر"
+  },
+  "seller_type": {
+   "value": "broker",
+   "evidence": "بواسطة سمسار"
+  }
+ },
+ "54314": {
+  "id": 54314,
+  "purpose": {
+   "value": "sale",
+   "evidence": "هايبر ماركت للبيع"
+  },
+  "property_type": {
+   "value": "shop",
+   "evidence": "هايبر ماركت للبيع"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "هايبر ماركت للبيع 700م"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": true,
+   "evidence": "قسط على 4 سنوات"
+  },
+  "down_payment": {
+   "value": 19250000,
+   "evidence": "مقدم دفعة أولى 19,250,000 جنيه"
+  },
+  "installment_months": {
+   "value": 48,
+   "evidence": "والباقي أٌقساط على 48 شهر"
+  },
+  "area_m2": {
+   "value": 700,
+   "evidence": "700 م²"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "semi_finished",
+   "evidence": "نصف تشطيب"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "مدينة العبور",
+   "evidence": "في مدينة العبور"
+  },
+  "seller_type": {
+   "value": "owner",
+   "evidence": "بدون وسيط من المالك مباشرة"
+  }
+ },
+ "54547": {
+  "id": 54547,
+  "purpose": {
+   "value": "rent",
+   "evidence": "للإيجار شقة"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقة بفيلا"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "شقة قانون جديد إيجار جديد في الحي المتميز 6 أكتوبر مصر، 3 غرف، 165 م²"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": null,
+   "evidence": null
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 165,
+   "evidence": "165 م²"
+  },
+  "bedrooms": {
+   "value": 3,
+   "evidence": "3 غرف"
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "extra_super_lux",
+   "evidence": "متشطب إكسترا سوبر لوكس"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "6 أكتوبر",
+   "evidence": "الحي المتميز 6 أكتوبر"
+  },
+  "seller_type": {
+   "value": "owner",
+   "evidence": "بدون وسيط من المالك مباشرة"
+  }
+ },
+ "54663": {
+  "id": 54663,
+  "purpose": {
+   "value": "sale",
+   "evidence": "مصنع للبيع"
+  },
+  "property_type": {
+   "value": "factory",
+   "evidence": "مصنع يصلح لأنشطة متعددة"
+  },
+  "is_multi_unit": {
+   "value": false,
+   "evidence": "مصنع يصلح لأنشطة متعددة بلوك كامل مساحة 25000 م2"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": 80000000,
+   "evidence": "السعر 80,000,000 جنيه"
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 25000,
+   "evidence": "25,000 م²"
+  },
+  "bedrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "semi_finished",
+   "evidence": "نصف تشطيب"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "برج العرب",
+   "evidence": "في برج العرب"
+  },
+  "seller_type": {
+   "value": "broker",
+   "evidence": "بواسطة سمسار"
+  }
+ },
+ "54059": {
+  "id": 54059,
+  "purpose": {
+   "value": "sale",
+   "evidence": "شقق للبيع"
+  },
+  "property_type": {
+   "value": "apartment",
+   "evidence": "شقق للبيع"
+  },
+  "is_multi_unit": {
+   "value": true,
+   "evidence": "شقق للبيع"
+  },
+  "is_resale": {
+   "value": null,
+   "evidence": null
+  },
+  "price": {
+   "value": 8500000,
+   "evidence": "السعر 8,500,000 جنيه"
+  },
+  "is_installment": {
+   "value": null,
+   "evidence": null
+  },
+  "down_payment": {
+   "value": null,
+   "evidence": null
+  },
+  "installment_months": {
+   "value": null,
+   "evidence": null
+  },
+  "area_m2": {
+   "value": 350,
+   "evidence": "350 م²"
+  },
+  "bedrooms": {
+   "value": 4,
+   "evidence": "4 غرف"
+  },
+  "bathrooms": {
+   "value": null,
+   "evidence": null
+  },
+  "finishing": {
+   "value": "semi_finished",
+   "evidence": "نصف تشطيب"
+  },
+  "delivery_status": {
+   "value": null,
+   "evidence": null
+  },
+  "compound": {
+   "value": null,
+   "evidence": null
+  },
+  "developer": {
+   "value": null,
+   "evidence": null
+  },
+  "city": {
+   "value": "الشيخ زايد",
+   "evidence": "في الشيخ زايد"
+  },
+  "seller_type": {
+   "value": "broker",
+   "evidence": "بواسطة سمسار"
+  }
+ }
+}
