@@ -194,27 +194,89 @@ def test_unanswered_listings_are_asked_once_more_then_fail(tmp_path, monkeypatch
     assert results[2].error == "Codex returned no answer for this listing"
 
 
-def test_failed_call_marks_batch_failed_and_explicit_retry_reclaims_it(tmp_path, monkeypatch):
+def test_failures_are_retried_on_later_runs_up_to_the_attempt_cap(tmp_path, monkeypatch):
     engine = get_engine(tmp_path / "qayem.db")
     init_db(engine)
     seed(engine, 3)
     monkeypatch.setattr(enrichment.shutil, "which", lambda _: "/usr/bin/codex")
+    calls = []
 
-    def fail(_tasks):
+    def fail(tasks):
+        calls.append(len(tasks))
         raise RuntimeError("Codex exited with status 1")
 
     monkeypatch.setattr(enrichment, "invoke_codex", fail)
-    results = enrichment.run_batches(engine, 0)
-    assert [r.status for r in results] == ["failed"] * 3
-    assert enrichment.claim_batch(engine) == []
-    assert len(enrichment.claim_batch(engine, retry_failed=True, dry_run=True)) == 3
+    for attempt in range(1, enrichment.MAX_ATTEMPTS + 1):
+        results = enrichment.run_batches(engine, 0)
+        assert [r.status for r in results] == ["failed"] * 3  # once per run, never twice
+    assert calls == [3] * enrichment.MAX_ATTEMPTS
+    assert enrichment.claim_batch(engine) == []  # attempts exhausted
+    with Session(engine) as session:
+        assert {r.attempts for r in session.query(PropertyEnrichment)} == {enrichment.MAX_ATTEMPTS}
 
+    # an operator can still force a retry
     monkeypatch.setattr(enrichment, "invoke_codex", lambda tasks: {
         t.property_id: facts(property_type="apartment") for t in tasks
     })
     retried = enrichment.run_batches(engine, 0, retry_failed=True)
     assert [r.applied for r in retried] == [1, 1, 1]
     assert enrichment.run_batches(engine, 0, retry_failed=True) == []
+
+
+def test_circuit_breaker_stops_a_run_after_consecutive_failed_batches(tmp_path, monkeypatch):
+    engine = get_engine(tmp_path / "qayem.db")
+    init_db(engine)
+    seed(engine, enrichment.BATCH_SIZE * 5)
+    monkeypatch.setattr(enrichment.shutil, "which", lambda _: "/usr/bin/codex")
+
+    def fail(_tasks):
+        raise RuntimeError("Codex exited with status 1")
+
+    monkeypatch.setattr(enrichment, "invoke_codex", fail)
+    reasons = []
+    results = enrichment.run_batches(engine, 0, workers=1, on_stop=reasons.append)
+    assert len(results) == enrichment.BATCH_SIZE * enrichment.CIRCUIT_BREAKER
+    assert reasons == ["2 batches in a row failed: Codex exited with status 1"]
+
+
+def test_time_budget_stops_new_batches(tmp_path, monkeypatch):
+    engine = get_engine(tmp_path / "qayem.db")
+    init_db(engine)
+    seed(engine, enrichment.BATCH_SIZE * 2)
+    monkeypatch.setattr(enrichment.shutil, "which", lambda _: "/usr/bin/codex")
+    monkeypatch.setattr(enrichment, "invoke_codex", lambda tasks: {})
+    reasons = []
+    assert enrichment.run_batches(engine, 0, deadline=0, on_stop=reasons.append) == []
+    assert reasons == ["time budget reached"]
+
+
+def test_abandoned_claims_are_taken_again(tmp_path):
+    from datetime import timedelta
+    engine = get_engine(tmp_path / "qayem.db")
+    init_db(engine)
+    seed(engine, 2)
+    assert len(enrichment.claim_batch(engine)) == 2
+    assert enrichment.claim_batch(engine) == []
+    with Session(engine) as session:
+        record = session.get(PropertyEnrichment, 1)
+        record.claimed_at = enrichment.utcnow() - enrichment.STALE_CLAIM - timedelta(minutes=1)
+        session.commit()
+    assert [t.property_id for t in enrichment.claim_batch(engine)] == [1]
+    with Session(engine) as session:
+        assert session.get(PropertyEnrichment, 1).attempts == 2
+
+
+def test_health_reports_backlog_and_failures(tmp_path, monkeypatch):
+    engine = get_engine(tmp_path / "qayem.db")
+    init_db(engine)
+    seed(engine, 12)
+    assert enrichment.enrichment_health(engine)["state"] == "stale"  # waiting, never enriched
+    monkeypatch.setattr(enrichment.shutil, "which", lambda _: "/usr/bin/codex")
+    monkeypatch.setattr(enrichment, "invoke_codex", lambda tasks: {})  # every listing unanswered
+    enrichment.run_batches(engine, 0)
+    health = enrichment.enrichment_health(engine)
+    assert health["state"] == "failing" and health["failed_24h"] == 12
+    assert health["detail"].startswith("12 of 12 listings failed")
 
 
 def test_source_updates_keep_inference_only_for_unchanged_text(tmp_path, monkeypatch):

@@ -14,8 +14,17 @@ crontab -l                             # the line is tagged "# qayem-nightly-cra
 
 1. takes `logs/crawl.lock`, so a second invocation exits and notes it in `logs/crawl-skipped.log`;
 2. runs `qayem crawl`, the production plan in `src/qayem/crawl.py`;
-3. runs `qayem health --write logs/health.json`;
-4. logs to `logs/crawl-YYYY-MM-DD.log` and deletes logs older than 30 days.
+3. runs `qayem enrich-descriptions --batches 0 --max-minutes 120` (override the budget with
+   `QAYEM_ENRICH_MINUTES`), which fills missing fields of new listings from their text with
+   `codex exec` (`~/.local/bin` is put on cron's PATH for it; see the README);
+4. runs `qayem health --write logs/health.json`;
+5. logs to `logs/crawl-YYYY-MM-DD.log` and deletes logs older than 30 days.
+
+Enrichment failures never fail the crawl. A run starts no new batch after its time budget or
+after two consecutive batches failed entirely (a Codex outage, logout or quota), so one bad
+night costs at most a few batches. Failed listings are retried on later nights, up to three
+runs in total (`--retry-failed` forces another try); claims left by a crashed run are taken
+again after six hours.
 
 ## The crawl plan
 
@@ -54,6 +63,11 @@ Rules the engine enforces:
 | `dropped` | Latest run produced under half its recent median for the same scope: a markup change or block |
 | `failing` | The last two runs failed, or no run has ever produced listings |
 | `never` | No run recorded |
+
+`qayem health` also reports an `enrichment` row: `failing` when at least 10 listings and over 20%
+of those finished in the last 24 hours failed, `stale` when listings are waiting and nothing was
+enriched for 36 hours, otherwise `ok` (with the backlog and any abandoned claims in the detail).
+The JSON report carries the same numbers under `enrichment`.
 
 The website hides listings that were not re-observed within 14 days of their source's latest observation, so a source that only samples its inventory cannot leave sold units looking active.
 

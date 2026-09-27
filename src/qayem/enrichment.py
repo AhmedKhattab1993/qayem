@@ -13,7 +13,7 @@ from __future__ import annotations
 from collections.abc import Callable, Collection
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from functools import cache
 import hashlib
 import json
@@ -25,7 +25,7 @@ import time
 import unicodedata
 from pathlib import Path
 
-from sqlalchemy import delete, func, insert, inspect, or_, select, update
+from sqlalchemy import and_, delete, func, insert, inspect, or_, select, update
 from sqlalchemy.engine import Engine
 
 from .db import session_scope
@@ -42,6 +42,9 @@ SPEC_PATH = Path(__file__).with_name("enrichment_spec.md")
 BATCH_SIZE = 40
 TIMEOUT_SECONDS = 600
 TIMEOUT_ATTEMPTS = 2
+MAX_ATTEMPTS = 3  # a failed listing is retried on later runs, at most this many runs in total
+STALE_CLAIM = timedelta(hours=6)  # a claim this old was left by a crashed run
+CIRCUIT_BREAKER = 2  # consecutive fully failed batches that stop a run (outage, auth, quota)
 
 # Columns a description can fill. is_multi_unit has no column: a multi-unit
 # ad (a project or several units) describes no single unit, so nothing from
@@ -261,7 +264,7 @@ def _candidates(engine: Engine, source: str | None, retry_failed: bool, dry_run:
     elif not dry_run or inspect(engine).has_table(PropertyEnrichment.__tablename__):
         query = query.outerjoin(
             PropertyEnrichment, PropertyEnrichment.property_id == Property.id
-        ).where(PropertyEnrichment.property_id.is_(None))
+        ).where(or_(PropertyEnrichment.property_id.is_(None), _retriable()))
     if exclude_ids:
         query = query.where(Property.id.not_in(exclude_ids))
     if source:
@@ -269,6 +272,16 @@ def _candidates(engine: Engine, source: str | None, retry_failed: bool, dry_run:
     if since:
         query = query.where(Property.first_seen_at >= since)
     return query.order_by(Property.first_seen_at.desc(), Property.id.desc())
+
+
+def _retriable():
+    """Records a normal run may take again: failed with attempts left, or abandoned claims."""
+    stale_before = utcnow() - STALE_CLAIM
+    return or_(
+        and_(PropertyEnrichment.status == "failed",
+             func.coalesce(PropertyEnrichment.attempts, 1) < MAX_ATTEMPTS),
+        and_(PropertyEnrichment.status == "claimed", PropertyEnrichment.claimed_at < stale_before),
+    )
 
 
 def count_eligible(engine: Engine, source: str | None = None, since: datetime | None = None) -> int:
@@ -308,19 +321,22 @@ def claim_batch(
                     model=MODEL, reasoning_effort=REASONING_EFFORT,
                     prompt_version=PROMPT_VERSION,
                 )
-                if retry_failed:
-                    claimed = session.execute(
-                        update(PropertyEnrichment)
-                        .where(PropertyEnrichment.property_id == prop.id,
-                               PropertyEnrichment.status == "failed")
-                        .values(**claim_values, finished_at=None, error=None,
-                                proposed=None, applied=None)
-                    )
-                else:
+                claimed = None
+                if not retry_failed:
                     claimed = session.execute(
                         insert(PropertyEnrichment).values(
-                            property_id=prop.id, **claim_values
+                            property_id=prop.id, attempts=1, **claim_values
                         ).prefix_with("OR IGNORE")
+                    )
+                if claimed is None or claimed.rowcount != 1:
+                    # An existing record: take it back only if it is (still) retriable.
+                    condition = (PropertyEnrichment.status == "failed") if retry_failed else _retriable()
+                    claimed = session.execute(
+                        update(PropertyEnrichment)
+                        .where(PropertyEnrichment.property_id == prop.id, condition)
+                        .values(**claim_values, finished_at=None, error=None, flags=None,
+                                proposed=None, applied=None,
+                                attempts=func.coalesce(PropertyEnrichment.attempts, 1) + 1)
                     )
                 if claimed.rowcount != 1:
                     continue
@@ -742,15 +758,28 @@ def run_batches(
     engine: Engine, batches: int, source: str | None = None,
     on_batch: Callable[[int, list[Result]], None] | None = None,
     *, retry_failed: bool = False, workers: int = 4, since: datetime | None = None,
+    deadline: float | None = None, on_stop: Callable[[str], None] | None = None,
 ) -> list[Result]:
-    """Claim batches of BATCH_SIZE and keep at most ``workers`` Codex calls running."""
+    """Claim batches of BATCH_SIZE and keep at most ``workers`` Codex calls running.
+
+    No new batch starts after ``deadline`` (a time.monotonic() value) or after
+    CIRCUIT_BREAKER consecutive batches failed entirely; running ones finish.
+    A listing is attempted at most once per run.
+    """
     if shutil.which("codex") is None:
         raise RuntimeError("Codex CLI is not installed or not on PATH")
     results: list[Result] = []
     claimed_batches = 0
     reported = 0
     exhausted = False
+    failed_in_a_row = 0
     attempted_ids: set[int] = set()
+
+    def stop(reason: str) -> None:
+        nonlocal exhausted
+        if not exhausted and on_stop:
+            on_stop(reason)
+        exhausted = True
     with ThreadPoolExecutor(max_workers=workers) as pool:
         pending = {}
 
@@ -758,9 +787,11 @@ def run_batches(
             nonlocal claimed_batches, exhausted
             if exhausted or (batches != 0 and claimed_batches >= batches):
                 return
+            if deadline is not None and time.monotonic() >= deadline:
+                stop("time budget reached")
+                return
             tasks = claim_batch(
-                engine, source, retry_failed=retry_failed,
-                exclude_ids=attempted_ids if retry_failed else (), since=since,
+                engine, source, retry_failed=retry_failed, exclude_ids=attempted_ids, since=since,
             )
             if not tasks:
                 exhausted = True
@@ -786,5 +817,40 @@ def run_batches(
                 reported += 1
                 if on_batch:
                     on_batch(reported, batch_results)
+                failed_in_a_row = failed_in_a_row + 1 if all(
+                    r.status == "failed" for r in batch_results) else 0
+                if failed_in_a_row >= CIRCUIT_BREAKER:
+                    stop(f"{failed_in_a_row} batches in a row failed: {batch_results[0].error}")
                 submit()
     return results
+
+
+def enrichment_health(engine: Engine, now: datetime | None = None) -> dict:
+    """Backlog, recent failures and abandoned claims, judged like a source's health."""
+    now = now or utcnow()
+    day_ago = now - timedelta(hours=24)
+    backlog = count_eligible(engine)
+    with session_scope(engine) as session:
+        finished = session.execute(
+            select(PropertyEnrichment.status, func.count())
+            .where(PropertyEnrichment.finished_at >= day_ago)
+            .group_by(PropertyEnrichment.status)).all()
+        last = session.scalar(select(func.max(PropertyEnrichment.finished_at)))
+        stale = session.scalar(select(func.count()).select_from(PropertyEnrichment).where(
+            PropertyEnrichment.status == "claimed", PropertyEnrichment.claimed_at < now - STALE_CLAIM))
+    counts = dict(finished)
+    done, failed = counts.get("done", 0), counts.get("failed", 0)
+    if last is not None and last.tzinfo is None:
+        last = last.replace(tzinfo=timezone.utc)
+    if failed >= 10 and failed > 0.2 * (done + failed):
+        state, detail = "failing", f"{failed} of {done + failed} listings failed in 24 h"
+    elif backlog and (last is None or now - last > timedelta(hours=36)):
+        state, detail = "stale", f"{backlog} listings waiting; last enrichment " + (
+            f"{int((now - last).total_seconds() // 3600)} h ago" if last else "never")
+    else:
+        state, detail = "ok", f"{done} done, {failed} failed in 24 h; {backlog} waiting"
+    if stale:
+        detail += f"; {stale} abandoned claims"
+    return {"state": state, "detail": detail, "backlog": backlog, "done_24h": done,
+            "failed_24h": failed, "abandoned_claims": stale,
+            "last_finished": last.isoformat() if last else None}

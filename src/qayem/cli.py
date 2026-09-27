@@ -14,7 +14,9 @@ from sqlalchemy import func, select
 
 from .config import DEFAULT_MIN_INTERVAL
 from .db import get_engine, init_db, session_scope
-from .enrichment import BATCH_SIZE, PROMPT_VERSION, claim_batch, count_eligible, revoke_outdated, run_batches
+from .enrichment import (
+    BATCH_SIZE, PROMPT_VERSION, claim_batch, count_eligible, enrichment_health, revoke_outdated, run_batches,
+)
 from .http_client import Fetcher
 from .models import ParseRun, Property, PropertyEnrichment, PropertyVersion, utcnow
 from .sources import SOURCE_REGISTRY
@@ -95,6 +97,7 @@ def enrich_descriptions(
     workers: int = typer.Option(4, min=1, max=16, help="Maximum concurrent Codex calls (one batch each)."),
     dry_run: bool = typer.Option(False, help="Show the next batch without invoking Codex or claiming rows."),
     since: datetime | None = typer.Option(None, formats=["%Y-%m-%d"], help="Only listings first seen on or after this date."),
+    max_minutes: float | None = typer.Option(None, min=1, help="Start no new batch after this many minutes."),
 ) -> None:
     """Fill missing listing facts from title and description (gpt-6-sol, batched).
 
@@ -130,6 +133,8 @@ def enrich_descriptions(
         results = run_batches(
             engine, batches, source, on_batch=report_batch,
             retry_failed=retry_failed, workers=workers, since=since,
+            deadline=time.monotonic() + max_minutes * 60 if max_minutes else None,
+            on_stop=lambda reason: console.print(f"[yellow]Stopping: {reason}[/yellow]"),
         )
     except RuntimeError as exc:
         console.print(f"[red]{exc}[/red]")
@@ -412,12 +417,16 @@ def health(
                       item.last_run.strftime("%Y-%m-%d %H:%M") if item.last_run else "-",
                       item.last_status or "-",
                       item.last_success.strftime("%Y-%m-%d %H:%M") if item.last_success else "-", item.detail)
+    enrichment = enrichment_health(engine, now)
+    table.add_row("enrichment", f"[{colors[enrichment['state']]}]{enrichment['state']}[/]",
+                  (enrichment["last_finished"] or "-")[:16].replace("T", " "), "-", "-", enrichment["detail"])
     console.print(table)
     if write:
         write.parent.mkdir(parents=True, exist_ok=True)
         write.write_text(json.dumps({"checked_at": now.isoformat(),
-                                     "sources": [item.as_dict() for item in report]}, indent=2))
-    if any(item.state not in ("ok", "running") for item in report):
+                                     "sources": [item.as_dict() for item in report],
+                                     "enrichment": enrichment}, indent=2))
+    if any(item.state not in ("ok", "running") for item in report) or enrichment["state"] != "ok":
         raise typer.Exit(1)
 
 
