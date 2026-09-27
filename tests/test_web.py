@@ -291,3 +291,14 @@ def test_spa_routes_and_unknown_api_remain_separate(database: Path, tmp_path: Pa
             assert response.status_code == 404
             assert response.headers["content-type"].startswith("application/json")
         assert client.get("/%2e%2e/fixture.db").status_code == 404
+
+
+def test_listing_whose_price_is_only_the_down_payment_is_hidden(database: Path):
+    with sqlite3.connect(database) as connection:
+        connection.execute(
+            "INSERT INTO property_enrichments (property_id, status, done, claimed_at, description_hash, "
+            "model, reasoning_effort, flags) VALUES (17, 'done', 1, '2026-09-27', 'x', 'gpt-6-sol', 'low', "
+            "'[\"price_is_down_payment\"]')")
+    with TestClient(create_app(database)) as client:
+        assert client.get("/api/units/17").status_code == 404
+        assert client.get("/api/overview").json()["total_eligible"] == 23

@@ -398,7 +398,8 @@ class Catalog:
                         "SELECT property_id, changed_fields FROM property_versions "
                         "WHERE change_type IN ('updated', 'relisted') AND changed_fields LIKE '%delivery_date%'"
                     ).fetchall()
-                snapshot = build_snapshot(rows, runs, moves)
+                    hidden = unreliable_price_ids(connection)
+                snapshot = build_snapshot(rows, runs, moves, hidden)
             except sqlite3.Error as exc:
                 raise CatalogUnavailable("Qayem dataset is not ready. Point QAYEM_DB to a database containing the Qayem tables.") from exc
             self._cached, self._fingerprint, self._built_at = snapshot, signature, time.monotonic()
@@ -413,12 +414,22 @@ class Catalog:
         return clean_text(row[0], 10_000) if row else None
 
 
-def build_snapshot(rows: list, runs: list, moves: list) -> Snapshot:
+def unreliable_price_ids(connection: sqlite3.Connection) -> set[int]:
+    """Listings whose description shows the stored price is only the down payment."""
+    present = {row[1] for row in connection.execute("PRAGMA table_info(property_enrichments)")}
+    if "flags" not in present:
+        return set()
+    return {row[0] for row in connection.execute(
+        "SELECT property_id FROM property_enrichments WHERE flags LIKE '%\"price_is_down_payment\"%'")}
+
+
+def build_snapshot(rows: list, runs: list, moves: list, hidden: set[int] = frozenset()) -> Snapshot:
     latest_by_source: dict[str, str] = {}
     for row in rows:
         if seen := iso_date(row["last_seen_at"]):
             latest_by_source[row["source"]] = max(seen, latest_by_source.get(row["source"], seen))
-    projected = [item for row in rows if (item := property_projection(row)) is not None
+    projected = [item for row in rows if row["id"] not in hidden
+                 and (item := property_projection(row)) is not None
                  and confirmed(item, latest_by_source.get(row["source"]))]
     launches = [item for item in projected if item["source"] in PRIMARY_SOURCES]
     records = {item["id"]: item for item in projected if item["source"] not in PRIMARY_SOURCES}

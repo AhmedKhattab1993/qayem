@@ -123,6 +123,7 @@ class PropertyEnrichment(Base):
     prompt_version: Mapped[str | None] = mapped_column(String(16))  # None: before the v2 prompt
     proposed: Mapped[list | None] = mapped_column(JSON)
     applied: Mapped[dict | None] = mapped_column(JSON)
+    flags: Mapped[list | None] = mapped_column(JSON)  # e.g. ["price_is_down_payment"]; see enrichment.FLAG_NOTES
     error: Mapped[str | None] = mapped_column(Text)
 
 

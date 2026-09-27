@@ -110,14 +110,14 @@ def test_down_payment_equal_to_listing_price_is_refused_and_noted():
     values, notes = enrichment.validated_facts(
         facts(down_payment=450_000), task(description="مقدم 450الف فقط", price=450_000))
     assert values == {}
-    assert notes == ["Listing price equals the stated down payment"]
+    assert notes == ["price_is_down_payment"]
 
 
 def test_multi_unit_ads_apply_nothing():
     values, notes = enrichment.validated_facts(
         facts(is_multi_unit="true", property_type="apartment"),
         task(description="شقق للبيع مساحات تبدأ من 120 متر"))
-    assert values == {} and notes == ["Multi-unit ad: nothing applied"]
+    assert values == {} and notes == ["multi_unit"]
 
 
 def test_room_counts_need_their_own_number():
@@ -171,6 +171,7 @@ def test_claims_a_batch_at_a_time_and_never_reinvokes(tmp_path, monkeypatch):
         assert record.status == "done" and record.applied == {
             "property_type": "apartment", "area_m2": 120.0}
         assert (record.model, record.reasoning_effort, record.prompt_version) == ("gpt-6-sol", "low", "v2")
+        assert record.flags is None and record.error is None
     assert enrichment.claim_batch(engine) == []
 
 
@@ -381,3 +382,17 @@ def test_revoke_undoes_old_prompt_fills_but_keeps_current_ones(tmp_path):
         assert session.get(PropertyEnrichment, 1) is None
         assert session.get(PropertyEnrichment, 2) is not None
     assert enrichment.revoke_outdated(engine) == []
+
+
+def test_flags_are_stored_with_a_readable_note(tmp_path, monkeypatch):
+    engine = get_engine(tmp_path / "qayem.db")
+    init_db(engine)
+    seed(engine, 1, description="مقدم 450الف فقط", price=450_000)
+    tasks = enrichment.claim_batch(engine)
+    monkeypatch.setattr(enrichment, "invoke_codex", lambda batch: {
+        t.property_id: facts(down_payment=450_000) for t in batch})
+    enrichment.process_batch(engine, tasks)
+    with Session(engine) as session:
+        record = session.get(PropertyEnrichment, tasks[0].property_id)
+        assert record.flags == ["price_is_down_payment"]
+        assert record.error == "Listing price equals the stated down payment"

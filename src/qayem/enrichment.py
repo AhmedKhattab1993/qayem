@@ -63,6 +63,13 @@ VALUATION_FIELDS = (
 # the text holds nothing the parser has not already read. (Semsar's
 # description is a template read by its parser, but its titles are free text.)
 TEMPLATED_SOURCES = {"nawy", "nawy_primary"}
+# Structured findings about a listing, stored on its enrichment record. The
+# website hides listings flagged price_is_down_payment: their shown price is
+# only the down payment.
+FLAG_NOTES = {
+    "multi_unit": "Multi-unit ad: nothing applied",
+    "price_is_down_payment": "Listing price equals the stated down payment",
+}
 TEXT_FIELDS = {"property_type", "finishing", "delivery_status", "compound", "developer"}
 PROPERTY_TYPES = {
     "apartment", "villa", "townhouse", "twinhouse", "penthouse",
@@ -634,9 +641,9 @@ def _validated_value(field: str, raw: str) -> object | None:
 def validated_facts(facts: list[dict], task: Task) -> tuple[dict[str, object], list[str]]:
     """Keep proposals that parse, are grounded in the text and fill a missing column.
 
-    Returns the values to apply and notes about the listing: a multi-unit ad
-    gets nothing applied, and a stated down payment equal to the listing's
-    price means that price is probably the down payment.
+    Returns the values to apply and flags about the listing (FLAG_NOTES): a
+    multi-unit ad gets nothing applied, and a stated down payment equal to the
+    listing's price means that price is probably the down payment.
     """
     proposed: dict[str, object] = {}
     duplicates: set[str] = set()
@@ -653,8 +660,8 @@ def validated_facts(facts: list[dict], task: Task) -> tuple[dict[str, object], l
     for field in duplicates:
         proposed.pop(field)
     if proposed.get("is_multi_unit") is True:
-        return {}, ["Multi-unit ad: nothing applied"]
-    notes = []
+        return {}, ["multi_unit"]
+    flags = []
 
     values = {
         field: value for field, value in proposed.items()
@@ -665,12 +672,12 @@ def validated_facts(facts: list[dict], task: Task) -> tuple[dict[str, object], l
     if down is not None and price is not None and down >= price:
         values.pop("down_payment")
         if task.price is not None and down == task.price:
-            notes.append("Listing price equals the stated down payment")
+            flags.append("price_is_down_payment")
     if values.get("price") is not None and task.price is None:
         extracted_down = proposed.get("down_payment")
         if extracted_down is not None and extracted_down >= values["price"]:
             values.pop("price")
-    return values, notes
+    return values, flags
 
 
 def _record_results(engine: Engine, tasks: list[Task], answers: dict[int, list[dict]],
@@ -698,8 +705,9 @@ def _record_results(engine: Engine, tasks: list[Task], answers: dict[int, list[d
                 record.error = "Listing text changed during invocation"
                 results.append(Result(task.property_id, "done", 0, record.error))
                 continue
-            values, notes = validated_facts(facts, task)
-            record.error = "; ".join(notes) or None
+            values, flags = validated_facts(facts, task)
+            record.flags = flags or None
+            record.error = "; ".join(FLAG_NOTES[flag] for flag in flags) or None
             applied = {}
             for field, value in values.items():
                 if not is_missing(field, getattr(prop, field)):
