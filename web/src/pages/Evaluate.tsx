@@ -1,16 +1,17 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowRight, ChevronDown, Link2, Scale } from "lucide-react";
-import { year as formatYear, api, ApiError, classLabel, money, number, percent, titleCase, useApi, useCatalog, sep } from "../lib";
+import { year as formatYear, api, ApiError, money, number, percent, titleCase, useApi, useCatalog, scrollBehavior, sep, nameOf, place } from "../lib";
 import { t } from "../locale";
 import type { Evaluation, Payment } from "../types";
 import { ErrorState, Loading } from "../components/States";
-import { BreakdownView, PaymentFacts, Unknowns, ValuationSummary } from "../components/Valuation";
-import { UnitTable } from "../components/UnitTable";
+import { OpportunitySummary, PaymentFacts, PeerPanel, Unknowns } from "../components/Opportunity";
+import { DeveloperPrice } from "../components/DeveloperPrice";
+import { Comparables } from "../components/UnitTable";
+import { NameList } from "../components/Names";
 
 const FIELDS = [
   "compound",
-  "district",
   "property_type",
   "area",
   "price",
@@ -36,6 +37,7 @@ export default function Evaluate() {
   const [mode, setMode] = useState(params.get("mode") === "link" ? "link" : "describe");
   const [form, setForm] = useState<Form>(() => fromParams(params));
   const [problem, setProblem] = useState("");
+  const result = useRef<HTMLElement>(null);
   const set = (field: keyof Form, value: string | boolean) => setForm((current) => ({ ...current, [field]: value }));
 
   const query = useMemo(() => {
@@ -44,7 +46,7 @@ export default function Evaluate() {
       const value = params.get(field);
       if (value) next.set(field, value);
     }
-    return next.get("property_type") && next.get("area") && next.get("price") && (next.get("compound") || next.get("district"))
+    return next.get("property_type") && next.get("area") && next.get("price") && next.get("compound")
       ? `/evaluate?${next}`
       : null;
   }, [params]);
@@ -55,7 +57,7 @@ export default function Evaluate() {
     const area = Number(form.area);
     const price = Number(form.price);
     const down = Number(form.down_payment);
-    if (!form.compound.trim() && !form.district) return setProblem("Choose a compound, or a district if the unit is not in one.");
+    if (!form.compound.trim()) return setProblem("Choose the unit’s compound: every comparison is within its compound.");
     if (!(area >= 20 && area <= 5000)) return setProblem("Enter an area between 20 and 5,000 m².");
     if (!(price >= 100_000)) return setProblem("Enter the full headline price in EGP.");
     if (form.plan && !(down >= 0 && down <= price)) return setProblem("The amount paid at signing must be between 0 and the headline price.");
@@ -68,6 +70,9 @@ export default function Evaluate() {
       if (value) next.set(field, value);
     }
     setParams(next);
+    // On a phone the result sits below the form: take the reader to it.
+    if (window.matchMedia("(max-width: 900px)").matches)
+      requestAnimationFrame(() => result.current?.scrollIntoView({ behavior: scrollBehavior(), block: "start" }));
   };
 
   const types = catalog?.property_types ?? [];
@@ -76,13 +81,13 @@ export default function Evaluate() {
     <div className="evaluate page-enter">
       <header className="page-head">
         <div className="page">
-          <span className="eyebrow">{t("Evaluate a unit")}</span>
+          <span className="eyebrow">{t("Compare a unit")}</span>
           <h1 className="display">
-            {t("Is this")} <em>{t("a fair price?")}</em>
+            {t("Is this")} <em>{t("a real opportunity?")}</em>
           </h1>
           <p className="lede">
             {t(
-              "Describe the unit you were offered. Qayem converts its payment plan to cash today and prices it against its own compound and developer.",
+              "Describe the unit you were offered. Qayem puts its payment plan in today’s money and compares it with the developer’s price today and the similar units listed in the same compound.",
             )}
           </p>
           <div className="segmented" role="group" aria-label={t("How to evaluate")}>
@@ -114,30 +119,15 @@ export default function Evaluate() {
                     maxLength={200}
                   />
                 </span>
-                <datalist id="evaluate-compounds">
-                  {catalog?.compounds.map((c) => (
-                    <option key={c.key} value={c.name}>
-                      {[c.developer, c.district].filter(Boolean).join(sep())}
-                    </option>
-                  ))}
-                </datalist>
               </label>
-              <label className="field">
-                <span className="field-label">{t("District, if not in a known compound")}</span>
-                <span className="select">
-                  <select value={form.district} onChange={(event) => set("district", event.target.value)}>
-                    <option value="">{t("Choose a district")}</option>
-                    {catalog?.districts
-                      .filter((d) => d.units >= 5)
-                      .map((d) => (
-                        <option key={d.key} value={d.name}>
-                          {d.name}
-                        </option>
-                      ))}
-                  </select>
-                  <ChevronDown size={15} />
-                </span>
-              </label>
+              {/* Outside the label: option text would otherwise become the field's accessible name. */}
+              <datalist id="evaluate-compounds">
+                {catalog?.compounds.map((c) => (
+                  <option key={c.key} value={c.name}>
+                    {[c.name_ar, c.developer, place(c.district)].filter(Boolean).join(sep())}
+                  </option>
+                ))}
+              </datalist>
             </fieldset>
             <fieldset>
               <legend>{t("The unit")}</legend>
@@ -264,26 +254,26 @@ export default function Evaluate() {
               </p>
             )}
             <button type="submit" className="btn btn-ink btn-block">
-              <Scale size={16} /> {t("Value this unit")}
+              <Scale size={16} /> {t("Compare this unit")}
             </button>
           </form>
         )}
 
-        <section className="evaluate-result" aria-live="polite" aria-label={t("Valuation")}>
+        <section className="evaluate-result" ref={result} aria-live="polite" aria-label={t("Comparison")}>
           {!query ? (
             <div className="evaluate-placeholder">
               <Scale size={28} strokeWidth={1.4} />
-              <h2>{t("Your valuation appears here")}</h2>
+              <h2>{t("Your comparison appears here")}</h2>
               <p>
                 {t(
-                  "You will see a fair cash value with a likely range, what the payment plan is worth today, how the value was built, and the comparable listings behind it.",
+                  "You will see how the unit compares with the developer’s price today and with the similar units listed in its compound, what its payment plan is worth today, and the units behind the comparison.",
                 )}
               </p>
             </div>
           ) : error ? (
             <ErrorState message={error} retry={retry} />
           ) : !data ? (
-            <Loading label="Valuing the unit…" />
+            <Loading label="Comparing the unit…" />
           ) : (
             <Result data={data} />
           )}
@@ -313,7 +303,7 @@ function LinkLookup({ onFallback }: { onFallback: () => void }) {
       <fieldset>
         <legend>{t("Listing link")}</legend>
         <label className="field">
-          <span className="field-label">{t("Paste a link from Nawy, OpenSooq, Aqarmap, Semsar Masr, GPM or Coldwell Banker")}</span>
+          <span className="field-label">{t("Paste an AqarExit unit link")}</span>
           <span className="input">
             <Link2 size={17} />
             <input
@@ -345,68 +335,71 @@ function LinkLookup({ onFallback }: { onFallback: () => void }) {
   );
 }
 
-const noteText: Record<string, string> = {
-  compound_not_found: "We have no resale listings for that compound, so it is valued at district level.",
-  developer_not_found: "We do not recognise that developer.",
-  district_not_found: "We have no resale listings in that district.",
-};
-
 function Result({ data }: { data: Evaluation }) {
-  const { inputs, valuation } = data;
+  const { inputs } = data;
   return (
     <div className="result">
       <div className="result-head">
-        <span className="eyebrow no-rule">{t("Valuation")}</span>
-        <h2 dir="auto">
+        <span className="eyebrow no-rule">{t("Comparison")}</span>
+        <h2>
           {titleCase(inputs.property_type)}{sep()}{number(inputs.area_m2)} {t("m²")}
         </h2>
-        <p className="muted" dir="auto">
-          {inputs.compound ? (
-            <Link to={`/compounds/${encodeURIComponent(inputs.compound.key)}`}>{inputs.compound.name}</Link>
-          ) : (
-            t("No compound")
-          )}
-          {inputs.developer && (
-            <>
-              {sep()}
-              <Link to={`/developers/${encodeURIComponent(inputs.developer.key)}`}>{inputs.developer.name}</Link>
-            </>
-          )}
-          {inputs.district && `${sep()}${inputs.district}`}
+        <p className="muted">
+          <NameList
+            items={[
+              inputs.compound ? (
+                <Link to={`/compounds/${encodeURIComponent(inputs.compound.key)}`}>{nameOf(inputs.compound)}</Link>
+              ) : (
+                t("No compound")
+              ),
+              inputs.developer && (
+                <Link to={`/developers/${encodeURIComponent(inputs.developer.key)}`}>{nameOf(inputs.developer)}</Link>
+              ),
+              place(inputs.district),
+            ]}
+          />
         </p>
       </div>
-      {data.notes.map((note) => (
-        <p key={note} className="notice">
-          {t(noteText[note] ?? note)}
+      {data.status === "compound_not_found" ? (
+        <p className="notice">
+          {t("We have no resale listings in that compound, so there is nothing to compare it with. Check the spelling, or choose a compound from the list.")}
         </p>
-      ))}
-      <ValuationSummary valuation={valuation} price={inputs.price} />
+      ) : (
+        <>
+          <OpportunitySummary unit={data} />
+          {data.launch && (
+            <section className="result-section">
+              <h3>{t("Against the developer’s price today")}</h3>
+              <DeveloperPrice
+                unit={{ launch: data.launch, payment: data.payment, price: inputs.price, finishing_class: inputs.finishing_class }}
+              />
+            </section>
+          )}
+          {data.peers && (
+            <section className="result-section">
+              <h3>{t("Against similar units listed now")}</h3>
+              <PeerPanel peers={data.peers} price_per_m2={inputs.price_per_m2} />
+            </section>
+          )}
+        </>
+      )}
       <section className="result-section">
         <h3>{t("The payment plan, in today’s money")}</h3>
         <PaymentFacts payment={data.payment} price={inputs.price} />
       </section>
-      <CostCalculator
-        price={inputs.price}
-        payment={data.payment}
-        fair={valuation.fair_value ?? null}
-        ready={inputs.delivery.bucket === "ready"}
-      />
-      {data.breakdown && (
+      <CostCalculator price={inputs.price} payment={data.payment} ready={inputs.delivery?.bucket === "ready"} />
+      {data.status === "compared" && (
         <section className="result-section">
-          <h3>{t("How the fair value was built")}</h3>
-          <BreakdownView breakdown={data.breakdown} cls={inputs.class} />
+          <h3>{t("What this comparison cannot see")}</h3>
+          <Unknowns items={data.unknowns} />
+          <p className="fineprint">{t("Ask the seller and the developer about each of these before you commit.")}</p>
         </section>
       )}
-      <section className="result-section">
-        <h3>{t("What this valuation cannot see")}</h3>
-        <Unknowns items={data.unknowns} />
-        <p className="fineprint">{t("Ask the seller and the developer about each of these before you commit.")}</p>
-      </section>
       {data.comparables.length > 0 && (
         <section className="result-section">
-          <h3>{t("Closest comparable listings")}</h3>
-          <p className="muted">{t("Same class of unit, nearest in size, from the same compound where possible. {cls}.", { cls: classLabel(inputs.class) })}</p>
-          <UnitTable items={data.comparables} caption="Comparable listings" />
+          <h3>{t("Similar units listed now")}</h3>
+          <p className="muted">{t("Same compound and unit type, nearest in size first.")}</p>
+          <Comparables items={data.comparables} caption="Similar units" />
         </section>
       )}
     </div>
@@ -416,7 +409,7 @@ function Result({ data }: { data: Evaluation }) {
 const DEFAULTS = { transfer: 5, brokerage: 2.5, maintenance: 8, registration: 0 };
 
 /** All-in cost of buying: what leaves your account now, later, and in today’s money. */
-function CostCalculator({ price, payment, fair, ready }: { price: number; payment: Payment; fair: number | null; ready: boolean }) {
+function CostCalculator({ price, payment, ready }: { price: number; payment: Payment; ready: boolean }) {
   const [rates, setRates] = useState({ ...DEFAULTS, maintenance: ready ? 0 : DEFAULTS.maintenance });
   useEffect(() => setRates((current) => ({ ...current, maintenance: ready ? 0 : DEFAULTS.maintenance })), [ready]);
   const fee = (key: keyof typeof DEFAULTS) => (price * rates[key]) / 100;
@@ -467,15 +460,10 @@ function CostCalculator({ price, payment, fair, ready }: { price: number; paymen
           <dt>{t("All-in cost in today’s money")}</dt>
           <dd className="num">{money(today)}</dd>
         </div>
-        {fair != null && (
-          <div>
-            <dt>{t("Fair value plus the same fees")}</dt>
-            <dd className="num">
-              {money(fair + fees + fee("maintenance"))}
-              <small className="muted">{sep()}{t("fees {share}", { share: percent((fees + fee("maintenance")) / price, 1) })}</small>
-            </dd>
-          </div>
-        )}
+        <div>
+          <dt>{t("Fees as a share of the price")}</dt>
+          <dd className="num">{percent((fees + fee("maintenance")) / price, 1)}</dd>
+        </div>
       </dl>
     </section>
   );

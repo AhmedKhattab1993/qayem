@@ -1,20 +1,31 @@
-import { ArrowDown, Banknote, Building2, CalendarClock, FileQuestion, Files, Gavel, History, Layers3, ScanLine } from "lucide-react";
-import { planLabel, bucketLabel, classLabel, date, number, percent, signed, titleCase, sep } from "../lib";
+import { ArrowDown, Banknote, Building2, CalendarClock, FileQuestion, Files, Gavel, History, Landmark, Layers3, ScanLine, Truck } from "lucide-react";
+import { date, number, percent, signed, sep } from "../lib";
+import type { ReactNode } from "react";
 import { t } from "../locale";
-import type { Overview } from "../types";
+import type { Level, Overview } from "../types";
 import { ErrorState, Loading } from "../components/States";
-import { GradeBadge, ScopeNote } from "../components/Valuation";
+import { LevelBadge, ScopeNote } from "../components/Opportunity";
 
 const limits = [
   {
     icon: ScanLine,
-    title: "Asking prices, not sale prices",
-    text: "Egypt publishes no resale transaction prices. A fair value is where comparable asking prices sit once payment plans are converted to cash, and final deals are often lower.",
+    title: "Contract prices, not sale prices",
+    text: "AqarExit units are listed at the owner’s original contract price, and Egypt publishes no resale sale prices. So Qayem does not say what a unit is worth; it compares it with what can be bought instead.",
+  },
+  {
+    icon: Layers3,
+    title: "Developer prices are list prices",
+    text: "Developer prices come from the developers’ own current listings on Nawy. Negotiated discounts and private offers are not visible.",
+  },
+  {
+    icon: Truck,
+    title: "Delivery is shown, not priced",
+    text: "A resale unit that delivers years before the developer’s new units is worth more for it. Both delivery dates are shown; the difference is not priced into the gap.",
   },
   {
     icon: Building2,
     title: "Floor, view and orientation",
-    text: "Sources rarely publish them, so they are not in the model. A sea-view or garden unit can be worth well above its compound’s norm.",
+    text: "Sources rarely publish them. A sea-view or garden unit can rightly cost more than similar units in its compound.",
   },
   {
     icon: Gavel,
@@ -29,7 +40,7 @@ const limits = [
   {
     icon: Files,
     title: "Listings, not unique units",
-    text: "The same unit can appear on several platforms or be listed twice by different brokers. Counts are listings.",
+    text: "The same unit can be listed twice. Counts are listings.",
   },
   {
     icon: History,
@@ -37,18 +48,13 @@ const limits = [
     text: "Price trends, time on market and delivery postponements need repeated observation. They appear once there are eight weeks of history.",
   },
   {
-    icon: Layers3,
-    title: "Launch prices are list prices",
-    text: "Developer launch prices come from the developers’ own current listings on Nawy. Negotiated discounts and private offers are not visible.",
-  },
-  {
     icon: FileQuestion,
     title: "Resale, with its evidence",
-    text: "The resale signal comes from a source field, a dedicated resale catalogue, or a keyword. It is shown on every unit.",
+    text: "Every AqarExit unit is a contract transfer (تنازل), and AqarExit says whether it verified the contract and receipts. It is shown on every unit.",
   },
 ];
 
-const deliveryOrder = ["ready", "under_1y", "1_2y", "2_3y", "3y_plus", "unknown"];
+const levels: Level[] = ["strong", "good", "in_line", "mixed", "pricier", "check", "unrated"];
 
 export default function Methodology({ overview, error, retry }: { overview: Overview | null; error: string; retry: () => void }) {
   if (error)
@@ -58,9 +64,21 @@ export default function Methodology({ overview, error, retry }: { overview: Over
       </div>
     );
   if (!overview) return <Loading />;
-  const { backtest, effects } = overview;
-  const naive = backtest.naive_baseline;
-  const types = Object.entries(effects.type).filter(([, value]) => Math.abs(value) > 0.001);
+  const rules = overview.thresholds;
+  const pct = (value: number) => percent(Math.abs(value));
+  const levelRule: Record<Level, string> = {
+    strong: t("At least {all} under every comparison that applies, and {one} under one of them.", { all: pct(rules.strong_all), one: pct(rules.strong_one) }),
+    good: t("At least {all} under every comparison that applies, and {one} under one of them.", { all: pct(rules.good_all), one: pct(rules.good_one) }),
+    in_line: t("Within the ranges above and below."),
+    mixed: t("At least {one} under one comparison and {up} over the other.", { one: pct(rules.good_one), up: pct(rules.pricier) }),
+    pricier: t("At least {up} over a comparison, as listed and in today’s money.", { up: pct(rules.pricier) }),
+    check: t(
+      "More than {dev} under the developer, {peers} under similar units, or {cheapest} under even the cheapest similar unit: verify it first. It may be a listing error or an unusually early contract.",
+      { dev: pct(rules.check_developer), peers: pct(rules.check_peers), cheapest: pct(rules.check_cheapest) },
+    ),
+    unrated: t("No like-for-like developer price and fewer than {n} other similar units.", { n: number(overview.peers.min_similar) }),
+  };
+  const good = (overview.opportunities.strong ?? 0) + (overview.opportunities.good ?? 0);
   return (
     <div className="method page-enter">
       <header className="method-hero">
@@ -68,15 +86,15 @@ export default function Methodology({ overview, error, retry }: { overview: Over
           <div>
             <span className="eyebrow">{t("Methodology")}</span>
             <h1 className="display">
-              {t("How a fair value")} <em>{t("is built, and tested.")}</em>
+              {t("How an opportunity")} <em>{t("is judged.")}</em>
             </h1>
             <p className="lede">
               {t(
-                "Every fair value on Qayem comes from one published model, checked against units it has not seen. Here is the model, its accuracy, and what it cannot know.",
+                "Qayem does not estimate a fair price. Egypt publishes no resale sale prices, and AqarExit lists each unit at its old contract price. Instead, every unit is compared with what could be bought instead today.",
               )}
             </p>
-            <a className="btn btn-brass" href="#accuracy">
-              {t("See the accuracy")} <ArrowDown size={16} />
+            <a className="btn btn-brass" href="#levels">
+              {t("See the rules")} <ArrowDown size={16} />
             </a>
           </div>
           <dl className="method-snapshot">
@@ -85,181 +103,131 @@ export default function Methodology({ overview, error, retry }: { overview: Over
               <dd className="num">{number(overview.total_resale)}</dd>
             </div>
             <div>
-              <dt>{t("Valued")}</dt>
-              <dd className="num">{number(overview.valued_count)}</dd>
+              <dt>{t("Compared")}</dt>
+              <dd className="num">{number(overview.rated_count)}</dd>
             </div>
             <div>
-              <dt>{t("Model trained on")}</dt>
-              <dd className="num">{number(backtest.trained_on)}</dd>
+              <dt>{t("Strong or good opportunities")}</dt>
+              <dd className="num">{number(good)}</dd>
             </div>
             <div>
               <dt>{t("Observation window")}</dt>
               <dd className="num method-dates">
-                {date(overview.first_observed)} → {date(overview.last_updated)}
+                {date(overview.first_observed)} – {date(overview.last_updated)}
               </dd>
             </div>
           </dl>
         </div>
       </header>
 
-      <section className="page section" aria-labelledby="model-heading">
+      <section className="page section" aria-labelledby="comparisons-heading">
         <div className="section-head">
           <div>
-            <span className="eyebrow">01{sep()}{t("The model")}</span>
-            <h2 id="model-heading" className="display">
-              {t("Compound first,")} <em>{t("then the unit.")}</em>
+            <span className="eyebrow">01{sep()}{t("Two comparisons")}</span>
+            <h2 id="comparisons-heading" className="display">
+              {t("Against what you")} <em>{t("could buy instead.")}</em>
             </h2>
           </div>
           <p className="lede">
             {t(
-              "Price per m² is modelled in cash-equivalent terms. Each unit starts from its property class across Egypt, then moves towards its district, its developer within that district, and its compound, each by as much as the number of listings there justifies.",
+              "Each comparison is made twice: on the listed price, and in today’s money. A gap counts only on the less favourable of the two, so neither a long remaining plan nor the discount rate can make a deal on its own.",
             )}
           </p>
+        </div>
+        <div className="definitions">
+          <article>
+            <Landmark size={22} strokeWidth={1.6} />
+            <h3>{t("The developer today")}</h3>
+            <p>
+              {t(
+                "The developer’s current units on Nawy in the same compound, of the same type and finishing, within 1.5× the size: the median of the nearest five, and at least two. {n} developer units in {c} compounds are matched; {u} resale units have a like-for-like developer price.",
+                { n: number(overview.launch.matched), c: number(overview.launch.compounds), u: number(overview.launch.compared) },
+              )}
+            </p>
+          </article>
+          <article>
+            <Building2 size={22} strokeWidth={1.6} />
+            <h3>{t("Similar units now")}</h3>
+            <p>
+              {t(
+                "The other resale units listed in the same compound, of the same type, within 1.5× the size, and of the same finishing when there are at least {n}. The unit is ranked against their median; {r} units have enough of them.",
+                { n: number(overview.peers.min_similar), r: number(overview.peers.ranked) },
+              )}
+            </p>
+          </article>
         </div>
         <div className="formula-card">
-          <code dir="ltr">
-            log(cash EGP/m²) = class + district + developer + compound + type + finishing + delivery + plan + size
-          </code>
+          <Formula
+            label={t("How a gap is calculated")}
+            term={t("Gap")}
+            parts={[
+              <span key="f">{t("the larger of")}</span>,
+              <Group key="g">
+                <span className="f-term">
+                  <Frac top={t("Listed price per m²")} bottom={t("Comparison, listed")} />
+                  <span className="f-op">−</span>
+                  <span className="num">{number(1)}</span>
+                </span>
+                <span className="f-sep">{t("and")}</span>
+                <span className="f-term">
+                  <Frac top={t("Today’s-money price per m²")} bottom={t("Comparison, in today’s money")} />
+                  <span className="f-op">−</span>
+                  <span className="num">{number(1)}</span>
+                </span>
+              </Group>,
+            ]}
+          />
           <p>
             {t(
-              "A level with n listings moves n ÷ (n + {k}) of the way from its parent, so a compound with four listings moves halfway. Unit adjustments are fitted jointly with the levels.",
-              { k: number(effects.shrinkage) },
+              "The median like-for-like resale unit sits {gap} against the developer’s price today. Since the sellers signed, developer list prices per m² have moved {annual} a year (median of {n} units).",
+              {
+                gap: signed(overview.launch.median_gap),
+                annual: signed(overview.since_contract.median_annual, 1),
+                n: number(overview.since_contract.units),
+              },
             )}
           </p>
         </div>
-        <div className="effects">
-          <article>
-            <h3>{t("Finishing")}</h3>
-            <p className="muted">{t("Against a finished unit")}</p>
-            <ul>
-              {Object.entries(effects.finishing).map(([level, value]) => (
-                <li key={level}>
-                  <span>{titleCase(level)}</span>
-                  <b className="num">{signed(value, 1)}</b>
-                </li>
-              ))}
-            </ul>
-          </article>
-          <article>
-            <h3>{t("Delivery")}</h3>
-            <p className="muted">{t("Against a ready unit, after converting to cash")}</p>
-            <ul>
-              {deliveryOrder
-                .filter((bucket) => bucket in effects.delivery)
-                .map((bucket) => (
-                  <li key={bucket}>
-                    <span>{bucketLabel(bucket)}</span>
-                    <b className="num">{signed(effects.delivery[bucket], 1)}</b>
-                  </li>
-                ))}
-            </ul>
-          </article>
-          <article>
-            <h3>{t("Payment plan")}</h3>
-            <p className="muted">{t("Cash-equivalent price against a cash unit")}</p>
-            <ul>
-              {Object.entries(effects.plan).map(([bucket, value]) => (
-                <li key={bucket}>
-                  <span>{planLabel(bucket)}</span>
-                  <b className="num">{signed(value, 1)}</b>
-                </li>
-              ))}
-            </ul>
-          </article>
-          <article>
-            <h3>{t("Unit type")}</h3>
-            <p className="muted">{t("Against an apartment, chalet or villa in the same place")}</p>
-            <ul>
-              {types.map(([type, value]) => (
-                <li key={type}>
-                  <span>{titleCase(type)}</span>
-                  <b className="num">{signed(value, 1)}</b>
-                </li>
-              ))}
-            </ul>
-          </article>
-          <article>
-            <h3>{t("Size")}</h3>
-            <p className="muted">{t("Price per m² when the area doubles")}</p>
-            <ul>
-              {Object.entries(effects.area_doubling).map(([cls, value]) => (
-                <li key={cls}>
-                  <span>{classLabel(cls)}</span>
-                  <b className="num">{signed(value, 1)}</b>
-                </li>
-              ))}
-            </ul>
-          </article>
-        </div>
-        <p className="fineprint">
-          {t(
-            "These effects are fitted from the data, not assumed. The payment-plan effect shows how buyers actually price long plans: less steeply than a flat discount rate. Listings more than 2.5× away from their district norm are excluded from fitting and flagged “check this listing”.",
-          )}
-        </p>
       </section>
 
-      <section className="page section" id="accuracy" aria-labelledby="accuracy-heading">
+      <section className="page section" id="levels" aria-labelledby="levels-heading">
         <div className="section-head">
           <div>
-            <span className="eyebrow">02{sep()}{t("Accuracy")}</span>
-            <h2 id="accuracy-heading" className="display">
-              {t("Tested on units")} <em>{t("it has not seen.")}</em>
+            <span className="eyebrow">02{sep()}{t("Levels")}</span>
+            <h2 id="levels-heading" className="display">
+              {t("Every comparison")} <em>{t("has to agree.")}</em>
             </h2>
           </div>
           <p className="lede">
             {t(
-              "Each of {n} listings is valued with itself removed from the data, and the prediction is compared with its cash-equivalent asking price. The ranges shown on every unit are the 10th to 90th percentile of these errors.",
-              { n: number(backtest.evaluated) },
+              "The developer comparison counts only when the finishing matches: an unfinished unit is not a deal for being unfinished. Units are ranked by level, then those checked against both comparisons first, then by their average gap.",
             )}
           </p>
         </div>
-        <div className="ledger stack backtest">
+        <div className="ledger stack">
           <table>
-            <caption className="sr-only">{t("Backtest by evidence grade")}</caption>
+            <caption className="sr-only">{t("Opportunity levels and their rules")}</caption>
             <thead>
               <tr>
-                <th scope="col">{t("Evidence")}</th>
-                <th scope="col">{t("Units tested")}</th>
-                <th scope="col">{t("Median error")}</th>
-                <th scope="col">{t("Within ±10%")}</th>
-                <th scope="col">{t("Within ±20%")}</th>
-                <th scope="col">{t("80% range")}</th>
+                <th scope="col">{t("Level")}</th>
+                <th scope="col">{t("Rule")}</th>
+                <th scope="col">{t("Units")}</th>
               </tr>
             </thead>
             <tbody>
-              {backtest.grades.map((grade) => (
-                <tr key={grade.grade}>
+              {levels.map((level) => (
+                <tr key={level}>
                   <th scope="row">
-                    <GradeBadge grade={grade.grade} long />
+                    <LevelBadge level={level} />
                   </th>
-                  <td data-label={t("Units tested")} className="num">{number(grade.count)}</td>
-                  <td data-label={t("Median error")} className="num ledger-strong">{percent(grade.median_abs_error, 1)}</td>
-                  <td data-label={t("Within ±10%")} className="num">{percent(grade.within_10pct)}</td>
-                  <td data-label={t("Within ±20%")} className="num">{percent(grade.within_20pct)}</td>
-                  <td data-label={t("80% range")} className="num">
-                    {signed(grade.range_low_pct)} … {signed(grade.range_high_pct)}
+                  <td data-label={t("Rule")}>{levelRule[level]}</td>
+                  <td data-label={t("Units")} className="num ledger-strong">
+                    {number(overview.opportunities[level] ?? 0)}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
-        <div className="kpis">
-          <article>
-            <span>{t("District median per m² (the naive method)")}</span>
-            <strong className="num">{percent(naive.median_abs_error, 1)}</strong>
-            <small>{t("Median error on the same {n} units", { n: number(naive.evaluated) })}</small>
-          </article>
-          <article className="kpi-feature">
-            <span>{t("Qayem model")}</span>
-            <strong className="num">{percent(naive.model_median_abs_error, 1)}</strong>
-            <small>{t("Median error on the same units")}</small>
-          </article>
-          <article>
-            <span>{t("Not valued")}</span>
-            <strong className="num">{number(overview.total_resale - overview.valued_count)}</strong>
-            <small>{t("Too little evidence, or not a residential unit. We do not guess.")}</small>
-          </article>
         </div>
       </section>
 
@@ -279,31 +247,34 @@ export default function Methodology({ overview, error, retry }: { overview: Over
           </p>
         </div>
         <div className="formula-card">
-          <code dir="ltr">cash today = paid at signing + Σ installment ÷ (1 + {overview.discount_rate})^years</code>
+          <Formula
+            label={t("How today’s money is calculated")}
+            term={t("Price in today’s money")}
+            parts={[
+              <span key="s">{t("Paid at signing")}</span>,
+              <span key="sum" className="f-term">
+                <span className="f-op">+</span>
+                <span className="f-sum">Σ</span>
+                <Frac
+                  top={t("Each remaining installment")}
+                  bottom={
+                    <>
+                      (<span className="num">{number(1)}</span> + <span className="num">{percent(overview.discount_rate)}</span>)
+                      <sup>{t("t")}</sup>
+                    </>
+                  }
+                />
+              </span>,
+            ]}
+            note={t("t: years until that installment is due.")}
+          />
           <p>
             {t(
-              "For the median installment listing the cash value is {cut} below the headline. When terms are not fully published the unit is valued but its price is not positioned: classified listings often show only what is due now.",
+              "For the median installment listing the cash value is {cut} below the headline. The developer’s plans are discounted the same way. Units whose terms are not fully published are not compared.",
               { cut: percent(overview.plan_median_discount) },
             )}
           </p>
         </div>
-        {overview.launch.compared > 0 && (
-          <div className="formula-card launch-method">
-            <h3>{t("Resale vs buying new")}</h3>
-            <p>
-              {t(
-                "{n} current developer launch units in {c} compounds are compared with the model’s resale value for the same unit on the same plan. The median launch unit costs {spread} against resale, in today’s money.",
-                { n: number(overview.launch.compared), c: number(overview.launch.compounds), spread: signed(overview.launch.median_spread) },
-              )}
-            </p>
-            <p>
-              {t(
-                "Launch plans are long and back-loaded, so the comparison depends on how the model prices such plans. {n} resale units carry launch-like plans (85% or more still owed, seven or more years); the model values them with a median bias of {bias}.",
-                { n: number(overview.launch.support.units), bias: signed(overview.launch.support.median_residual, 1) },
-              )}
-            </p>
-          </div>
-        )}
         <ul className="terms-mix">
           {(["plan", "cash", "partial", "unknown"] as const).map((terms) => (
             <li key={terms}>
@@ -336,13 +307,13 @@ export default function Methodology({ overview, error, retry }: { overview: Over
         </div>
         <div className="coverage-scroll">
           <table className="coverage">
-            <caption className="sr-only">{t("Indexed records, resale listings and valued listings by source")}</caption>
+            <caption className="sr-only">{t("Indexed records, resale listings and compared listings by source")}</caption>
             <thead>
               <tr>
                 <th scope="col">{t("Source")}</th>
                 <th scope="col">{t("Indexed records")}</th>
                 <th scope="col">{t("Identified resale")}</th>
-                <th scope="col">{t("Positioned against fair value")}</th>
+                <th scope="col">{t("Compared")}</th>
                 <th scope="col">{t("Last observed")}</th>
                 <th scope="col">{t("Collection status")}</th>
               </tr>
@@ -351,23 +322,48 @@ export default function Methodology({ overview, error, retry }: { overview: Over
               {overview.sources.map((source) => (
                 <tr key={source.id}>
                   <th scope="row">
-                    <span className="source-initial" aria-hidden="true">
-                      {source.name.slice(0, 1)}
+                    <span className="coverage-source">
+                      <span className="source-initial" aria-hidden="true">
+                        {t(source.name).slice(0, 1)}
+                      </span>
+                      {t(source.name)}
                     </span>
-                    {source.name}
                   </th>
-                  <td className="num">{number(source.count)}</td>
-                  <td className="num">{number(source.resale_count)}</td>
-                  <td>
+                  <td className="num" data-label={t("Indexed records")}>{number(source.count)}</td>
+                  <td className="num" data-label={t("Identified resale")}>{number(source.resale_count)}</td>
+                  <td data-label={t("Compared")}>
                     <span className="coverage-bar">
-                      <b className="num">{number(source.valued_count)}</b>
+                      <b className="num">{number(source.rated_count)}</b>
                       <span aria-hidden="true">
-                        <i style={{ width: `${source.resale_count ? (source.valued_count / source.resale_count) * 100 : 0}%` }} />
+                        <i style={{ width: `${source.resale_count ? (source.rated_count / source.resale_count) * 100 : 0}%` }} />
                       </span>
                     </span>
                   </td>
-                  <td className="num">{date(source.last_seen_at)}</td>
-                  <td>
+                  <td className="num" data-label={t("Last observed")}>{date(source.last_seen_at)}</td>
+                  <td data-label={t("Collection status")}>
+                    <span className={`status status-${source.status}`}>
+                      <i />
+                      {t(source.status === "completed" ? "Complete run" : source.status === "partial" ? "Partial run" : "Not recorded")}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+              {overview.benchmarks.map((source) => (
+                <tr key={source.id}>
+                  <th scope="row">
+                    <span className="coverage-source">
+                      <span className="source-initial" aria-hidden="true">
+                        {t(source.name).slice(0, 1)}
+                      </span>
+                      {t(source.name)}
+                    </span>
+                  </th>
+                  <td className="num" data-label={t("Indexed records")}>{number(source.count)}</td>
+                  <td colSpan={2} data-label={t("Role")} className="muted">
+                    {t("Price benchmark: the developers’ current prices, never counted as resale")}
+                  </td>
+                  <td className="num" data-label={t("Last observed")}>{date(source.last_seen_at)}</td>
+                  <td data-label={t("Collection status")}>
                     <span className={`status status-${source.status}`}>
                       <i />
                       {t(source.status === "completed" ? "Complete run" : source.status === "partial" ? "Partial run" : "Not recorded")}
@@ -380,7 +376,7 @@ export default function Methodology({ overview, error, retry }: { overview: Over
         </div>
         <p className="fineprint">
           {t(
-            "Included: active sale listings in EGP between EGP 100,000 and 200 million, 20–5,000 m², with a property type and a district or compound. Only identified resale listings are valued by default. A complete run covers its defined scope, not the whole market.",
+            "Included: active sale listings in EGP between EGP 100,000 and 200 million, 20–5,000 m², with a property type and a district or compound. A complete run covers its defined scope, not the whole market.",
           )}
         </p>
       </section>
@@ -390,18 +386,20 @@ export default function Methodology({ overview, error, retry }: { overview: Over
           <div>
             <span className="eyebrow">05{sep()}{t("Limits")}</span>
             <h2 id="limits-heading" className="display">
-              {t("What a fair value")} <em>{t("cannot tell you.")}</em>
+              {t("What a comparison")} <em>{t("cannot tell you.")}</em>
             </h2>
           </div>
         </div>
         <div className="definitions">
-          {limits.map(({ icon: Icon, title, text }) => (
-            <article key={title}>
-              <Icon size={22} strokeWidth={1.6} />
-              <h3>{t(title)}</h3>
-              <p>{t(text)}</p>
-            </article>
-          ))}
+          {limits
+            .filter(({ title }) => overview.launch.units > 0 || title !== "Developer prices are list prices")
+            .map(({ icon: Icon, title, text }) => (
+              <article key={title}>
+                <Icon size={22} strokeWidth={1.6} />
+                <h3>{t(title)}</h3>
+                <p>{t(text)}</p>
+              </article>
+            ))}
         </div>
         {!overview.history_ready && (
           <p className="notice notice-soft">
@@ -411,12 +409,47 @@ export default function Methodology({ overview, error, retry }: { overview: Over
                 overview.observation_days === 1
                   ? "Qayem has observed this market for {n} day."
                   : "Qayem has observed this market for {n} days.",
-                { n: number(overview.observation_days) },
+                { n: number(overview.observation_days), count: overview.observation_days },
               )}
             </span>
           </p>
         )}
       </section>
     </div>
+  );
+}
+
+/** A formula typeset in the interface language: stacked fractions, real exponents, the page's direction. */
+function Formula({ label, term, parts, note }: { label: string; term: string; parts: ReactNode[]; note?: string }) {
+  return (
+    <figure className="formula" aria-label={label}>
+      <div className="formula-line">
+        <span className="f-lhs">
+          <b>{term}</b>
+          <span className="f-op">=</span>
+        </span>
+        {parts}
+      </div>
+      {note && <figcaption>{note}</figcaption>}
+    </figure>
+  );
+}
+
+function Frac({ top, bottom }: { top: ReactNode; bottom: ReactNode }) {
+  return (
+    <span className="f-frac">
+      <span>{top}</span>
+      <span>{bottom}</span>
+    </span>
+  );
+}
+
+function Group({ children }: { children: ReactNode }) {
+  return (
+    <span className="f-group">
+      <span className="f-paren" aria-hidden="true">(</span>
+      {children}
+      <span className="f-paren" aria-hidden="true">)</span>
+    </span>
   );
 }

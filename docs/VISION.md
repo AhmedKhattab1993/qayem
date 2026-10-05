@@ -3,9 +3,10 @@
 ## The one-line version
 
 Qayem answers the buyer's question in Egypt's secondary property market:
-**what is this unit really worth?** It values units by compound, developer,
-delivery date and payment plan, not by area alone, publishes how accurate
-that is, and says so when the evidence is too thin. A user marketplace is the
+**is this unit a real opportunity?** It compares each resale unit, as listed and
+in today's money, with what could be bought instead (the developer's current
+price and the similar units in the same compound), publishes the rules, and says
+so when there is too little to compare. A user marketplace is the
 designed endgame, deliberately deferred until the data and the trust layer
 are strong enough to carry it.
 
@@ -47,24 +48,25 @@ regular runs it produces what no portal publishes:
 This is the moat: it compounds. Every week of crawl history makes every
 evaluation sharper, and no competitor can backfill it.
 
-## The fair-value standard
+## The comparison standard
 
-Portals list prices; Qayem values them. The standard is public:
+Portals list prices; Qayem compares them with what can be bought instead. It does
+not claim a fair price: Egypt publishes no resale sale prices, and AqarExit lists
+each unit at the price its owner originally contracted. The standard is public:
 
 - **Cash today first.** A headline on a seven-year plan is not a cash price.
   Remaining installments are discounted to today's money before any comparison.
-- **The compound sets the price.** Each unit is valued from its district, its
-  developer within that district, and its compound, each level trusted in
-  proportion to its evidence, then adjusted for unit type, finishing,
-  delivery, plan length and size.
-- **Measured, not asserted.** Every value carries an evidence grade (A/B/C) and
-  a range calibrated on units the model has not seen; the backtest is published.
-- **No guessing.** Thin evidence, unknown payment terms, or a price 2.5× away
-  from any comparable get "not positioned", "insufficient" or "check this
-  listing", never a confident number.
+- **Against what you could buy instead.** Each unit is compared with the
+  developer's current price for a similar unit in the same compound, and with
+  the similar resale units listed there now.
+- **Both bases must agree.** A gap counts on the less favourable of listed price
+  and today's money, so neither a long plan nor the discount rate makes a deal.
+- **No guessing.** Too few comparisons, unknown payment terms, or a price far
+  below everything get "not enough to compare" or "check this listing", never
+  a confident verdict.
 
 The completeness score it replaced measured how many fields a portal filled
-in, not whether a price was fair. The same fair-value standard will later be
+in, not whether a price was fair. The same comparison standard will later be
 the first thing a user-submitted listing shows.
 
 ## Content — video and market analysis
@@ -78,7 +80,7 @@ evaluation brand reaches the market before any listing product exists.
 ## Deferred by design: listings & marketplace
 
 Qayem is designed to become a curated secondary marketplace — user listings
-valued by the same fair-value standard, verification badges, evaluation context
+compared by the same standard, verification badges, evaluation context
 per unit. Deferred for now, deliberately:
 
 - **The engine compounds; the marketplace doesn't.** Every week of crawl
@@ -102,7 +104,7 @@ need.
   schema, with source payload and resale evidence kept per row.
 - A lifecycle engine with guarded, scope-aware removals, a nightly crawl with
   per-source time budgets, locks and a health check (docs/OPERATIONS.md).
-- The fair-value model and backtest (`src/qayem/valuation.py`).
+- The opportunity comparisons (`src/qayem/website_data.py`); the earlier fair-value model stays in `src/qayem/valuation.py`, unused by the website.
 - The website: evaluate a unit, compounds, developers, units, compare,
   watchlist and methodology, in Arabic and English.
 
@@ -128,9 +130,10 @@ need.
 - **Verification**: what "documents verified" means concretely (AqarExit
   already does contract + receipts review; the bar must be as high or the
   badge is worthless).
-- **Valuation credibility**: fair values rest on asking prices, not
-  transactions. Until transaction evidence exists (a partner, or first-party
-  deals), the published backtest and ranges are the honesty mechanism.
+- **Comparison credibility**: resale prices are contract prices and developer
+  prices are list prices, not transactions. Until transaction evidence exists
+  (a partner, or first-party deals), Qayem compares instead of estimating a fair
+  price, and publishes the rules and both bases of every gap.
 
 ## Principles
 

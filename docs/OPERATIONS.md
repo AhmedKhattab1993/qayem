@@ -2,7 +2,14 @@
 
 History is Qayem's moat: time on market, price cuts, delivery postponements and trends all need the same listings observed again and again. A nightly crawl keeps that history accruing.
 
-## The nightly crawl
+## The cloud nightly crawl
+
+The independent Cloudflare updater is scheduled at 02:30 Africa/Cairo. It runs
+the same crawl plan and Pi stages, saves the canonical database privately in R2,
+and publishes a verified D1 catalogue after health checks. Follow its migration
+status and operating commands in [CLOUD_UPDATES.md](CLOUD_UPDATES.md).
+
+## The local crawl (fallback)
 
 ```bash
 ./scripts/install-cron.sh              # installs: 30 2 * * * scripts/crawl.sh (02:30 local time)
@@ -13,15 +20,20 @@ crontab -l                             # the line is tagged "# qayem-nightly-cra
 `scripts/crawl.sh` (safe to run by hand):
 
 1. takes `logs/crawl.lock`, so a second invocation exits and notes it in `logs/crawl-skipped.log`;
-2. runs `qayem crawl`, the production plan in `src/qayem/crawl.py`;
-3. runs `qayem enrich-descriptions --batches 0 --max-minutes 120` (override the budget with
+2. runs `qayem crawl`, the production plan in `src/qayem/crawl.py`, limited to the sources in
+   use (`QAYEM_SOURCES`, AqarExit by default; `qayem health` and enrichment follow the same setting)
+   and the price benchmarks (`QAYEM_BENCHMARK_SOURCES`, Nawy's developer sales by default);
+3. runs `qayem resolve-entities --max-minutes 30` (override with `QAYEM_ENTITY_MINUTES`), which
+   gives new compound/developer spellings their canonical names and Nawy match; only new pairs
+   are sent, so a night costs a call or two;
+4. runs `qayem enrich-descriptions --batches 0 --max-minutes 120` (override the budget with
    `QAYEM_ENRICH_MINUTES`), which fills missing fields of new listings from their text with
-   `codex exec` (`~/.local/bin` is put on cron's PATH for it; see the README);
-4. runs `qayem health --write logs/health.json`;
-5. logs to `logs/crawl-YYYY-MM-DD.log` and deletes logs older than 30 days.
+   `pi --print` (`/opt/homebrew/bin` and `~/.local/bin` are on cron's PATH; see the README);
+5. runs `qayem health --write logs/health.json`;
+6. logs to `logs/crawl-YYYY-MM-DD.log` and deletes logs older than 30 days.
 
 Enrichment failures never fail the crawl. A run starts no new batch after its time budget or
-after two consecutive batches failed entirely (a Codex outage, logout or quota), so one bad
+after two consecutive batches failed entirely (a Pi/provider outage, logout or quota), so one bad
 night costs at most a few batches. Failed listings are retried on later nights, up to three
 runs in total (`--retry-failed` forces another try); claims left by a crashed run are taken
 again after six hours.
@@ -77,6 +89,7 @@ The website hides listings that were not re-observed within 14 days of their sou
 .venv/bin/qayem parse aqarexit               # one-off, no time budget (first sitemap backfill: ~7,300 pages, ~5 h)
 .venv/bin/qayem renormalize nawy             # re-parse stored payloads after a parser change; no fetching
 .venv/bin/qayem renormalize nawy_primary
+.venv/bin/qayem renormalize aqarexit         # derive missing installment terms (balance ÷ installment, ≤ 10 years)
 ```
 
 ## Sources not added, and why

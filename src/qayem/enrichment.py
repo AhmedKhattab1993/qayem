@@ -1,9 +1,7 @@
-"""Batched Codex extraction of missing listing facts from title and description.
+"""Batched Pi extraction of missing listing facts from title and description.
 
-The model, effort, prompt, output format and batch size are the configuration
-chosen by the benchmark in bench/enrichment/RESULTS.md (held-out precision
-99% on the core fields): gpt-6-sol at low effort, the enrichment_spec.md
-instructions, sparse JSON output and 40 listings per headless call. Every
+The pipeline uses Pi with GLM-5.3-Flash at low effort, the enrichment_spec.md
+instructions, validated sparse JSON output and 40 listings per headless call. Every
 proposed value is then checked against the listing's own text before it may
 fill a column that the source left empty.
 """
@@ -14,13 +12,10 @@ from collections.abc import Callable, Collection
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from functools import cache
 import hashlib
 import json
 import re
 import shutil
-import subprocess
-import tempfile
 import time
 import unicodedata
 from pathlib import Path
@@ -28,6 +23,8 @@ from pathlib import Path
 from sqlalchemy import and_, delete, func, insert, inspect, or_, select, update
 from sqlalchemy.engine import Engine
 
+from .ai import MODEL, REASONING_EFFORT, run_pi
+from .config import active_sources
 from .db import session_scope
 from .models import Property, PropertyEnrichment, utcnow
 from .normalization import to_western_digits
@@ -35,13 +32,10 @@ from .valuation import CLASSES
 from .website_data import MAX_PRICE, MIN_PRICE
 
 
-MODEL = "gpt-6-sol"
-REASONING_EFFORT = "low"
 PROMPT_VERSION = "v2"
 SPEC_PATH = Path(__file__).with_name("enrichment_spec.md")
 BATCH_SIZE = 40
 TIMEOUT_SECONDS = 600
-TIMEOUT_ATTEMPTS = 2
 MAX_ATTEMPTS = 3  # a failed listing is retried on later runs, at most this many runs in total
 STALE_CLAIM = timedelta(hours=6)  # a claim this old was left by a crashed run
 CIRCUIT_BREAKER = 2  # consecutive fully failed batches that stop a run (outage, auth, quota)
@@ -269,6 +263,8 @@ def _candidates(engine: Engine, source: str | None, retry_failed: bool, dry_run:
         query = query.where(Property.id.not_in(exclude_ids))
     if source:
         query = query.where(Property.source == source)
+    if (sources := active_sources()) is not None:
+        query = query.where(Property.source.in_(sorted(sources)))
     if since:
         query = query.where(Property.first_seen_at >= since)
     return query.order_by(Property.first_seen_at.desc(), Property.id.desc())
@@ -384,77 +380,23 @@ def _prompt(tasks: list[Task]) -> str:
     )
 
 
-@cache
-def _lean_flags() -> tuple[str, ...]:
-    """Disable every optional Codex feature: the call then carries ~2.5k tokens of overhead, not ~12k."""
-    try:
-        listing = subprocess.run(
-            ["codex", "features", "list"], capture_output=True, text=True, timeout=30, check=False,
-        ).stdout
-    except (OSError, subprocess.TimeoutExpired):
-        return ()
-    flags: list[str] = []
-    for line in listing.splitlines():
-        parts = line.split()
-        if len(parts) >= 3 and parts[-1] == "true" and "removed" not in parts:
-            flags += ["--disable", parts[0]]
-    return tuple(flags)
 
-
-def invoke_codex(tasks: list[Task]) -> dict[int, list[dict]]:
-    """Run one fresh, isolated headless Codex session for a batch of listings.
+def invoke_pi(tasks: list[Task]) -> dict[int, list[dict]]:
+    """Run one fresh, isolated headless Pi session for a batch of listings.
 
     Returns the facts proposed per listing id. Listings the answer omits are
     simply absent; the caller decides whether to ask again.
     """
-    with tempfile.TemporaryDirectory(prefix="qayem-enrich-") as tmp:
-        root = Path(tmp)
-        schema_path = root / "output-schema.json"
-        output_path = root / "answer.json"
-        schema_path.write_text(json.dumps(OUTPUT_SCHEMA), encoding="utf-8")
-        command = [
-            "codex", "exec", "--ephemeral", "--ignore-user-config", "--ignore-rules",
-            "--skip-git-repo-check", "--sandbox", "read-only",
-            "--model", MODEL, "-c", f'model_reasoning_effort="{REASONING_EFFORT}"',
-            "-c", 'approval_policy="never"', "-c", 'web_search="disabled"',
-            "-c", f'model_instructions_file="{SPEC_PATH}"', *_lean_flags(),
-            "--cd", str(root), "--output-schema", str(schema_path),
-            "--output-last-message", str(output_path), "-",
-        ]
-        for attempt in range(TIMEOUT_ATTEMPTS):
-            output_path.unlink(missing_ok=True)
-            try:
-                completed = subprocess.run(
-                    command, input=_prompt(tasks), text=True, encoding="utf-8",
-                    capture_output=True, timeout=TIMEOUT_SECONDS, check=False,
-                )
-                break
-            except subprocess.TimeoutExpired as exc:
-                if attempt + 1 == TIMEOUT_ATTEMPTS:
-                    raise RuntimeError(
-                        f"Codex timed out after {TIMEOUT_SECONDS}s "
-                        f"on {TIMEOUT_ATTEMPTS} attempts"
-                    ) from exc
-                time.sleep(5)
-            except OSError as exc:
-                raise RuntimeError(f"Codex could not start: {exc.strerror or type(exc).__name__}") from exc
-        if completed.returncode != 0:
-            raise RuntimeError(f"Codex exited with status {completed.returncode}")
-        if not output_path.is_file():
-            raise RuntimeError("Codex did not write its final response")
-        try:
-            answer = json.loads(output_path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError) as exc:
-            raise RuntimeError("Codex response was not valid JSON") from exc
-        if not isinstance(answer, dict) or not isinstance(answer.get("listings"), list):
-            raise RuntimeError("Codex response did not match the expected schema")
-        wanted = {task.property_id for task in tasks}
-        facts: dict[int, list[dict]] = {}
-        for item in answer["listings"]:
-            if (isinstance(item, dict) and item.get("id") in wanted
-                    and isinstance(item.get("facts"), list) and item["id"] not in facts):
-                facts[item["id"]] = [fact for fact in item["facts"] if isinstance(fact, dict)]
-        return facts
+    answer = run_pi(_prompt(tasks), OUTPUT_SCHEMA, SPEC_PATH)
+    if not isinstance(answer.get("listings"), list):
+        raise RuntimeError("Pi response did not match the expected schema")
+    wanted = {task.property_id for task in tasks}
+    facts: dict[int, list[dict]] = {}
+    for item in answer["listings"]:
+        if (isinstance(item, dict) and item.get("id") in wanted
+                and isinstance(item.get("facts"), list) and item["id"] not in facts):
+            facts[item["id"]] = [fact for fact in item["facts"] if isinstance(fact, dict)]
+    return facts
 
 
 def _normalized_text(value: str) -> str:
@@ -710,7 +652,7 @@ def _record_results(engine: Engine, tasks: list[Task], answers: dict[int, list[d
             record.done = True
             if task.property_id not in answers:
                 record.status = "failed"
-                record.error = error or "Codex returned no answer for this listing"
+                record.error = error or "Pi returned no answer for this listing"
                 results.append(Result(task.property_id, "failed", 0, record.error))
                 continue
             facts = answers[task.property_id]
@@ -741,14 +683,14 @@ def _record_results(engine: Engine, tasks: list[Task], answers: dict[int, list[d
 
 
 def process_batch(engine: Engine, tasks: list[Task]) -> list[Result]:
-    """One Codex call for the batch; listings missing from the answer are asked once more."""
+    """One Pi call for the batch; listings missing from the answer are asked once more."""
     answers: dict[int, list[dict]] = {}
     error = None
     try:
-        answers = invoke_codex(tasks)
+        answers = invoke_pi(tasks)
         unanswered = [task for task in tasks if task.property_id not in answers]
         if unanswered:
-            answers.update(invoke_codex(unanswered))
+            answers.update(invoke_pi(unanswered))
     except RuntimeError as exc:
         error = str(exc)
     return _record_results(engine, tasks, answers, error)
@@ -760,14 +702,14 @@ def run_batches(
     *, retry_failed: bool = False, workers: int = 4, since: datetime | None = None,
     deadline: float | None = None, on_stop: Callable[[str], None] | None = None,
 ) -> list[Result]:
-    """Claim batches of BATCH_SIZE and keep at most ``workers`` Codex calls running.
+    """Claim batches of BATCH_SIZE and keep at most ``workers`` Pi calls running.
 
     No new batch starts after ``deadline`` (a time.monotonic() value) or after
     CIRCUIT_BREAKER consecutive batches failed entirely; running ones finish.
     A listing is attempted at most once per run.
     """
-    if shutil.which("codex") is None:
-        raise RuntimeError("Codex CLI is not installed or not on PATH")
+    if shutil.which("pi") is None:
+        raise RuntimeError("Pi CLI is not installed or not on PATH")
     results: list[Result] = []
     claimed_batches = 0
     reported = 0

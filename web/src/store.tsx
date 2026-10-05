@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
 
-export type EntityKind = "compound" | "developer";
+export type EntityKind = "compound" | "developer" | "unit";
 export interface Pinned {
   kind: EntityKind;
   key: string;
@@ -26,7 +26,7 @@ function read(key: string, limit: number): Pinned[] {
     return values
       .filter(
         (v): v is Pinned =>
-          v && (v.kind === "compound" || v.kind === "developer") && typeof v.key === "string" && typeof v.name === "string",
+          v && ["compound", "developer", "unit"].includes(v.kind) && typeof v.key === "string" && typeof v.name === "string",
       )
       .slice(0, limit);
   } catch {

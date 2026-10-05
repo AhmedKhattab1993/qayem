@@ -1,21 +1,23 @@
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowUpRight, Calculator } from "lucide-react";
-import { number, signed, titleCase, useApi, sep } from "../lib";
+import { number, signed, titleCase, useApi, useTitle, nameOf, place } from "../lib";
 import { t } from "../locale";
 import type { CompoundDetail, Overview, Page, Unit } from "../types";
 import { ErrorState, Loading } from "../components/States";
-import { EntityActions, GradeBadge, ScopeNote } from "../components/Valuation";
+import { EntityActions, ScopeNote } from "../components/Opportunity";
 import { ClassCards, HistoryPending, LaunchPanel, ProfileFacts } from "../components/Entity";
 import { UnitTable } from "../components/UnitTable";
+import { NameList } from "../components/Names";
 
 export default function CompoundPage({ overview }: { overview: Overview | null }) {
   const { key = "" } = useParams();
-  const { data, error, retry } = useApi<CompoundDetail>(`/compounds/${encodeURIComponent(key)}`);
-  const units = useApi<Page<Unit>>(`/units?compound=${encodeURIComponent(key)}&page_size=10&sort=value`);
+  const { data, error, missing, retry } = useApi<CompoundDetail>(`/compounds/${encodeURIComponent(key)}`);
+  const units = useApi<Page<Unit>>(`/units?compound=${encodeURIComponent(key)}&page_size=10&sort=opportunity`);
+  useTitle(nameOf(data?.compound));
   if (error)
     return (
       <div className="page">
-        <ErrorState message={error} retry={retry} />
+        <ErrorState message={error} retry={retry} missing={missing} />
       </div>
     );
   if (!data) return <Loading />;
@@ -30,21 +32,23 @@ export default function CompoundPage({ overview }: { overview: Overview | null }
           <span className="eyebrow">{t("Compound")}</span>
           <div className="entity-title">
             <h1 className="display" dir="auto">
-              {compound.name}
+              {nameOf(compound)}
             </h1>
-            <GradeBadge grade={compound.grade} long />
           </div>
-          <p className="unit-place" dir="auto">
-            {compound.developer && (
-              <Link to={`/developers/${encodeURIComponent(compound.developer.key)}`}>{compound.developer.name}</Link>
-            )}
-            <span>{sep()}</span>
-            <Link to={`/compounds?district=${encodeURIComponent(compound.district_key)}`}>{compound.district}</Link>
+          <p className="unit-place">
+            <NameList
+              items={[
+                compound.developer && (
+                  <Link to={`/developers/${encodeURIComponent(compound.developer.key)}`}>{nameOf(compound.developer)}</Link>
+                ),
+                <Link to={`/compounds?district=${encodeURIComponent(compound.district_key)}`}>{place(compound.district)}</Link>,
+              ]}
+            />
           </p>
           <div className="entity-bar">
             <EntityActions kind="compound" entityKey={compound.key} name={compound.name} />
             <Link className="btn btn-sm btn-brass" to={`/evaluate?compound=${encodeURIComponent(compound.name)}`}>
-              <Calculator size={15} /> {t("Value a unit here")}
+              <Calculator size={15} /> {t("Compare a unit here")}
             </Link>
           </div>
         </div>
@@ -54,14 +58,11 @@ export default function CompoundPage({ overview }: { overview: Overview | null }
         <section className="section-tight">
           <div className="section-row">
             <div>
-              <span className="eyebrow">{t("Fair value")}</span>
+              <span className="eyebrow">{t("Prices here")}</span>
               <h2 className="display">
-                {compound.premium_vs_district == null
-                  ? t("Priced against its district")
-                  : t("{premium} against comparable units in {district}", {
-                      premium: signed(compound.premium_vs_district),
-                      district: compound.district,
-                    })}
+                {compound.good_count
+                  ? t("{n} strong or good opportunities", { n: number(compound.good_count), count: compound.good_count })
+                  : t("What resale units here cost")}
               </h2>
             </div>
             <ScopeNote scope={compound.scope} />
@@ -69,11 +70,14 @@ export default function CompoundPage({ overview }: { overview: Overview | null }
           <ClassCards classes={compound.classes} />
         </section>
 
-        <section className="section-tight">
-          <span className="eyebrow">{t("Resale vs buying new")}</span>
-          <h2 className="display section-title">{t("Against the developer’s launch price")}</h2>
-          <LaunchPanel launch={compound.launch} scope="compound" />
-        </section>
+        {/* Developer prices need a benchmark source; without one the comparison is not shown. */}
+        {overview?.launch.units ? (
+          <section className="section-tight">
+            <span className="eyebrow">{t("Resale vs buying new")}</span>
+            <h2 className="display section-title">{t("Against the developer’s price today")}</h2>
+            <LaunchPanel launch={compound.launch} scope="compound" />
+          </section>
+        ) : null}
 
         <section className="section-tight split">
           <div>
@@ -83,7 +87,7 @@ export default function CompoundPage({ overview }: { overview: Overview | null }
           </div>
           <div>
             <span className="eyebrow">{t("Stock on the resale market")}</span>
-            <h2 className="display">{t("{n} listings", { n: number(compound.units) })}</h2>
+            <h2 className="display">{t("{n} listings", { n: number(compound.units), count: compound.units })}</h2>
             <ul className="type-mix">
               {Object.entries(compound.types).map(([type, count]) => (
                 <li key={type}>
@@ -98,12 +102,14 @@ export default function CompoundPage({ overview }: { overview: Overview | null }
             {developer && (
               <p className="entity-link">
                 <Link className="link-arrow" to={`/developers/${encodeURIComponent(developer.key)}`}>
-                  {t("{developer}: {premium} vs district across {n} listings", {
-                    developer: developer.name,
-                    premium: signed(developer.premium_vs_district),
-                    n: number(developer.units),
-                  })}
-                  <ArrowUpRight size={15} />
+                  {developer.launch?.median_gap != null
+                    ? t("{developer}: resale {gap} vs its prices today, across {n} listings", {
+                        developer: nameOf(developer),
+                        gap: signed(developer.launch.median_gap),
+                        n: number(developer.units),
+                      })
+                    : t("{developer}: {n} resale listings", { developer: nameOf(developer), n: number(developer.units) })}
+                  <ArrowUpRight size={15} className="flip-rtl" />
                 </Link>
               </p>
             )}
@@ -116,10 +122,10 @@ export default function CompoundPage({ overview }: { overview: Overview | null }
           <div className="section-row">
             <div>
               <span className="eyebrow">{t("Units")}</span>
-              <h2 className="display">{t("Furthest below fair value first")}</h2>
+              <h2 className="display">{t("Best opportunities first")}</h2>
             </div>
             <Link className="link-arrow" to={`/units?compound=${encodeURIComponent(compound.key)}`}>
-              {t("All {n} units", { n: number(compound.units) })} <ArrowUpRight size={16} />
+              {t("All {n} units", { n: number(compound.units), count: compound.units })} <ArrowUpRight size={16} className="flip-rtl" />
             </Link>
           </div>
           {units.data ? (

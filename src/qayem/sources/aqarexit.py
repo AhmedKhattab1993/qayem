@@ -17,6 +17,7 @@ confirmed present without a fetch. The public /opportunities grid shows only
 from __future__ import annotations
 
 import json
+import math
 import re
 from collections.abc import Iterator
 
@@ -25,6 +26,15 @@ from bs4 import BeautifulSoup
 from ..http_client import BlockedError, FetchError
 from ..normalization import detect_property_type, parse_number
 from .base import BaseSource, NormalizedListing
+
+# Without "years left", the term is the balance ÷ the regular installment. Balloon and yearly
+# payments make that run long; on units publishing both, a derived term of up to ten years
+# puts the plan's present value within about ±13% (p10–p90) of the published one, so longer
+# derived terms are not trusted.
+DERIVED_TERM_MAX_MONTHS = 120
+# No developer plan in Egypt runs this long; a larger "years left" is a typo (a unit publishing 30 years
+# pays EGP 12.5M at EGP 175,250 a month: six years), so the term is derived instead.
+PUBLISHED_TERM_MAX_YEARS = 15
 
 BASE = "https://aqarexit.com"
 SITEMAP_URL = f"{BASE}/sitemap.xml"
@@ -76,6 +86,17 @@ def _jsonld(soup: BeautifulSoup) -> dict:
         if isinstance(data, dict) and data.get("@type") == "Product":
             return data
     return {}
+
+
+def _images(product: dict) -> list[str]:
+    """The unit's own photos, as the page's structured data lists them (the page also shows other units' photos)."""
+    value = product.get("image") or []
+    urls = [value] if isinstance(value, str) else value if isinstance(value, list) else []
+    return list(dict.fromkeys(u for u in urls if isinstance(u, str) and u.startswith("https://")))
+
+
+def images_from_page(html: str) -> list[str]:
+    return _images(_jsonld(BeautifulSoup(html, "lxml")))
 
 
 def parse_detail(html: str, uid: str, lastmod: str | None = None) -> NormalizedListing | None:
@@ -130,7 +151,7 @@ def parse_detail(html: str, uid: str, lastmod: str | None = None) -> NormalizedL
         currency="EGP",
         is_installment=remaining > 0,
         down_payment=cash_now,
-        installment_months=round(years * 12) if years and remaining > 0 else None,
+        installment_months=plan_months(years, remaining, parse_number(installment_text), frequency),
         area_m2=parse_number(pairs.get("المساحة")),
         bedrooms=int(parse_number(pairs.get("غرف")) or 0) or None,
         bathrooms=int(parse_number(pairs.get("حمامات")) or 0) or None,
@@ -142,6 +163,7 @@ def parse_detail(html: str, uid: str, lastmod: str | None = None) -> NormalizedL
         developer=developer,
         district=district,
         seller_type="owner",
+        images=_images(product),
         raw={
             "lastmod": lastmod, "unit_code": code.strip() if code else None, "documents_verified": verified,
             "cash_required_now": cash_now, "remaining_to_developer": remaining,
@@ -151,6 +173,27 @@ def parse_detail(html: str, uid: str, lastmod: str | None = None) -> NormalizedL
             "overpayment_note": note, "delivery_year": delivery_year,
         },
     )
+
+
+def plan_months(years: float | None, remaining: float | None, installment: float | None,
+                frequency: int | None) -> int | None:
+    """Months of installments left: published, or derived from the balance and the installment."""
+    if not remaining or remaining <= 0:
+        return None
+    if years and years <= PUBLISHED_TERM_MAX_YEARS:
+        return round(years * 12)
+    if installment and installment > 0 and frequency:
+        months = math.ceil(remaining / installment) * frequency
+        return months if months <= DERIVED_TERM_MAX_MONTHS else None
+    return None
+
+
+def terms_from_raw(raw: dict | None) -> dict:
+    """Backfill for stored units (the incremental crawl never refetches unchanged pages)."""
+    raw = raw or {}
+    months = plan_months(raw.get("years_left"), raw.get("remaining_to_developer"), raw.get("installment"),
+                         raw.get("installment_every_months"))
+    return {"installment_months": months} if months else {}
 
 
 class AqarExitSource(BaseSource):

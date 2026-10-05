@@ -15,6 +15,7 @@ from statistics import median
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from .config import crawled_sources
 from .models import ParseRun
 
 
@@ -49,6 +50,12 @@ PLAN: tuple[Scope, ...] = (
     # ~24k sitemap URLs need one detail fetch each; the newest slice is refreshed nightly.
     Scope("coldwellbanker", {"max_details": 400}, 40),
 )
+
+def active_plan() -> tuple[Scope, ...]:
+    """The scopes of the sources in use and the price benchmarks (AqarExit and Nawy's developer sales by default)."""
+    sources = crawled_sources()
+    return tuple(scope for scope in PLAN if sources is None or scope.source in sources)
+
 
 STALE_AFTER = timedelta(hours=36)
 ABANDONED_AFTER = timedelta(hours=6)
@@ -99,7 +106,7 @@ def _key(run: ParseRun) -> str:
 
 
 def source_health(session: Session, now: datetime, sources: list[str] | None = None) -> list[SourceHealth]:
-    names = sources or sorted({scope.source for scope in PLAN})
+    names = sources or sorted({scope.source for scope in active_plan()})
     report = []
     for name in names:
         runs = session.execute(

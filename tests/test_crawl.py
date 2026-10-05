@@ -152,3 +152,15 @@ def test_repeating_pages_are_reported_and_never_remove(engine, monkeypatch):
         assert session.query(Property).filter_by(status="removed").count() == 0  # 5-9 unseen, not removed
         run_row = session.execute(select(ParseRun).order_by(ParseRun.id.desc())).scalars().first()
         assert "paging repeats" in run_row.errors[0]
+
+
+def test_nightly_plan_covers_only_the_sources_in_use(monkeypatch):
+    from qayem.crawl import active_plan
+    monkeypatch.delenv("QAYEM_SOURCES")
+    # resale from AqarExit; the developers' current prices from Nawy's developer sales
+    assert {scope.source for scope in active_plan()} == {"aqarexit", "nawy_primary"}
+    monkeypatch.setenv("QAYEM_BENCHMARK_SOURCES", "none")
+    assert {scope.source for scope in active_plan()} == {"aqarexit"}
+    monkeypatch.delenv("QAYEM_BENCHMARK_SOURCES")
+    monkeypatch.setenv("QAYEM_SOURCES", "all")
+    assert active_plan() == PLAN

@@ -1,4 +1,4 @@
-"""The enrichment job never needs a live Codex call in these tests."""
+"""The enrichment job never needs a live Pi call in these tests."""
 
 import json
 import subprocess
@@ -22,60 +22,36 @@ def facts(**values):
     return [{"field": field, "value": str(value)} for field, value in values.items()]
 
 
-def answer_file(command, listings):
-    output = command[command.index("--output-last-message") + 1]
-    with open(output, "w", encoding="utf-8") as file:
-        json.dump({"listings": listings}, file)
-
-
-def test_batch_invocation_uses_the_benchmarked_configuration(monkeypatch):
+def test_batch_invocation_uses_pi_and_the_requested_model(monkeypatch):
+    from qayem import ai
     tasks = [task(7, "شقة 120 متر", title="للبيع"), task(8, "فيلا")]
     captured = {}
 
     def fake_run(command, **kwargs):
-        if command[:3] == ["codex", "features", "list"]:
-            return subprocess.CompletedProcess(command, 0, "apps  stable  true\nsqlite  removed  true\n", "")
         captured["command"], captured["prompt"] = command, kwargs["input"]
-        answer_file(command, [
-            {"id": 7, "facts": facts(property_type="apartment")},
-            {"id": 99, "facts": facts(property_type="villa")},  # not requested
-        ])
-        return subprocess.CompletedProcess(command, 0, "", "")
+        message = {"role": "assistant", "provider": ai.PROVIDER, "model": ai.MODEL,
+                   "stopReason": "stop", "content": [{"type": "text", "text": json.dumps({
+                       "listings": [{"id": 7, "facts": facts(property_type="apartment")},
+                                    {"id": 99, "facts": facts(property_type="villa")}]
+                   })}]}
+        output = "\n".join(json.dumps(e) for e in [
+            {"type": "message_end", "message": message}, {"type": "agent_end"}])
+        return subprocess.CompletedProcess(command, 0, output, "")
 
-    enrichment._lean_flags.cache_clear()
-    monkeypatch.setattr(enrichment.subprocess, "run", fake_run)
-    assert enrichment.invoke_codex(tasks) == {7: [{"field": "property_type", "value": "apartment"}]}
+    monkeypatch.setattr(ai.subprocess, "run", fake_run)
+    assert enrichment.invoke_pi(tasks) == {7: [{"field": "property_type", "value": "apartment"}]}
     command = captured["command"]
-    assert command[command.index("--model") + 1] == "gpt-6-sol"
-    assert 'model_reasoning_effort="low"' in command
-    assert f'model_instructions_file="{enrichment.SPEC_PATH}"' in command
-    assert 'web_search="disabled"' in command
-    assert command[command.index("--disable") + 1] == "apps" and "sqlite" not in command
-    assert "--sandbox" in command and "read-only" in command
-    payload = json.loads(captured["prompt"].split("\n", 1)[1])
-    assert payload == [
+    assert command[0] == "pi"
+    assert command[command.index("--provider") + 1] == "zai-coding-cn"
+    assert command[command.index("--model") + 1] == "glm-5.3-flash"
+    assert command[command.index("--thinking") + 1] == "low"
+    assert enrichment.SPEC_PATH.read_text() in command[command.index("--system-prompt") + 1]
+    for flag in ("--no-tools", "--no-extensions", "--no-skills", "--no-context-files", "--no-session"):
+        assert flag in command
+    assert json.loads(captured["prompt"].split("\n", 1)[1]) == [
         {"id": 7, "title": "للبيع", "description": "شقة 120 متر"},
         {"id": 8, "title": "", "description": "فيلا"},
     ]
-    assert enrichment.SPEC_PATH.is_file()
-    enrichment._lean_flags.cache_clear()
-
-
-def test_timeout_is_retried_before_recording_failure(monkeypatch):
-    calls = []
-
-    def flaky_run(command, **kwargs):
-        calls.append(kwargs["timeout"])
-        if len(calls) == 1:
-            raise subprocess.TimeoutExpired(command, kwargs["timeout"])
-        answer_file(command, [])
-        return subprocess.CompletedProcess(command, 0, "", "")
-
-    monkeypatch.setattr(enrichment, "_lean_flags", lambda: ())
-    monkeypatch.setattr(enrichment.subprocess, "run", flaky_run)
-    monkeypatch.setattr(enrichment.time, "sleep", lambda _: None)
-    assert enrichment.invoke_codex([task()]) == {}
-    assert calls == [600, 600]
 
 
 def test_values_must_be_grounded_in_the_listing_text():
@@ -159,7 +135,7 @@ def test_claims_a_batch_at_a_time_and_never_reinvokes(tmp_path, monkeypatch):
     assert len(first) == enrichment.BATCH_SIZE and len(second) == 2
     assert enrichment.claim_batch(engine) == []
 
-    monkeypatch.setattr(enrichment, "invoke_codex", lambda tasks: {
+    monkeypatch.setattr(enrichment, "invoke_pi", lambda tasks: {
         t.property_id: facts(property_type="apartment", area_m2=120) for t in tasks
     })
     results = enrichment.process_batch(engine, second)
@@ -170,7 +146,7 @@ def test_claims_a_batch_at_a_time_and_never_reinvokes(tmp_path, monkeypatch):
         assert prop.property_type == "apartment" and prop.area_m2 == 120
         assert record.status == "done" and record.applied == {
             "property_type": "apartment", "area_m2": 120.0}
-        assert (record.model, record.reasoning_effort, record.prompt_version) == ("gpt-6-sol", "low", "v2")
+        assert (record.model, record.reasoning_effort, record.prompt_version) == ("glm-5.3-flash", "low", "v2")
         assert record.flags is None and record.error is None
     assert enrichment.claim_batch(engine) == []
 
@@ -186,26 +162,26 @@ def test_unanswered_listings_are_asked_once_more_then_fail(tmp_path, monkeypatch
         calls.append([t.property_id for t in batch])
         return {batch[0].property_id: facts(property_type="apartment")}
 
-    monkeypatch.setattr(enrichment, "invoke_codex", partial)
+    monkeypatch.setattr(enrichment, "invoke_pi", partial)
     results = enrichment.process_batch(engine, tasks)
     ids = [t.property_id for t in tasks]
     assert calls == [ids, ids[1:]]
     assert [r.status for r in results] == ["done", "done", "failed"]
-    assert results[2].error == "Codex returned no answer for this listing"
+    assert results[2].error == "Pi returned no answer for this listing"
 
 
 def test_failures_are_retried_on_later_runs_up_to_the_attempt_cap(tmp_path, monkeypatch):
     engine = get_engine(tmp_path / "qayem.db")
     init_db(engine)
     seed(engine, 3)
-    monkeypatch.setattr(enrichment.shutil, "which", lambda _: "/usr/bin/codex")
+    monkeypatch.setattr(enrichment.shutil, "which", lambda _: "/usr/bin/pi")
     calls = []
 
     def fail(tasks):
         calls.append(len(tasks))
-        raise RuntimeError("Codex exited with status 1")
+        raise RuntimeError("Pi exited with status 1")
 
-    monkeypatch.setattr(enrichment, "invoke_codex", fail)
+    monkeypatch.setattr(enrichment, "invoke_pi", fail)
     for attempt in range(1, enrichment.MAX_ATTEMPTS + 1):
         results = enrichment.run_batches(engine, 0)
         assert [r.status for r in results] == ["failed"] * 3  # once per run, never twice
@@ -215,7 +191,7 @@ def test_failures_are_retried_on_later_runs_up_to_the_attempt_cap(tmp_path, monk
         assert {r.attempts for r in session.query(PropertyEnrichment)} == {enrichment.MAX_ATTEMPTS}
 
     # an operator can still force a retry
-    monkeypatch.setattr(enrichment, "invoke_codex", lambda tasks: {
+    monkeypatch.setattr(enrichment, "invoke_pi", lambda tasks: {
         t.property_id: facts(property_type="apartment") for t in tasks
     })
     retried = enrichment.run_batches(engine, 0, retry_failed=True)
@@ -227,24 +203,24 @@ def test_circuit_breaker_stops_a_run_after_consecutive_failed_batches(tmp_path, 
     engine = get_engine(tmp_path / "qayem.db")
     init_db(engine)
     seed(engine, enrichment.BATCH_SIZE * 5)
-    monkeypatch.setattr(enrichment.shutil, "which", lambda _: "/usr/bin/codex")
+    monkeypatch.setattr(enrichment.shutil, "which", lambda _: "/usr/bin/pi")
 
     def fail(_tasks):
-        raise RuntimeError("Codex exited with status 1")
+        raise RuntimeError("Pi exited with status 1")
 
-    monkeypatch.setattr(enrichment, "invoke_codex", fail)
+    monkeypatch.setattr(enrichment, "invoke_pi", fail)
     reasons = []
     results = enrichment.run_batches(engine, 0, workers=1, on_stop=reasons.append)
     assert len(results) == enrichment.BATCH_SIZE * enrichment.CIRCUIT_BREAKER
-    assert reasons == ["2 batches in a row failed: Codex exited with status 1"]
+    assert reasons == ["2 batches in a row failed: Pi exited with status 1"]
 
 
 def test_time_budget_stops_new_batches(tmp_path, monkeypatch):
     engine = get_engine(tmp_path / "qayem.db")
     init_db(engine)
     seed(engine, enrichment.BATCH_SIZE * 2)
-    monkeypatch.setattr(enrichment.shutil, "which", lambda _: "/usr/bin/codex")
-    monkeypatch.setattr(enrichment, "invoke_codex", lambda tasks: {})
+    monkeypatch.setattr(enrichment.shutil, "which", lambda _: "/usr/bin/pi")
+    monkeypatch.setattr(enrichment, "invoke_pi", lambda tasks: {})
     reasons = []
     assert enrichment.run_batches(engine, 0, deadline=0, on_stop=reasons.append) == []
     assert reasons == ["time budget reached"]
@@ -271,8 +247,8 @@ def test_health_reports_backlog_and_failures(tmp_path, monkeypatch):
     init_db(engine)
     seed(engine, 12)
     assert enrichment.enrichment_health(engine)["state"] == "stale"  # waiting, never enriched
-    monkeypatch.setattr(enrichment.shutil, "which", lambda _: "/usr/bin/codex")
-    monkeypatch.setattr(enrichment, "invoke_codex", lambda tasks: {})  # every listing unanswered
+    monkeypatch.setattr(enrichment.shutil, "which", lambda _: "/usr/bin/pi")
+    monkeypatch.setattr(enrichment, "invoke_pi", lambda tasks: {})  # every listing unanswered
     enrichment.run_batches(engine, 0)
     health = enrichment.enrichment_health(engine)
     assert health["state"] == "failing" and health["failed_24h"] == 12
@@ -294,7 +270,7 @@ def test_source_updates_keep_inference_only_for_unchanged_text(tmp_path, monkeyp
         session.commit()
     tasks = enrichment.claim_batch(engine)
     assert len(tasks) == 1
-    monkeypatch.setattr(enrichment, "invoke_codex", lambda batch: {
+    monkeypatch.setattr(enrichment, "invoke_pi", lambda batch: {
         t.property_id: facts(property_type="apartment") for t in batch
     })
     assert enrichment.process_batch(engine, tasks)[0].applied == 1
@@ -335,8 +311,8 @@ def test_scheduler_runs_one_batch_then_resumes(tmp_path, monkeypatch):
     engine = get_engine(tmp_path / "qayem.db")
     init_db(engine)
     seed(engine, enrichment.BATCH_SIZE + 2)
-    monkeypatch.setattr(enrichment.shutil, "which", lambda command: "/usr/bin/codex")
-    monkeypatch.setattr(enrichment, "invoke_codex", lambda tasks: {
+    monkeypatch.setattr(enrichment.shutil, "which", lambda command: "/usr/bin/pi")
+    monkeypatch.setattr(enrichment, "invoke_pi", lambda tasks: {
         t.property_id: facts(property_type="apartment") for t in tasks
     })
     assert len(enrichment.run_batches(engine, 1)) == enrichment.BATCH_SIZE
@@ -361,8 +337,8 @@ def test_slow_batch_does_not_hold_the_next_one(tmp_path, monkeypatch):
             later_started.set()
         return {}
 
-    monkeypatch.setattr(enrichment.shutil, "which", lambda command: "/usr/bin/codex")
-    monkeypatch.setattr(enrichment, "invoke_codex", fake_invoke)
+    monkeypatch.setattr(enrichment.shutil, "which", lambda command: "/usr/bin/pi")
+    monkeypatch.setattr(enrichment, "invoke_pi", fake_invoke)
     worker = Thread(target=lambda: results.extend(enrichment.run_batches(engine, 0, workers=2)))
     worker.start()
     try:
@@ -451,7 +427,7 @@ def test_flags_are_stored_with_a_readable_note(tmp_path, monkeypatch):
     init_db(engine)
     seed(engine, 1, description="مقدم 450الف فقط", price=450_000)
     tasks = enrichment.claim_batch(engine)
-    monkeypatch.setattr(enrichment, "invoke_codex", lambda batch: {
+    monkeypatch.setattr(enrichment, "invoke_pi", lambda batch: {
         t.property_id: facts(down_payment=450_000) for t in batch})
     enrichment.process_batch(engine, tasks)
     with Session(engine) as session:

@@ -1,23 +1,25 @@
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowUpRight, CalendarClock } from "lucide-react";
-import { number, signed, useApi, sep } from "../lib";
+import { number, signed, useApi, useTitle, sep, nameOf, place } from "../lib";
 import { t } from "../locale";
 import type { Developer, Overview } from "../types";
 import { ErrorState, Loading } from "../components/States";
-import { EntityActions, PremiumBars, ScopeNote } from "../components/Valuation";
+import { DivergingBars, EntityActions, ScopeNote } from "../components/Opportunity";
 import { HistoryPending, LaunchPanel, ProfileFacts } from "../components/Entity";
+import { NameList } from "../components/Names";
 
 export default function DeveloperPage({ overview }: { overview: Overview | null }) {
   const { key = "" } = useParams();
-  const { data, error, retry } = useApi<Developer>(`/developers/${encodeURIComponent(key)}`);
+  const { data, error, missing, retry } = useApi<Developer>(`/developers/${encodeURIComponent(key)}`);
+  useTitle(nameOf(data));
   if (error)
     return (
       <div className="page">
-        <ErrorState message={error} retry={retry} />
+        <ErrorState message={error} retry={retry} missing={missing} />
       </div>
     );
   if (!data) return <Loading />;
-  const priced = data.compounds.filter((c) => c.premium_vs_district != null);
+  const priced = data.compounds.filter((c) => c.median_gap != null);
   const changes = data.delivery_changes;
   return (
     <div className="entity page-enter">
@@ -28,13 +30,10 @@ export default function DeveloperPage({ overview }: { overview: Overview | null 
           </Link>
           <span className="eyebrow">{t("Developer")}</span>
           <h1 className="display" dir="auto">
-            {data.name}
+            {nameOf(data)}
           </h1>
-          <p className="unit-place" dir="auto">
-            {data.districts
-              .slice(0, 4)
-              .map((d) => d.name)
-              .join(sep())}
+          <p className="unit-place">
+            <NameList items={data.districts.slice(0, 4).map((d) => place(d.name))} />
           </p>
           <div className="entity-bar">
             <EntityActions kind="developer" entityKey={data.key} name={data.name} />
@@ -45,18 +44,23 @@ export default function DeveloperPage({ overview }: { overview: Overview | null 
         <section className="section-tight">
           <div className="kpis">
             <article className="kpi-feature">
-              <span>{t("Premium vs district norm")}</span>
-              <strong className="num">{signed(data.premium_vs_district)}</strong>
+              <span>{t("Resale vs its prices today")}</span>
+              <strong className="num">{signed(data.launch?.median_gap)}</strong>
               <small>
-                {data.premium_vs_district == null
-                  ? t("Not enough valued units yet")
-                  : t("Across {n} valued units, like for like", { n: number(data.premium_basis) })}
+                {data.launch?.median_gap == null
+                  ? t("No like-for-like developer price yet")
+                  : t("Median of {n} like-for-like resale units", { n: number(data.launch.compared) })}
               </small>
+            </article>
+            <article>
+              <span>{t("Strong or good opportunities")}</span>
+              <strong className="num">{number(data.good_count)}</strong>
+              <small>{t("of {n} resale listings", { n: number(data.units) })}</small>
             </article>
             <article>
               <span>{t("Compounds")}</span>
               <strong className="num">{number(data.compounds.length)}</strong>
-              <small>{t("{n} districts", { n: number(data.districts.length) })}</small>
+              <small>{t("{n} districts", { n: number(data.districts.length), count: data.districts.length })}</small>
             </article>
             <article>
               <span>{t("Resale listings")}</span>
@@ -66,33 +70,47 @@ export default function DeveloperPage({ overview }: { overview: Overview | null 
           </div>
         </section>
 
-        <section className="section-tight">
-          <span className="eyebrow">{t("Resale vs buying new")}</span>
-          <h2 className="display section-title">{t("Against the developer’s launch prices")}</h2>
-          <LaunchPanel launch={data.launch} scope="developer" />
-        </section>
-
-        {priced.length > 0 && (
+        {overview?.launch.units ? (
           <section className="section-tight">
-            <div className="section-row">
-              <div>
-                <span className="eyebrow">{t("Its compounds")}</span>
-                <h2 className="display">{t("Premium against each district")}</h2>
-              </div>
-            </div>
-            <div className="chart-card">
-              <PremiumBars
-                items={priced.slice(0, 20).map((c) => ({
-                  key: c.key,
-                  label: c.name,
-                  meta: `${c.district}${sep()}${t("{n} listings", { n: number(c.units) })}`,
-                  value: c.premium_vs_district!,
-                  to: `/compounds/${encodeURIComponent(c.key)}`,
-                }))}
-              />
-            </div>
+            <span className="eyebrow">{t("Resale vs buying new")}</span>
+            <h2 className="display section-title">{t("Against the developer’s prices today")}</h2>
+            <LaunchPanel launch={data.launch} scope="developer" />
           </section>
-        )}
+        ) : null}
+
+        <section className="section-tight">
+          <div className="section-row">
+            <div>
+              <span className="eyebrow">{t("Its compounds")}</span>
+              <h2 className="display">
+                {t(priced.length > 0 ? "Resale against the developer, compound by compound" : "Where its resale units are")}
+              </h2>
+            </div>
+            <Link className="link-arrow" to={`/compounds?developer=${encodeURIComponent(data.key)}`}>
+              {t("All {n} compounds", { n: number(data.compounds.length), count: data.compounds.length })}{" "}
+              <ArrowUpRight size={16} className="flip-rtl" />
+            </Link>
+          </div>
+          {priced.length > 0 && (
+            <div className="chart-card">
+              <DivergingBars
+                items={[...priced]
+                  .sort((a, b) => a.median_gap! - b.median_gap!)
+                  .slice(0, 20)
+                  .map((c) => ({
+                    key: c.key,
+                    label: nameOf(c)!,
+                    meta: `${place(c.district)}${sep()}${t("{n} listings", { n: number(c.units), count: c.units })}`,
+                    value: c.median_gap!,
+                    to: `/compounds/${encodeURIComponent(c.key)}`,
+                  }))}
+              />
+              <p className="fineprint">
+                {t("Median gap of like-for-like resale units against the developer’s current price, on the less favourable of listed price and today’s money.")}
+              </p>
+            </div>
+          )}
+        </section>
 
         <section className="section-tight split">
           <div>
@@ -127,12 +145,12 @@ export default function DeveloperPage({ overview }: { overview: Overview | null 
             </p>
             {data.compounds.length > priced.length && (
               <p className="muted">
-                {t("{n} further compounds have too few listings for a premium.", { n: number(data.compounds.length - priced.length) })}
+                {t("{n} further compounds have no like-for-like developer price.", { n: number(data.compounds.length - priced.length), count: data.compounds.length - priced.length })}
               </p>
             )}
             <p className="entity-link">
-              <Link className="link-arrow" to={`/units?developer=${encodeURIComponent(data.key)}&sort=value`}>
-                {t("See its units")} <ArrowUpRight size={15} />
+              <Link className="link-arrow" to={`/units?developer=${encodeURIComponent(data.key)}&sort=opportunity`}>
+                {t("See its units")} <ArrowUpRight size={15} className="flip-rtl" />
               </Link>
             </p>
           </div>

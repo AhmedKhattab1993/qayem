@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ChevronDown, Search, X } from "lucide-react";
-import { number, percent, signed, useApi, sep } from "../lib";
+import { number, percent, signed, useApi, tone, nameOf, place } from "../lib";
 import { t } from "../locale";
 import type { Developer, Page } from "../types";
 import { EmptyState, ErrorState, Loading } from "../components/States";
-import { Pager } from "../components/UnitTable";
+import { Pager, scrollToResults } from "../components/UnitTable";
+import { NameList } from "../components/Names";
 
 export default function Developers() {
   const [params, setParams] = useSearchParams();
@@ -19,7 +20,8 @@ export default function Developers() {
     }
     return `/developers?${next}`;
   }, [params]);
-  const { data, error, retry } = useApi<Page<Developer>>(query);
+  const { data, latest, error, retry } = useApi<Page<Developer>>(query);
+  const list = data ?? latest;
   const update = (changes: Record<string, string>) =>
     setParams((previous) => {
       const next = new URLSearchParams(previous);
@@ -45,7 +47,7 @@ export default function Developers() {
           </h1>
           <p className="lede">
             {t(
-              "How each developer’s resale units price against comparable units in the same districts, and what their stock looks like: delivery, payment plans and finishing.",
+              "How each developer’s resale units compare with what it sells today, how many are real opportunities, and what the stock looks like: delivery, payment plans and finishing.",
             )}
           </p>
           <form className="searchbar" onSubmit={submit} role="search">
@@ -84,29 +86,34 @@ export default function Developers() {
             <span className="select">
               <select value={params.get("sort") ?? "units"} onChange={(event) => update({ sort: event.target.value })}>
                 <option value="units">{t("Most listings")}</option>
-                <option value="premium_desc">{t("Highest premium")}</option>
-                <option value="premium_asc">{t("Lowest premium")}</option>
+                <option value="opportunities">{t("Most opportunities")}</option>
+                <option value="gap_asc">{t("Resale furthest below the developer")}</option>
+                <option value="gap_desc">{t("Resale furthest above the developer")}</option>
                 <option value="name">{t("Name")}</option>
               </select>
               <ChevronDown size={15} />
             </span>
           </label>
         </div>
+        <div className="results-bar" id="results">
+          <p className="muted num">{list ? t("{n} developers", { n: number(list.total), count: list.total }) : "—"}</p>
+        </div>
         {error ? (
           <ErrorState message={error} retry={retry} />
-        ) : !data ? (
+        ) : !list ? (
           <Loading />
-        ) : data.items.length === 0 ? (
+        ) : list.items.length === 0 ? (
           <EmptyState title={t("No developers match.")} text={t("Try a different name.")} />
         ) : (
           <>
-            <div className="ledger stack">
+            <div className={`ledger stack row-link grid-cards${data ? "" : " is-busy"}`}>
               <table>
-                <caption className="sr-only">{t("Developers with their premium against district norms")}</caption>
+                <caption className="sr-only">{t("Developers with their resale units against their prices today")}</caption>
                 <thead>
                   <tr>
                     <th scope="col">{t("Developer")}</th>
-                    <th scope="col">{t("Vs district")}</th>
+                    <th scope="col">{t("Resale vs developer")}</th>
+                    <th scope="col">{t("Opportunities")}</th>
                     <th scope="col">{t("Compounds")}</th>
                     <th scope="col">{t("Listings")}</th>
                     <th scope="col">{t("Ready")}</th>
@@ -115,22 +122,20 @@ export default function Developers() {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.items.map((developer) => (
+                  {list.items.map((developer) => (
                     <tr key={developer.key}>
                       <th scope="row">
                         <Link className="ledger-title" to={`/developers/${encodeURIComponent(developer.key)}`}>
-                          <strong dir="auto">{developer.name}</strong>
-                          <small dir="auto">
-                            {developer.districts
-                              .slice(0, 2)
-                              .map((d) => d.name)
-                              .join(sep())}
+                          <strong dir="auto">{nameOf(developer)}</strong>
+                          <small>
+                            <NameList items={developer.districts.slice(0, 2).map((d) => place(d.name))} />
                           </small>
                         </Link>
                       </th>
-                      <td data-label={t("Vs district")} className={`num ledger-strong ${(developer.premium_vs_district ?? 0) >= 0 ? "is-up" : "is-down"}`}>
-                        {signed(developer.premium_vs_district)}
+                      <td data-label={t("Resale vs developer")} className={`num ledger-strong ${tone(developer.launch?.median_gap)}`}>
+                        {signed(developer.launch?.median_gap)}
                       </td>
+                      <td data-label={t("Opportunities")} className="num">{developer.good_count ? number(developer.good_count) : "—"}</td>
                       <td data-label={t("Compounds")} className="num">{number(developer.compounds.length)}</td>
                       <td data-label={t("Listings")} className="num">{number(developer.units)}</td>
                       <td data-label={t("Ready")} className="num">{percent(developer.ready_share)}</td>
@@ -142,18 +147,21 @@ export default function Developers() {
               </table>
             </div>
             <Pager
-              page={data.page}
-              pages={data.pages}
-              total={data.total}
-              pageSize={data.page_size}
+              page={list.page}
+              pages={list.pages}
+              total={list.total}
+              pageSize={list.page_size}
               noun="developers"
-              onPage={(page) => update({ page: String(page) })}
+              onPage={(page) => {
+                update({ page: String(page) });
+                scrollToResults();
+              }}
             />
           </>
         )}
         <p className="fineprint">
           {t(
-            "Vs district is the average gap between the developer’s units and the benchmark for the same class in the same district, after adjusting for unit type, finishing, delivery and size. It needs at least five valued units, and twenty to appear in a premium ranking.",
+            "Resale vs developer is the median gap between the developer’s resale units and its own current units of the same type, finishing and similar size, on the less favourable of listed price and today’s money. A developer needs twenty such units to be ranked. Opportunities counts strong and good units.",
           )}
         </p>
       </div>

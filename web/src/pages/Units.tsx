@@ -1,18 +1,20 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
-import { ChevronDown, Search, X } from "lucide-react";
-import { number, titleCase, useApi, useCatalog, sep } from "../lib";
+import { ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
+import { number, titleCase, useApi, useCatalog, sep, nameOf, place } from "../lib";
 import { t } from "../locale";
 import type { Page, Unit } from "../types";
 import { EmptyState, ErrorState, Loading } from "../components/States";
-import { Pager, UnitTable, type UnitSort } from "../components/UnitTable";
+import { Pager, UnitTable, scrollToResults, type UnitSort } from "../components/UnitTable";
+import { levelText } from "../components/Opportunity";
 
-const KEYS = ["q", "district", "compound", "developer", "property_type", "verdict", "grade", "terms", "sort", "page"];
+const KEYS = ["q", "district", "compound", "developer", "property_type", "level", "terms", "launch", "sort", "page"];
 
 export default function Units() {
   const [params, setParams] = useSearchParams();
   const catalog = useCatalog();
   const [search, setSearch] = useState(params.get("q") ?? "");
+  const [filtersOpen, setFiltersOpen] = useState(false);
   useEffect(() => setSearch(params.get("q") ?? ""), [params]);
   const query = useMemo(() => {
     const next = new URLSearchParams();
@@ -22,7 +24,9 @@ export default function Units() {
     }
     return `/units?${next}`;
   }, [params]);
-  const { data, error, retry } = useApi<Page<Unit>>(query);
+  const { data, latest, error, retry } = useApi<Page<Unit>>(query);
+  // While the next page or filter loads, the current list stays on screen, dimmed.
+  const list = data ?? latest;
 
   const update = (changes: Record<string, string>) =>
     setParams((previous) => {
@@ -38,15 +42,16 @@ export default function Units() {
     event.preventDefault();
     update({ q: search.trim() });
   };
-  const select = (key: string, label: string, all: string, options: { value: string; label: string }[]) => (
-    <label className="field">
+  const select = (key: string, label: string, all: string, options: { value: string; label: string }[], first?: string) => {
+    // The default sort is the empty option, whether or not the link spells it out.
+    const value = key === "sort" && params.get(key) === "opportunity" ? "" : (params.get(key) ?? "");
+    return (
+    <label className={`field field-${key}`}>
       <span className="field-label">{t(label)}</span>
       <span className="select">
-        <select value={params.get(key) ?? ""} onChange={(event) => update({ [key]: event.target.value })}>
-          <option value="">{t(all)}</option>
-          {params.get(key) && !options.some((o) => o.value === params.get(key)) && (
-            <option value={params.get(key)!}>{params.get(key)}</option>
-          )}
+        <select value={value} onChange={(event) => update({ [key]: event.target.value })}>
+          <option value="">{t(first ?? all)}</option>
+          {value && !options.some((o) => o.value === value) && <option value={value}>{value}</option>}
           {options.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -56,8 +61,12 @@ export default function Units() {
         <ChevronDown size={15} />
       </span>
     </label>
-  );
+    );
+  };
   const filtered = KEYS.some((key) => key !== "sort" && key !== "page" && params.get(key));
+  const active = ["district", "developer", "property_type", "level", "terms", "launch"].filter((key) => params.get(key)).length;
+  const compoundKey = params.get("compound");
+  const compound = compoundKey ? catalog?.compounds.find((c) => c.key === compoundKey) : undefined;
 
   return (
     <div className="units page-enter">
@@ -69,7 +78,7 @@ export default function Units() {
           </h1>
           <p className="lede">
             {t(
-              "Identified resale listings with their cash-equivalent price, Qayem’s fair range and the strength of the evidence behind it.",
+              "Every resale unit against the developer’s price today and the similar units listed in its compound, best opportunities first.",
             )}
           </p>
           <form className="searchbar" onSubmit={submit} role="search">
@@ -103,79 +112,116 @@ export default function Units() {
       </header>
 
       <div className="page">
-        <div className="filters">
-          {select(
-            "district",
-            "District",
-            "All districts",
-            catalog?.districts.filter((d) => d.units >= 10).map((d) => ({ value: d.key, label: d.name })) ?? [],
-          )}
-          {select(
-            "developer",
-            "Developer",
-            "All developers",
-            catalog?.developers.filter((d) => d.units >= 10).map((d) => ({ value: d.key, label: d.name })) ?? [],
-          )}
-          {select(
-            "property_type",
-            "Unit type",
-            "All unit types",
-            catalog?.property_types.map((p) => ({ value: p.value, label: `${titleCase(p.value)} (${number(p.count)})` })) ?? [],
-          )}
-          {select("verdict", "Position", "Any position", [
-            { value: "below", label: t("Below fair range") },
-            { value: "within", label: t("Within fair range") },
-            { value: "above", label: t("Above fair range") },
-            { value: "suspect", label: t("Check this listing") },
-          ])}
-          {select("grade", "Evidence", "Any evidence", [
-            { value: "A", label: t("A · compound level") },
-            { value: "B", label: t("B · developer level") },
-            { value: "C", label: t("C · district level") },
-          ])}
-          {select("terms", "Payment", "Any payment", [
-            { value: "cash", label: t("Cash") },
-            { value: "plan", label: t("Installment plan") },
-            { value: "partial", label: t("Plan, term unknown") },
-            { value: "unknown", label: t("Terms unknown") },
-          ])}
-        </div>
-        <div className="results-bar">
-          <p className="muted num">
-            {data ? t("{n} units", { n: number(data.total) }) : "—"}
-            {params.get("compound") && `${sep()}${params.get("compound")}`}
-          </p>
-          {filtered && (
-            <button className="link-arrow" onClick={() => setParams(new URLSearchParams())}>
-              {t("Clear filters")}
-            </button>
-          )}
+        <div className="list-controls">
+          <button
+            type="button"
+            className="btn btn-sm filters-toggle"
+            aria-expanded={filtersOpen}
+            aria-controls="unit-filters"
+            onClick={() => setFiltersOpen((open) => !open)}
+          >
+            <SlidersHorizontal size={15} />
+            {t("Filters")}
+            {active > 0 && <span className="count-pill num">{number(active)}</span>}
+          </button>
+          {select("sort", "Sort by", "", [
+            { value: "launch_gap", label: t("Furthest below the developer") },
+            { value: "peer_gap", label: t("Furthest below similar units") },
+            { value: "price_asc", label: t("Price, low to high") },
+            { value: "price_desc", label: t("Price, high to low") },
+            { value: "cash_ppm_asc", label: t("Cheapest per m² in today’s money") },
+            { value: "area_desc", label: t("Largest first") },
+          ], "Best opportunities first")}
+          <div className={`filters${filtersOpen ? " is-open" : ""}`} id="unit-filters">
+            {select(
+              "district",
+              "District",
+              "All districts",
+              catalog?.districts.filter((d) => d.units >= 10).map((d) => ({ value: d.key, label: place(d.name)! })) ?? [],
+            )}
+            {select(
+              "developer",
+              "Developer",
+              "All developers",
+              catalog?.developers.filter((d) => d.units >= 10).map((d) => ({ value: d.key, label: nameOf(d)! })) ?? [],
+            )}
+            {select(
+              "property_type",
+              "Unit type",
+              "All unit types",
+              catalog?.property_types.map((p) => ({ value: p.value, label: `${titleCase(p.value)} (${number(p.count)})` })) ?? [],
+            )}
+            {select(
+              "level",
+              "Opportunity",
+              "Any level",
+              (["strong", "good", "in_line", "mixed", "pricier", "check", "unrated"] as const).map((level) => ({
+                value: level,
+                label: t(levelText[level]),
+              })),
+            )}
+            {select("terms", "Payment", "Any payment", [
+              { value: "cash", label: t("Cash") },
+              { value: "plan", label: t("Installment plan") },
+              { value: "partial", label: t("Plan, term unknown") },
+              { value: "unknown", label: t("Terms unknown") },
+            ])}
+            {select("launch", "Developer price", "All units", [
+              { value: "true", label: t("Developer selling similar units") },
+            ])}
+          </div>
+          <div className="results-bar" id="results">
+            <p className="muted num">
+              {list ? t("{n} units", { n: number(list.total), count: list.total }) : "—"}
+              {compoundKey && (
+                <>
+                  {sep()}
+                  <button type="button" className="chip" onClick={() => update({ compound: "" })} aria-label={t("Remove filter: {name}", { name: nameOf(compound) ?? compoundKey })}>
+                    <bdi>{nameOf(compound) ?? compoundKey}</bdi>
+                    <X size={13} />
+                  </button>
+                </>
+              )}
+            </p>
+            {filtered && (
+              <button
+                className="link-arrow"
+                onClick={() => setParams(params.get("sort") ? new URLSearchParams({ sort: params.get("sort")! }) : new URLSearchParams())}
+              >
+                {t("Clear filters")}
+              </button>
+            )}
+          </div>
         </div>
         {error ? (
           <ErrorState message={error} retry={retry} />
-        ) : !data ? (
+        ) : !list ? (
           <Loading />
-        ) : data.items.length === 0 ? (
+        ) : list.items.length === 0 ? (
           <EmptyState title={t("No units match.")} text={t("Try fewer filters or a broader search.")} />
         ) : (
           <>
             <UnitTable
-              items={data.items}
-              sort={params.get("sort") ?? "grade"}
+              items={list.items}
+              busy={!data}
+              sort={params.get("sort") ?? "opportunity"}
               onSort={(sort: UnitSort) => update({ sort })}
             />
             <Pager
-              page={data.page}
-              pages={data.pages}
-              total={data.total}
-              pageSize={data.page_size}
-              onPage={(page) => update({ page: String(page) })}
+              page={list.page}
+              pages={list.pages}
+              total={list.total}
+              pageSize={list.page_size}
+              onPage={(page) => {
+                update({ page: String(page) });
+                scrollToResults();
+              }}
             />
           </>
         )}
         <p className="fineprint">
           {t(
-            "Below or above means the cash-equivalent price falls outside the range that held 80% of comparable units in our backtest. It is a prompt to look closer, not a recommendation.",
+            "Vs developer compares the unit with the developer’s current price for similar units in the same compound; vs similar units compares it with the other resale units of the same type and size listed there, with its rank. Each gap is the less favourable of listed price and today’s money. A level is a prompt to look closer, not a recommendation.",
           )}
         </p>
       </div>

@@ -2,15 +2,35 @@
 
 **Qayem (قيم / تقييم) — "to evaluate."** Egypt's resale market is priced by
 compound, developer, delivery date and payment plan, yet listings are compared
-by area. Qayem collects the secondary market from eight sources, converts every
-payment plan to cash-today terms, and values each unit against its own compound
-and developer with a published, backtested model that says how sure it is.
+by area. Qayem reads the secondary market from AqarExit's contract-transfer
+(تنازل) marketplace, converts every payment plan to cash-today terms, and compares
+each unit with what could be bought instead: the developer's current price for a
+similar unit and the similar resale units listed in the same compound. It does not
+estimate a "fair price": AqarExit lists units at their old contract prices, and
+Egypt publishes no resale sale prices.
 
-- **Fair-value model:** hierarchical (district → developer → compound) with
-  fitted adjustments for unit type, finishing, delivery, plan length and size.
-  Leave-one-out backtest: median error 12.7% vs 20.1% for the district-median
-  method. Details: the website's Methodology page and `src/qayem/valuation.py`.
-- **Website:** evaluate a unit, compounds, developers, units, compare, watchlist
+**Sources in use.** AqarExit is the only complete record of the secondary market
+(paid amount, balance and installments for every unit), so the website, the model,
+the nightly crawl and description enrichment use AqarExit only. The other parsers
+below still work and their rows stay in the database, unused. `QAYEM_SOURCES`
+changes the selection: `QAYEM_SOURCES=aqarexit,nawy` or `QAYEM_SOURCES=all`.
+
+**Developer prices.** Nawy's developer-sale units (`nawy_primary`: each developer's
+current price and payment plan, per unit) are crawled nightly as a price benchmark
+(`QAYEM_BENCHMARK_SOURCES`, `none` turns it off). They are never listed, fitted or
+enriched; the website compares each AqarExit unit with the developer's current price
+for a similar unit in the same compound. AqarExit's compound and developer names are
+free text («باديا», «Badya», «بادية»), so `qayem resolve-entities` maps each spelling to
+a canonical compound, its Arabic name and Nawy's name for it (`src/qayem/entities.py`).
+Property Finder's new-projects section was considered and is walled (CloudFront 403,
+even for robots.txt); it is not crawled.
+
+- **Opportunity levels:** strong / good / in line / mixed / pricier / check this
+  listing / unrated, from the two comparisons, each on the less favourable of listed
+  price and today's money. Details: the website's Methodology page and
+  `src/qayem/website_data.py`. (`src/qayem/valuation.py` still holds the earlier
+  fair-value model; the website no longer uses it.)
+- **Website:** compare a unit, compounds, developers, units, compare, watchlist
   and methodology, in Arabic and English. See [docs/WEBSITE.md](docs/WEBSITE.md).
 - **Pipeline:** eight parsers into one SQLite database with a full lifecycle per
   listing and a nightly crawl. See [docs/OPERATIONS.md](docs/OPERATIONS.md).
@@ -69,6 +89,7 @@ qayem crawl                         # the full nightly plan: every scope, each w
 qayem health                        # per-source health; exit 1 if any source needs attention
 qayem renormalize nawy              # re-parse stored payloads with the current parser (no fetching)
 qayem renormalize semsar            # fill empty columns from Semsar's template descriptions
+qayem renormalize aqarexit          # derive missing installment terms from stored AqarExit payloads
 ./scripts/install-cron.sh           # schedule the nightly crawl (02:30); see docs/OPERATIONS.md
 
 qayem status                        # last run per source + DB totals
@@ -78,26 +99,33 @@ qayem show 42                       # one property + full change history
 qayem removed --since 2026-09-01    # removal audit
 
 qayem enrich-descriptions --dry-run  # preview the next batch of 40 listings
-qayem enrich-descriptions            # one batch: 40 listings in one headless Codex call
+qayem enrich-descriptions            # one batch: 40 listings in one headless Pi call
 qayem enrich-descriptions --batches 5 --source opensooq
 qayem enrich-descriptions --batches 0  # continue until no eligible rows remain
 qayem enrich-descriptions --retry-failed --batches 0 --workers 4  # retry recorded failures
 qayem enrich-descriptions --since 2026-09-26 --batches 0  # only listings first seen since
 qayem enrich-revoke --dry-run        # fills from earlier prompt versions that would be undone
 qayem enrich-status                  # claimed / done / failed counts
+
+qayem resolve-entities --dry-run     # spelling pairs waiting for canonical names
+qayem resolve-entities               # resolve them (glm-5.3-flash, 120 pairs per Pi call)
 ```
 
 Every `parse` prints a summary: pages fetched, seen / created / updated /
 unchanged / relisted / removed counts.
 
 `enrich-descriptions` sends **only each listing's title and description** —
-40 listings per fresh headless Codex call — to `gpt-6-sol` with low reasoning
-effort, using the extraction rules in `src/qayem/enrichment_spec.md` as the
-model's instructions and a sparse JSON schema (only stated fields). Codex's
-optional features and web search are disabled, which cuts the per-call
-overhead from ~12k to ~2.5k input tokens. This configuration was chosen by
-the benchmark in `bench/enrichment/RESULTS.md` (99% precision on a held-out
-set; one listing per call was both less accurate and 8x the tokens).
+40 listings per fresh headless Pi call — to `zai-coding-cn/glm-5.3-flash`
+with low reasoning effort. The extraction rules in
+`src/qayem/enrichment_spec.md` and a sparse JSON schema constrain the response.
+The runner disables tools, extensions, skills, project context and session storage;
+it checks the returned provider, model, completion status and JSON schema before
+accepting any facts. Configure this provider in Pi locally and verify it with
+`pi auth check --provider zai-coding-cn --model glm-5.3-flash`.
+
+The older Codex precision benchmark in `bench/enrichment/RESULTS.md` is historical;
+it is not an accuracy measurement for GLM. Live Arabic and English extraction
+fixtures have been checked with the new runner and the same grounding validators.
 
 Only listings the website could show are sent, newest first: active,
 not Nawy (its title and description are generated from the payload the
@@ -117,7 +145,7 @@ several units) get nothing applied, and a stated down payment equal to the
 listing's price is refused and noted, since that price is probably the down
 payment. Listings missing from a batch answer are asked once more, then
 recorded as failed. By default one batch runs; `--batches 0` processes all
-eligible active listings. The Codex CLI must be installed and authenticated
+eligible active listings. The Pi CLI must be installed and authenticated
 on the machine running the job.
 
 The `property_enrichments` table stores the latest durable outcome per
@@ -168,3 +196,19 @@ Tests run entirely on captured fixtures (`tests/fixtures/`) — no network
 needed. When a source's markup changes, refresh its fixture and update the
 assertions. Source payloads are also kept in each property's `raw` JSON
 column so data can be re-normalized later without re-fetching.
+
+For website changes, use local development, then
+[Cloudflare staging](docs/CLOUDFLARE.md#development-and-staging), then production.
+Staging has a separate database and manual refresh from saved cloud data, reusing
+existing enrichment instead of running another crawl or AI batch.
+
+
+## Cloudflare backend
+
+The React site and an async Python Workers API can serve the same endpoints from
+Cloudflare D1. The isolated cloud updater schedules crawling, entity resolution
+and Pi enrichment at 02:30 Africa/Cairo. Its canonical SQLite database is restored
+from and checkpointed to private R2; complete, healthy catalogues are published
+to D1. See [cloud updates and commissioning status](docs/CLOUD_UPDATES.md) and
+[website deployment](docs/CLOUDFLARE.md). Website releases use the active cloud
+dataset; publishing the local database requires `QAYEM_LOCAL_PUBLISH=1` explicitly.

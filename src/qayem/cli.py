@@ -57,11 +57,13 @@ def init() -> None:
 RENORMALIZERS = {"nawy": "qayem.sources.nawy:parse_unit", "nawy_primary": "qayem.sources.nawy:parse_primary_unit"}
 # Sources without a re-parseable payload whose description is a generated template.
 DESCRIPTION_BACKFILLS = {"semsar": "qayem.sources.semsar:parse_description"}
+# Sources whose stored payload keeps parsed facts (not the page): empty columns are derived from it.
+RAW_BACKFILLS = {"aqarexit": "qayem.sources.aqarexit:terms_from_raw"}
 
 
 @app.command("renormalize")
 def renormalize_command(
-    source: str = typer.Argument("nawy", help=f"Source to re-parse: {', '.join([*RENORMALIZERS, *DESCRIPTION_BACKFILLS])}."),
+    source: str = typer.Argument("nawy", help=f"Source to re-parse: {', '.join([*RENORMALIZERS, *DESCRIPTION_BACKFILLS, *RAW_BACKFILLS])}."),
 ) -> None:
     """Re-parse stored raw payloads (or template descriptions) with the current parser.
 
@@ -69,16 +71,17 @@ def renormalize_command(
     """
     from importlib import import_module
 
-    if source in DESCRIPTION_BACKFILLS:
-        module, name = DESCRIPTION_BACKFILLS[source].split(":")
+    if source in DESCRIPTION_BACKFILLS or source in RAW_BACKFILLS:
+        column = "description" if source in DESCRIPTION_BACKFILLS else "raw"
+        module, name = (DESCRIPTION_BACKFILLS.get(source) or RAW_BACKFILLS[source]).split(":")
         engine = get_engine()
         init_db(engine)
         with session_scope(engine) as session:
-            rows, changed = backfill_from_description(session, source, getattr(import_module(module), name))
-        console.print(f"[green]{source}:[/green] read {rows} stored descriptions, {changed} rows filled")
+            rows, changed = backfill_from_description(session, source, getattr(import_module(module), name), column)
+        console.print(f"[green]{source}:[/green] read {rows} stored {column} payloads, {changed} rows filled")
         return
     if source not in RENORMALIZERS:
-        available = ", ".join([*RENORMALIZERS, *DESCRIPTION_BACKFILLS])
+        available = ", ".join([*RENORMALIZERS, *DESCRIPTION_BACKFILLS, *RAW_BACKFILLS])
         raise typer.BadParameter(f"{source!r} keeps no re-parseable payload. Available: {available}")
 
     module, name = RENORMALIZERS[source].split(":")
@@ -94,12 +97,12 @@ def enrich_descriptions(
     batches: int = typer.Option(1, min=0, help=f"Number of {BATCH_SIZE}-listing batches; 0 runs until exhausted."),
     source: str | None = typer.Option(None, help="Limit to one source, such as opensooq."),
     retry_failed: bool = typer.Option(False, help="Explicitly retry only failed listings; successful listings stay untouched."),
-    workers: int = typer.Option(4, min=1, max=16, help="Maximum concurrent Codex calls (one batch each)."),
-    dry_run: bool = typer.Option(False, help="Show the next batch without invoking Codex or claiming rows."),
+    workers: int = typer.Option(4, min=1, max=16, help="Maximum concurrent Pi calls (one batch each)."),
+    dry_run: bool = typer.Option(False, help="Show the next batch without invoking Pi or claiming rows."),
     since: datetime | None = typer.Option(None, formats=["%Y-%m-%d"], help="Only listings first seen on or after this date."),
     max_minutes: float | None = typer.Option(None, min=1, help="Start no new batch after this many minutes."),
 ) -> None:
-    """Fill missing listing facts from title and description (gpt-6-sol, batched).
+    """Fill missing listing facts from title and description (GLM-5.3-Flash, batched).
 
     Only listings the website could show are sent: free-text sources, for
     sale in EGP within the price range, a valued unit type, a missing
@@ -200,6 +203,40 @@ def enrich_status() -> None:
             console.print(f"{state}: {count}")
         if not counts:
             console.print("No properties invoked yet.")
+
+
+@app.command("resolve-entities")
+def resolve_entities(
+    limit: int | None = typer.Option(None, min=1, help="Resolve at most this many spelling pairs (most-listed first)."),
+    workers: int = typer.Option(4, min=1, max=16, help="Maximum concurrent Pi calls (one batch each)."),
+    max_minutes: float | None = typer.Option(None, min=1, help="Start no new batch after this many minutes."),
+    dry_run: bool = typer.Option(False, help="Only count the pairs waiting for resolution."),
+) -> None:
+    """Map free-text compound/developer spellings to canonical names and Nawy compounds (GLM-5.3-Flash).
+
+    Only pairs never resolved (or failed fewer than three times) are sent, so nightly runs are small.
+    """
+    from . import entities
+    from .config import db_path
+
+    if not db_path().is_file():
+        console.print(f"[red]Database not found:[/red] {db_path().resolve()}")
+        raise typer.Exit(1)
+    engine = get_engine()
+    init_db(engine)  # adds the entity_aliases table to an existing database
+    todo = entities.pending(engine)[:limit]
+    console.print(f"{len(todo)} spelling pairs waiting ({sum(p.listings for p in todo)} listings).")
+    if dry_run or not todo:
+        return
+    try:
+        results = entities.run(
+            engine, limit=limit, workers=workers, max_minutes=max_minutes,
+            on_batch=lambda n, r: console.print(f"Batch {n}: {r.done} resolved, {r.failed} failed"
+                                                + (f" ({r.error})" if r.error else "")))
+    except RuntimeError as exc:
+        console.print(f"[red]{exc}[/red]")
+        raise typer.Exit(1) from exc
+    console.print(f"Resolved {sum(r.done for r in results)} pairs; {sum(r.failed for r in results)} failed.")
 
 
 @app.command()
@@ -368,13 +405,68 @@ def source_lock(name: str):
     return handle
 
 
+@app.command("backfill-images")
+def backfill_images(
+    limit: int = typer.Option(None, help="Stop after this many unit pages."),
+    order: Path = typer.Option(None, help="JSON list of property ids to check first (e.g. the website's ranking)."),
+    min_interval: float = typer.Option(DEFAULT_MIN_INTERVAL, help="Min seconds between requests to a host."),
+) -> None:
+    """Fetch the photos of stored AqarExit units once. The incremental crawl only refetches changed pages, so units
+    stored before photos were parsed have none. Progress is kept in logs/, so a rerun continues where it stopped."""
+    from .sources.aqarexit import BASE, DETAIL_PATH, images_from_page
+    from .http_client import BlockedError, FetchError
+
+    lock = source_lock("aqarexit")
+    if lock is None:
+        console.print("[yellow]aqarexit: a crawl of this source is in progress; try later[/yellow]")
+        raise typer.Exit(1)
+    progress = Path("logs") / "backfill-images-aqarexit.json"
+    progress.parent.mkdir(exist_ok=True)
+    checked: set[str] = set(json.loads(progress.read_text())) if progress.exists() else set()
+    engine = get_engine()
+    with session_scope(engine) as session:
+        todo = [
+            (pid, uid) for pid, uid, images in session.execute(
+                select(Property.id, Property.source_listing_id, Property.images)
+                .where(Property.source == "aqarexit", Property.status == "active").order_by(Property.id.desc())
+            )
+            if not images and uid not in checked
+        ]
+    if order:
+        rank = {pid: index for index, pid in enumerate(json.loads(order.read_text()))}
+        todo.sort(key=lambda item: rank.get(item[0], len(rank)))
+    todo = todo[:limit]
+    console.print(f"{len(todo)} AqarExit units to check for photos")
+    found = 0
+    with Fetcher(min_interval=min_interval) as fetcher:
+        for number, (pid, uid) in enumerate(todo, 1):
+            try:
+                images = images_from_page(fetcher.get_text(f"{BASE}{DETAIL_PATH}{uid}"))
+            except BlockedError as exc:
+                console.print(f"[red]Blocked, stopping: {exc}[/red]")
+                break
+            except FetchError as exc:
+                console.print(f"[yellow]{uid}: {exc}[/yellow]")
+                continue
+            if images:
+                found += 1
+                with session_scope(engine) as session:
+                    session.get(Property, pid).images = images
+            checked.add(uid)
+            if number % 25 == 0 or number == len(todo):
+                progress.write_text(json.dumps(sorted(checked)))
+                console.print(f"{number}/{len(todo)} checked, {found} with photos")
+    progress.write_text(json.dumps(sorted(checked)))
+    lock.close()
+
+
 @app.command()
 def crawl(
     only: list[str] = typer.Option(None, "--only", help="Limit to these sources (repeatable)."),
     min_interval: float = typer.Option(DEFAULT_MIN_INTERVAL, help="Min seconds between requests to a host."),
 ) -> None:
-    """Run the full production crawl plan: every source scope, each with a time budget."""
-    from .crawl import PLAN, close_abandoned_runs
+    """Run the production crawl plan for the sources in use (QAYEM_SOURCES), each scope with a time budget."""
+    from .crawl import active_plan, close_abandoned_runs
 
     engine = get_engine()
     init_db(engine)
@@ -386,7 +478,7 @@ def crawl(
     if unknown:
         raise typer.BadParameter(f"unknown source(s): {', '.join(sorted(unknown))}")
     outcomes: dict[str, int] = {}
-    for scope in PLAN:
+    for scope in active_plan():
         if only and scope.source not in only:
             continue
         console.print(f"[bold]→ {scope.label}[/bold] (budget {scope.budget_minutes} min)")

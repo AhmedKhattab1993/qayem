@@ -1,0 +1,43 @@
+{
+  "name": "qayem",
+  "account_id": "8157d695115b808345ee82fce21007f3",
+  "main": "build/main.py",
+  "compatibility_date": "2026-10-04",
+  "compatibility_flags": ["python_workers"],
+  "workers_dev": true,
+  "routes": [
+    {"pattern": "qayem.ai", "custom_domain": true, "zone_id": "616067124bd2dcdc329de9e77c2e7a0a"},
+    {"pattern": "www.qayem.ai", "custom_domain": true, "zone_id": "616067124bd2dcdc329de9e77c2e7a0a"}
+  ],
+  "assets": {
+    "directory": "../web/dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api", "/api/*", "/media/*.mp4"]
+  },
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "qayem-public",
+    "database_id": "3249fecc-5050-4913-afaa-329fa561e0ad"
+  }],
+  "observability": {"enabled": true},
+  "env": {
+    "staging": {
+      "workers_dev": true,
+      "routes": [],
+      "vars": {"QAYEM_ENVIRONMENT": "staging"},
+      "assets": {
+        "directory": "../web/dist-staging",
+        "binding": "ASSETS",
+        "not_found_handling": "single-page-application",
+        "run_worker_first": ["/api", "/api/*", "/media/*.mp4"]
+      },
+      "d1_databases": [{
+        "binding": "DB",
+        "database_name": "qayem-staging",
+        "database_id": "a5519958-fe4b-40d8-b9ae-7061b73adc3a"
+      }],
+      "triggers": {"crons": []}
+    }
+  }
+}

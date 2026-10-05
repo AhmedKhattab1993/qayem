@@ -20,16 +20,16 @@ import { getLanguage, setLanguage, t, type Language } from "./locale";
 import type { Overview } from "./types";
 
 const nav = [
-  { to: "/evaluate", label: "Evaluate a unit", short: "Evaluate", icon: Calculator },
+  { to: "/evaluate", label: "Compare a unit", short: "Evaluate", icon: Calculator },
   { to: "/compounds", label: "Compounds", short: "Compounds", icon: Building2 },
   { to: "/developers", label: "Developers", short: "Developers", icon: Landmark },
   { to: "/units", label: "Units", short: "Units", icon: Rows3 },
   { to: "/methodology", label: "Methodology", short: "Methodology", icon: Compass },
 ];
 const titles: [RegExp, string][] = [
-  [/^\/$/, "Resale fair value"],
-  [/^\/evaluate/, "Evaluate a unit"],
-  [/^\/units\/\d+/, "Unit valuation"],
+  [/^\/$/, "Resale opportunities"],
+  [/^\/evaluate/, "Compare a unit"],
+  [/^\/units\/\d+/, "Unit"],
   [/^\/units/, "Units"],
   [/^\/compounds\/.+/, "Compound"],
   [/^\/compounds/, "Compounds"],
@@ -132,7 +132,7 @@ export default function App() {
               <NavLink
                 key={to}
                 to={to}
-                className={({ isActive }) => `nav-icon${isActive ? " is-active" : ""}`}
+                className={({ isActive }) => `nav-icon${to === "/watchlist" ? " nav-icon-tabbed" : ""}${isActive ? " is-active" : ""}`}
                 aria-label={`${t(label)}${counts[to] ? ` (${number(counts[to])})` : ""}`}
                 title={t(label)}
               >
@@ -176,7 +176,7 @@ export default function App() {
                 <h1 className="display">{t("A little off the map")}</h1>
                 <p>{t("That page isn’t here.")}</p>
                 <Link to="/evaluate" className="btn btn-ink">
-                  {t("Evaluate a unit")} <ArrowRight size={16} className="flip-rtl" />
+                  {t("Compare a unit")} <ArrowRight size={16} className="flip-rtl" />
                 </Link>
               </div>
             }
@@ -189,9 +189,9 @@ export default function App() {
           <div className="footer-brand">
             <Mark size={46} />
             <p className="display">
-              {t("What is it")} <em>{t("really worth?")}</em>
+              {t("Is it really")} <em>{t("a good deal?")}</em>
             </p>
-            <span>{t("A fair-value layer for Egypt’s resale property market.")}</span>
+            <span>{t("Resale units against what you could buy instead, in Egypt’s property market.")}</span>
           </div>
           <nav className="footer-links" aria-label={t("Footer")}>
             {[...nav, { to: "/watchlist", label: "Watchlist" }, { to: "/compare", label: "Compare" }].map((item) => (
@@ -207,7 +207,7 @@ export default function App() {
             </span>
             <p>
               {t(
-                "Fair values are estimates built from published asking prices, not appraisals or completed sales. Confirm every detail with the seller and the developer.",
+                "Comparisons use published listing and developer list prices, not appraisals or completed sales. Confirm every detail with the seller and the developer.",
               )}
             </p>
           </div>

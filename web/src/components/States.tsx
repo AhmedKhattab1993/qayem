@@ -1,5 +1,6 @@
 import { AlertCircle, ArrowRight, Compass } from "lucide-react";
 import type { ReactNode } from "react";
+import { Link } from "react-router-dom";
 import { Mark } from "./Brand";
 import { t } from "../locale";
 
@@ -14,7 +15,20 @@ export function Loading({ label = "Weighing the market…" }: { label?: string }
   );
 }
 
-export function ErrorState({ message, retry }: { message: string; retry?: () => void }) {
+export function ErrorState({ message, retry, missing }: { message: string; retry?: () => void; missing?: boolean }) {
+  if (missing)
+    return (
+      <div className="state" role="alert">
+        <span className="state-icon">
+          <Compass size={26} />
+        </span>
+        <h2>{t("A little off the map")}</h2>
+        <p>{t(message)}</p>
+        <Link to="/evaluate" className="btn btn-ink">
+          {t("Compare a unit")} <ArrowRight size={16} className="flip-rtl" />
+        </Link>
+      </div>
+    );
   return (
     <div className="state" role="alert">
       <span className="state-icon">

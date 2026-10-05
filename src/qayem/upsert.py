@@ -267,7 +267,7 @@ def mark_removals(session: Session, source: str, scope_key: str, cutoff: datetim
     return len(stale)
 
 
-def backfill_from_description(session: Session, source: str, extract) -> tuple[int, int]:
+def backfill_from_description(session: Session, source: str, extract, column: str = "description") -> tuple[int, int]:
     """Fill empty columns from facts a source's generated description states. → (rows, changed).
 
     For sources whose stored payload cannot be re-parsed but whose description
@@ -279,7 +279,7 @@ def backfill_from_description(session: Session, source: str, extract) -> tuple[i
     for prop in session.execute(select(Property).where(Property.source == source)).scalars():
         rows += 1
         touched = False
-        for name, value in extract(prop.description).items():
+        for name, value in extract(getattr(prop, column)).items():
             current = getattr(prop, name)
             if not (is_missing(name, current) or (value is True and current is False)):
                 continue

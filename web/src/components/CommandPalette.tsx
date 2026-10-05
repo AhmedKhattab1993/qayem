@@ -13,7 +13,7 @@ import {
   Scale,
   Search,
 } from "lucide-react";
-import { number, useCatalog, sep } from "../lib";
+import { number, useCatalog, sep, nameOf, place } from "../lib";
 import { getLanguage, t } from "../locale";
 
 type Item = { id: string; group: string; label: string; meta?: string; icon: ReactNode; run: () => void };
@@ -46,35 +46,35 @@ export function CommandPalette({ onClose, onToggleLanguage }: { onClose: () => v
       onClose();
     };
     const result: Item[] = [];
-    for (const compound of catalog?.compounds.filter((c) => matches(c.name, c.developer)).slice(0, q ? 6 : 4) ?? [])
+    for (const compound of catalog?.compounds.filter((c) => matches(c.name, c.name_ar, c.developer, c.developer_ar)).slice(0, q ? 6 : 4) ?? [])
       result.push({
         id: `compound-${compound.key}`,
         group: "Compounds",
-        label: compound.name,
-        meta: [compound.developer, compound.district].filter(Boolean).join(sep()),
+        label: nameOf(compound)!,
+        meta: [nameOf(compound.developer ? { name: compound.developer, name_ar: compound.developer_ar } : null), place(compound.district)].filter(Boolean).join(sep()),
         icon: <Building2 size={17} />,
         run: go(`/compounds/${encodeURIComponent(compound.key)}`),
       });
-    for (const developer of catalog?.developers.filter((d) => matches(d.name)).slice(0, q ? 4 : 3) ?? [])
+    for (const developer of catalog?.developers.filter((d) => matches(d.name, d.name_ar)).slice(0, q ? 4 : 3) ?? [])
       result.push({
         id: `developer-${developer.key}`,
         group: "Developers",
-        label: developer.name,
-        meta: t("{n} listings", { n: number(developer.units) }),
+        label: nameOf(developer)!,
+        meta: t("{n} listings", { n: number(developer.units), count: developer.units }),
         icon: <Landmark size={17} />,
         run: go(`/developers/${encodeURIComponent(developer.key)}`),
       });
-    for (const district of catalog?.districts.filter((d) => matches(d.name)).slice(0, q ? 4 : 3) ?? [])
+    for (const district of catalog?.districts.filter((d) => matches(d.name, place(d.name)!)).slice(0, q ? 4 : 3) ?? [])
       result.push({
         id: `district-${district.key}`,
         group: "Districts",
-        label: district.name,
-        meta: t("{n} listings", { n: number(district.units) }),
+        label: place(district.name)!,
+        meta: t("{n} listings", { n: number(district.units), count: district.units }),
         icon: <MapPin size={17} />,
         run: go(`/compounds?district=${encodeURIComponent(district.key)}`),
       });
     const pages: [string, string, ReactNode][] = [
-      ["/evaluate", "Evaluate a unit", <Calculator size={17} />],
+      ["/evaluate", "Compare a unit", <Calculator size={17} />],
       ["/compounds", "Compounds", <Building2 size={17} />],
       ["/developers", "Developers", <Landmark size={17} />],
       ["/units", "Units", <Rows3 size={17} />],

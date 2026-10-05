@@ -1,13 +1,18 @@
 import { useEffect, useState } from "react";
-import { api } from "./lib";
+import { api, nameOf } from "./lib";
 import type { Pinned } from "./store";
-import type { CompoundDetail, Developer } from "./types";
+import type { CompoundDetail, Developer, UnitDetail } from "./types";
+import { unitName } from "./components/UnitTable";
 
 export type Loaded =
   | { status: "loading" }
   | { status: "error"; error: string }
   | { status: "ready"; kind: "compound"; data: CompoundDetail }
-  | { status: "ready"; kind: "developer"; data: Developer };
+  | { status: "ready"; kind: "developer"; data: Developer }
+  | { status: "ready"; kind: "unit"; data: UnitDetail };
+const folder = { compound: "compounds", developer: "developers", unit: "units" } as const;
+/** Where a pinned compound, developer or unit lives on the site. */
+export const pinnedPath = (item: Pinned) => `/${folder[item.kind]}/${encodeURIComponent(item.key)}`;
 
 const id = (item: Pinned) => `${item.kind}:${item.key}`;
 
@@ -19,15 +24,18 @@ export function usePinned(items: Pinned[]) {
   useEffect(() => {
     const controller = new AbortController();
     for (const item of items) {
-      const path = `/${item.kind === "compound" ? "compounds" : "developers"}/${encodeURIComponent(item.key)}`;
+      const path = pinnedPath(item);
       setEntries((current) => (current[id(item)]?.status === "ready" ? current : { ...current, [id(item)]: { status: "loading" } }));
-      api<CompoundDetail | Developer>(path, controller.signal)
+      api<CompoundDetail | Developer | UnitDetail>(path, controller.signal)
         .then((data) =>
           setEntries((current) => ({
             ...current,
-            [id(item)]: item.kind === "compound"
-              ? { status: "ready", kind: "compound", data: data as CompoundDetail }
-              : { status: "ready", kind: "developer", data: data as Developer },
+            [id(item)]:
+              item.kind === "compound"
+                ? { status: "ready", kind: "compound", data: data as CompoundDetail }
+                : item.kind === "developer"
+                  ? { status: "ready", kind: "developer", data: data as Developer }
+                  : { status: "ready", kind: "unit", data: data as UnitDetail },
           })),
         )
         .catch((error) => {
@@ -40,3 +48,11 @@ export function usePinned(items: Pinned[]) {
   }, [signature, revision]);
   return { get: (item: Pinned): Loaded => entries[id(item)] ?? { status: "loading" }, retry: () => setRevision((n) => n + 1) };
 }
+
+/** A pinned entry's name in the interface language once loaded; the stored (English) name until then. */
+export const pinnedName = (item: Pinned, entry: Loaded) =>
+  entry.status !== "ready"
+    ? item.name
+    : entry.kind === "unit"
+      ? unitName(entry.data.unit)
+      : nameOf(entry.kind === "compound" ? entry.data.compound : entry.data)!;

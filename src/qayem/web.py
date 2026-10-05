@@ -2,39 +2,42 @@
 
 from __future__ import annotations
 
+from contextlib import asynccontextmanager
 import os
 from pathlib import Path
-from typing import Literal
+from threading import Thread
+from typing import Collection, Literal
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from .config import db_path as configured_db_path
+from .config import crawled_sources, db_path as configured_db_path
 from .valuation import developer_key, slug
-from .website_data import Catalog, CatalogUnavailable, detail, evaluate, public_unit, url_key
+from .website_data import Catalog, CatalogUnavailable, detail, evaluate, opportunity_key, public_unit, url_key
 
-VERDICT_ORDER = {"below", "within", "above"}
-RANK_MIN_UNITS = 20
+from .web_common import RANK_MIN_COMPOUND, RANK_MIN_DEVELOPER, matches, page_of, sort_entities
 
-
-def page_of(items: list, page: int, page_size: int) -> dict:
-    start = (page - 1) * page_size
-    return {"items": items[start:start + page_size], "total": len(items), "page": page,
-            "page_size": page_size, "pages": (len(items) + page_size - 1) // page_size}
+Level = Literal["", "strong", "good", "in_line", "mixed", "pricier", "check", "unrated"]
 
 
-def matches(query: str, *values: str | None) -> bool:
-    text = " ".join(value or "" for value in values).casefold()
-    return all(term in text for term in query.casefold().split())
+_CONFIGURED = object()
 
 
 def create_app(db_path: str | Path | None = None, static_dir: str | Path | None = None,
-               refresh_seconds: float | None = None) -> FastAPI:
-    app = FastAPI(title="Qayem Market Evaluation", version="0.2.0", docs_url=None, redoc_url=None)
+               refresh_seconds: float | None = None, sources: Collection[str] | None | object = _CONFIGURED) -> FastAPI:
     if refresh_seconds is None:
         refresh_seconds = float(os.environ.get("QAYEM_REFRESH_SECONDS", "300"))
-    catalog = Catalog(db_path if db_path is not None else configured_db_path(), refresh_seconds)
+    if sources is _CONFIGURED:
+        sources = crawled_sources()  # benchmark rows are read for launch prices, never listed
+    catalog = Catalog(db_path if db_path is not None else configured_db_path(), refresh_seconds, sources)
+
+    @asynccontextmanager
+    async def lifespan(_app: FastAPI):
+        Thread(target=catalog.warm, name="qayem-catalog-warm", daemon=True).start()  # the first fit takes seconds
+        yield
+
+    app = FastAPI(title="Qayem Market Evaluation", version="0.2.0", docs_url=None, redoc_url=None, lifespan=lifespan)
     app.state.catalog = catalog
     static_root = Path(static_dir) if static_dir is not None else Path(__file__).resolve().parents[2] / "web" / "dist"
     static_root = static_root.resolve()
@@ -63,12 +66,13 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
         compound: str = Query("", max_length=200),
         developer: str = Query("", max_length=200),
         property_type: str = Query("", max_length=64),
-        verdict: Literal["", "below", "within", "above", "suspect"] = "",
-        grade: Literal["", "A", "B", "C"] = "",
+        level: Level = "",
         terms: Literal["", "cash", "plan", "partial", "unknown"] = "",
         source: str = Query("", max_length=32),
         resale: Literal["true", "all"] = "true",
-        sort: Literal["grade", "value", "price_asc", "price_desc", "area_desc", "cash_ppm_asc"] = "grade",
+        launch: Literal["", "true"] = "",
+        sort: Literal["opportunity", "launch_gap", "peer_gap", "price_asc", "price_desc", "area_desc",
+                      "cash_ppm_asc"] = "opportunity",
         page: int = Query(1, ge=1, le=100_000),
         page_size: int = Query(25, ge=1, le=100),
     ) -> dict:
@@ -77,7 +81,9 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
         if q.strip():
             items = [r for r in items if matches(q, r["title"], r["district"], r["compound_name"], r["developer_name"],
                                                  r["compound"] and r["compound"]["name"],
-                                                 r["developer"] and r["developer"]["name"])]
+                                                 r["compound"] and r["compound"]["name_ar"],
+                                                 r["developer"] and r["developer"]["name"],
+                                                 r["developer"] and r["developer"]["name_ar"])]
         if district.strip():
             items = [r for r in items if slug(r["district"]) == slug(district)]
         if compound.strip():
@@ -87,21 +93,26 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
             items = [r for r in items if r["developer_key"] == key]
         if property_type.strip():
             items = [r for r in items if r["property_type"] == property_type.strip().casefold()]
-        if verdict:
-            items = [r for r in items if r["valuation"].get("verdict") == verdict]
-        if grade:
-            items = [r for r in items if r["valuation"].get("grade") == grade]
+        if level:
+            items = [r for r in items if r["opportunity"]["level"] == level]
         if terms:
             items = [r for r in items if r["payment"]["terms"] == terms]
         if source.strip():
             items = [r for r in items if r["source"] == source.strip().casefold()]
-        if sort == "value":
-            items = [r for r in items if r["valuation"].get("verdict") in VERDICT_ORDER]
-            items.sort(key=lambda r: (r["valuation"]["deviation"], r["id"]))
+        if launch or sort == "launch_gap":  # only units with a current developer price for a similar unit
+            items = [r for r in items if r.get("launch")]
+        if sort == "opportunity":
+            items.sort(key=opportunity_key)
+        elif sort == "launch_gap":  # like for like only: a listing error or an unfinished unit is not a deal
+            items = [r for r in items if r["opportunity"]["level"] != "check" and r["launch"]["same_finishing"]]
+            items.sort(key=lambda r: (r["launch"]["gap"], r["id"]))
+        elif sort == "peer_gap":
+            items = [r for r in items if r["peers"] and r["opportunity"]["level"] != "check"]
+            items.sort(key=lambda r: (r["peers"]["gap"], r["id"]))
         elif sort == "cash_ppm_asc":
             items = [r for r in items if r["payment"]["cash_equivalent"]]
             items.sort(key=lambda r: (r["payment"]["cash_equivalent"] / r["area_m2"], r["id"]))
-        elif sort != "grade":
+        else:
             key = {"price_asc": "price", "price_desc": "price", "area_desc": "area_m2"}[sort]
             direction = -1 if sort in {"price_desc", "area_desc"} else 1
             items.sort(key=lambda r: (direction * r[key], r["id"]))
@@ -122,23 +133,21 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
         q: str = Query("", max_length=200),
         district: str = Query("", max_length=200),
         developer: str = Query("", max_length=200),
-        sort: Literal["units", "premium_desc", "premium_asc", "name"] = "units",
+        sort: Literal["units", "gap_asc", "gap_desc", "opportunities", "name"] = "units",
         page: int = Query(1, ge=1, le=10_000),
         page_size: int = Query(30, ge=1, le=100),
     ) -> dict:
         snapshot = catalog.snapshot()
         items = list(snapshot.compounds.values())
         if q.strip():
-            items = [c for c in items if matches(q, c["name"], c["district"], c["developer"] and c["developer"]["name"])]
+            items = [c for c in items if matches(q, c["name"], c["name_ar"], c["district"],
+                                                 c["developer"] and c["developer"]["name"],
+                                                 c["developer"] and c["developer"]["name_ar"])]
         if district.strip():
             items = [c for c in items if c["district_key"] == slug(district)]
         if developer.strip():
             items = [c for c in items if c["developer"] and c["developer"]["key"] == developer.strip()]
-        if sort == "name":
-            items.sort(key=lambda c: c["name"].casefold())
-        elif sort.startswith("premium"):
-            items = [c for c in items if c["premium_vs_district"] is not None]
-            items.sort(key=lambda c: c["premium_vs_district"], reverse=sort == "premium_desc")
+        items = sort_entities(items, sort, RANK_MIN_COMPOUND)
         result = page_of(items, page, page_size)
         result["district"] = snapshot.districts.get(slug(district)) if district.strip() else None
         return result
@@ -155,20 +164,15 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
     @app.get("/api/developers")
     def developers(
         q: str = Query("", max_length=200),
-        sort: Literal["units", "premium_desc", "premium_asc", "name"] = "units",
+        sort: Literal["units", "gap_asc", "gap_desc", "opportunities", "name"] = "units",
         page: int = Query(1, ge=1, le=10_000),
         page_size: int = Query(30, ge=1, le=100),
     ) -> dict:
         items = list(catalog.snapshot().developers.values())
         if q.strip():
-            items = [d for d in items if matches(q, d["name"], *(c["name"] for c in d["compounds"]))]
-        if sort == "name":
-            items.sort(key=lambda d: d["name"].casefold())
-        elif sort.startswith("premium"):
-            # rankings need depth: a premium from a handful of units is shown, not ranked
-            items = [d for d in items if d["premium_vs_district"] is not None and d["premium_basis"] >= RANK_MIN_UNITS]
-            items.sort(key=lambda d: d["premium_vs_district"], reverse=sort == "premium_desc")
-        return page_of(items, page, page_size)
+            items = [d for d in items if matches(q, d["name"], d["name_ar"], *(c["name"] for c in d["compounds"]),
+                                                 *(c["name_ar"] for c in d["compounds"]))]
+        return page_of(sort_entities(items, sort, RANK_MIN_DEVELOPER), page, page_size)
 
     @app.get("/api/developers/{key}")
     def developer_detail(key: str) -> dict:
@@ -189,9 +193,7 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
         property_type: str = Query(..., min_length=2, max_length=64),
         area: float = Query(..., ge=20, le=5_000, allow_inf_nan=False),
         price: float = Query(..., ge=100_000, le=1_000_000_000, allow_inf_nan=False),
-        compound: str = Query("", max_length=200),
-        developer: str = Query("", max_length=200),
-        district: str = Query("", max_length=200),
+        compound: str = Query(..., min_length=1, max_length=200),
         down_payment: float | None = Query(None, ge=0, le=1_000_000_000, allow_inf_nan=False),
         installment_years: float | None = Query(None, gt=0, le=15, allow_inf_nan=False),
         delivery: str = Query("", pattern=r"^(|ready|\d{4}(-\d{2})?)$"),
@@ -199,11 +201,11 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
     ) -> dict:
         if down_payment is not None and down_payment > price:
             raise HTTPException(422, "The down payment cannot exceed the total price.")
-        if not (compound.strip() or district.strip()):
-            raise HTTPException(422, "Choose a compound or a district.")
+        if not compound.strip():
+            raise HTTPException(422, "Choose the unit's compound.")
         return evaluate(catalog.snapshot(), property_type=property_type, area=area, price=price,
-                        compound=compound, developer=developer, district=district, down_payment=down_payment,
-                        installment_years=installment_years, delivery=delivery, finishing=finishing)
+                        compound=compound, down_payment=down_payment, installment_years=installment_years,
+                        delivery=delivery, finishing=finishing)
 
     @app.get("/api/lookup")
     def lookup(url: str = Query(..., min_length=8, max_length=2048)) -> dict:

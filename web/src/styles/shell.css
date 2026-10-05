@@ -269,7 +269,7 @@
 }
 @media (max-width: 860px) {
   .nav-links,
-  .nav-tools .nav-icon {
+  .nav-tools .nav-icon-tabbed {
     display: none;
   }
   .nav-search {
@@ -302,7 +302,7 @@
     gap: 2px;
     padding: 7px 2px 6px;
     border-radius: 16px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     line-height: 1.2;
     transition: color 0.2s, background 0.2s;
@@ -435,7 +435,7 @@
 .palette-group {
   display: block;
   padding: 12px 12px 6px;
-  font-size: 11.5px;
+  font-size: 12.5px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -443,7 +443,7 @@
 }
 :lang(ar) .palette-group {
   letter-spacing: 0;
-  font-size: 12.5px;
+  font-size: 13.5px;
 }
 .palette-results button {
   display: flex;
@@ -477,7 +477,7 @@
 }
 .palette-meta {
   color: var(--ink-4);
-  font-size: 12.5px;
+  font-size: 13.5px;
 }
 .palette-enter {
   color: var(--ink-4);
@@ -497,12 +497,33 @@
   padding: 10px 20px;
   border-top: 1px solid var(--line-soft);
   color: var(--ink-4);
-  font-size: 12px;
+  font-size: 13px;
 }
 .palette-foot span {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+}
+/* Touch screens have no arrow keys; a narrow one puts the meta under the name. */
+@media (hover: none) {
+  .palette-foot,
+  .palette-enter {
+    display: none;
+  }
+}
+@media (max-width: 560px) {
+  .palette-results button {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    column-gap: 12px;
+    row-gap: 2px;
+  }
+  .palette-icon {
+    grid-row: span 2;
+  }
+  .palette-enter {
+    display: none;
+  }
 }
 
 /* ——— States ——— */

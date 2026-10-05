@@ -7,6 +7,7 @@ qayem.db
 # Website build and local tooling
 web/node_modules/
 web/dist/
+web/dist-staging/
 web/*.tsbuildinfo
 web/test-results/
 .artifacts/
@@ -20,3 +21,18 @@ backups/
 qayem.db-*
 # Benchmark run logs
 bench/enrichment/*.log
+
+# Explainer film: encoded from the master by scripts/encode-explainer.sh (posters are committed)
+web/public/media/*.mp4
+
+# Cloudflare build, local D1, and generated data exports
+cloudflare/build/
+cloudflare/.venv/
+cloudflare/.venv-workers/
+cloudflare/.wrangler/
+cloudflare/.dev.vars*
+cloudflare/node_modules/
+cloudflare/python_modules/
+cloudflare/updater/node_modules/
+cloudflare/updater/.wrangler/
+cloudflare/updater/.dev.vars*

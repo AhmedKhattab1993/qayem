@@ -1,0 +1,15 @@
+*
+!pyproject.toml
+!README.md
+!src/
+src/*
+!src/qayem/
+!src/**
+!cloudflare/
+cloudflare/*
+!cloudflare/updater/
+cloudflare/updater/*
+!cloudflare/updater/container/
+!cloudflare/updater/container/**
+**/__pycache__/
+**/*.pyc

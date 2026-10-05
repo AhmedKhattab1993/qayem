@@ -128,6 +128,32 @@ class PropertyEnrichment(Base):
     error: Mapped[str | None] = mapped_column(Text)
 
 
+class EntityAlias(Base):
+    """Canonical compound and developer for one free-text spelling pair (see entities.py)."""
+
+    __tablename__ = "entity_aliases"
+
+    key: Mapped[str] = mapped_column(String(400), primary_key=True)  # entities.alias_key(compound, developer)
+    compound_text: Mapped[str | None] = mapped_column(String(300))  # the spelling as published
+    developer_text: Mapped[str | None] = mapped_column(String(300))
+    district_text: Mapped[str | None] = mapped_column(String(300))
+    listings: Mapped[int] = mapped_column(Integer, default=0)  # listings with this spelling when resolved
+    status: Mapped[str] = mapped_column(String(16))  # done | failed
+    kind: Mapped[str | None] = mapped_column(String(16))  # compound | not_compound
+    compound: Mapped[str | None] = mapped_column(String(200))  # canonical English name
+    compound_ar: Mapped[str | None] = mapped_column(String(200))
+    developer: Mapped[str | None] = mapped_column(String(200))  # canonical English name (Nawy's spelling)
+    developer_ar: Mapped[str | None] = mapped_column(String(200))
+    reference: Mapped[str | None] = mapped_column(String(300))  # the same compound's exact Nawy name
+    confidence: Mapped[str | None] = mapped_column(String(8))  # high | medium | low
+    notes: Mapped[list | None] = mapped_column(JSON)  # validation findings, e.g. ["reference_not_listed"]
+    attempts: Mapped[int] = mapped_column(Integer, default=1)
+    model: Mapped[str | None] = mapped_column(String(64))
+    prompt_version: Mapped[str | None] = mapped_column(String(16))
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    error: Mapped[str | None] = mapped_column(Text)
+
+
 class ParseRun(Base):
     """Log of one parse invocation for one source."""
 

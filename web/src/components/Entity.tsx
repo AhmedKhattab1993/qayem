@@ -1,45 +1,44 @@
 import { Clock } from "lucide-react";
-import { year, classLabel, money, number, percent, signed, titleCase, sep } from "../lib";
+import { year, classLabel, money, number, percent, signed, titleCase, sep, tone } from "../lib";
 import { t } from "../locale";
 import type { ClassSummary, Launch, Overview, Profile } from "../types";
-import { GradeBadge } from "./Valuation";
+import { NameList } from "./Names";
 
-/** Reference fair value per class: a finished, ready unit of typical size. */
-export function ClassCards({ classes, premiumLabel = "vs district" }: { classes: ClassSummary[]; premiumLabel?: string }) {
+/** Observed prices per class: what resale units were contracted at, what they cost in today’s money,
+ * and what the developer asks today for the same class. */
+export function ClassCards({ classes }: { classes: ClassSummary[] }) {
   return (
     <div className="class-cards">
       {classes.map((item) => (
         <article key={item.class}>
           <div className="class-head">
             <span className="eyebrow no-rule">{classLabel(item.class)}</span>
-            <GradeBadge grade={item.grade} />
+            <span className="muted num">{t("{n} listings", { n: number(item.units), count: item.units })}</span>
           </div>
           <strong className="num">
-            {item.reference_ppm ? money(item.reference_ppm, true) : "—"}
+            {money(item.median_asking_ppm, true)}
             <small> / {t("m²")}</small>
           </strong>
-          <span className="muted">{t("Fair cash value, finished and ready, typical size")}</span>
+          <span className="muted">
+            {item.median_contract_year
+              ? t("Median resale contract price, signed around {year}", { year: year(item.median_contract_year) })
+              : t("Median resale asking price")}
+          </span>
           <dl>
-            {item.premium_vs_district != null && (
-              <div>
-                <dt>{t(premiumLabel)}</dt>
-                <dd className={`num ${item.premium_vs_district >= 0 ? "is-up" : "is-down"}`}>
-                  {signed(item.premium_vs_district)}
-                </dd>
-              </div>
-            )}
             <div>
-              <dt>{t("Median asking / m²")}</dt>
-              <dd className="num">{money(item.median_asking_ppm, true)}</dd>
-            </div>
-            <div>
-              <dt>{t("Median cash-equivalent / m²")}</dt>
+              <dt>{t("Resale in today’s money / m²")}</dt>
               <dd className="num">{money(item.median_cash_ppm, true)}</dd>
             </div>
             <div>
-              <dt>{t("Listings")}</dt>
-              <dd className="num">{number(item.units)}</dd>
+              <dt>{t("Developer today / m²")}</dt>
+              <dd className="num">{item.developer_ppm ? money(item.developer_ppm, true) : t("Not selling")}</dd>
             </div>
+            {item.median_gap != null && (
+              <div>
+                <dt>{t("Resale vs developer")}</dt>
+                <dd className={`num ${tone(item.median_gap)}`}>{signed(item.median_gap)}</dd>
+              </div>
+            )}
           </dl>
         </article>
       ))}
@@ -50,15 +49,15 @@ export function ClassCards({ classes, premiumLabel = "vs district" }: { classes:
 export function ProfileFacts({ profile }: { profile: Profile }) {
   const finishing = Object.entries(profile.finishing).filter(([level]) => level !== "unknown");
   const finishedTotal = finishing.reduce((sum, [, count]) => sum + count, 0);
-  const verdicts = profile.verdicts;
-  const positioned = (verdicts.below ?? 0) + (verdicts.within ?? 0) + (verdicts.above ?? 0);
+  const levels = profile.opportunities;
+  const rated = Object.entries(levels).reduce((sum, [level, count]) => (level === "unrated" ? sum : sum + (count ?? 0)), 0);
   const rows: [string, string][] = [
     ["Ready to move in", `${percent(profile.ready_share)}${profile.delivery_known ? "" : ""}`],
-    ["Median wait for the rest", profile.median_years_to_delivery ? t("{n} years", { n: number(profile.median_years_to_delivery, 1) }) : "—"],
+    ["Median wait for the rest", profile.median_years_to_delivery ? t("{n} years", { n: number(profile.median_years_to_delivery, 1), count: profile.median_years_to_delivery }) : "—"],
     ["Latest promised delivery", year(profile.latest_delivery_year)],
     ["Listed on installment plans", percent(profile.plan_share)],
     ["Median share still owed", percent(profile.median_remaining_share)],
-    ["Median plan length", profile.median_plan_years ? t("{n} years", { n: number(profile.median_plan_years, 1) }) : "—"],
+    ["Median plan length", profile.median_plan_years ? t("{n} years", { n: number(profile.median_plan_years, 1), count: profile.median_plan_years }) : "—"],
     ["Headline above cash value by", percent(profile.median_plan_discount)],
     [
       "Finishing mix",
@@ -70,9 +69,9 @@ export function ProfileFacts({ profile }: { profile: Profile }) {
         : "—",
     ],
     [
-      "Priced below / within / above range",
-      positioned
-        ? `${percent((verdicts.below ?? 0) / positioned)}${sep()}${percent((verdicts.within ?? 0) / positioned)}${sep()}${percent((verdicts.above ?? 0) / positioned)}`
+      "Strong or good opportunities",
+      rated
+        ? t("{n} of {rated} compared", { n: number((levels.strong ?? 0) + (levels.good ?? 0)), rated: number(rated) })
         : "—",
     ],
   ];
@@ -98,70 +97,86 @@ export function HistoryPending({ overview }: { overview: Overview | null }) {
           overview.observation_days === 1
             ? "Price trends, time on market and delivery-date changes appear after eight weeks of observation. Qayem has observed this market for {n} day."
             : "Price trends, time on market and delivery-date changes appear after eight weeks of observation. Qayem has observed this market for {n} days.",
-          { n: number(overview.observation_days) },
+          { n: number(overview.observation_days), count: overview.observation_days },
         )}
       </span>
     </p>
   );
 }
 
-/** The developer's current launch price for comparable units, against the resale market. */
+/** The developer's current units here against the resale units: the median like-for-like gap. */
 export function LaunchPanel({ launch, scope }: { launch: Launch | null; scope: "compound" | "developer" }) {
-  if (!launch || launch.median_spread == null)
+  if (!launch)
     return (
       <p className="muted">
         {t(
           scope === "compound"
-            ? "No current developer launch units could be matched to this compound."
-            : "No current launch units from this developer could be matched to a resale compound.",
+            ? "The developer is not selling units in this compound on Nawy now."
+            : "None of this developer’s current units on Nawy could be matched to a resale compound.",
         )}
       </p>
     );
-  const spread = launch.median_spread;
+  const gap = launch.median_gap;
   return (
     <div className="launch">
-      <div className={`launch-headline ${spread >= 0 ? "is-up" : "is-down"}`}>
-        <strong className="num">{signed(spread)}</strong>
-        <p>
-          {t(
-            spread >= 0
-              ? "Buying new from the developer costs this much more than the resale market pays for the same unit, in today’s money."
-              : "Buying new from the developer costs this much less than the resale market pays for the same unit, in today’s money.",
-          )}
-        </p>
+      <div className="launch-lead">
+        {gap != null ? (
+          <div className={`launch-headline ${tone(gap)}`}>
+            <strong className="num">{signed(gap)}</strong>
+            <p>
+              {t(
+                gap < 0
+                  ? "The typical resale unit here costs this much less than a similar unit the developer sells today, on the less favourable of listed price and today’s money."
+                  : "The typical resale unit here costs this much more than a similar unit the developer sells today, on the less favourable of listed price and today’s money.",
+              )}
+            </p>
+          </div>
+        ) : (
+          <p className="muted">{t("No resale unit here matches the developer’s units in type, size and finishing yet.")}</p>
+        )}
+        {launch.median_since_contract != null && (
+          <div className="launch-since">
+            <strong className="num">{signed(launch.median_since_contract, 1)}</strong>
+            <p>{t("A year: how the developer’s list price per m² has moved since the typical seller here signed.")}</p>
+          </div>
+        )}
       </div>
       <dl className="facts facts-single">
         <div>
-          <dt>{t("Launch headline / m²")}</dt>
+          <dt>{t("Developer today / m², as listed")}</dt>
           <dd className="num">{money(launch.median_headline_ppm, true)}</dd>
         </div>
         <div>
-          <dt>{t("Launch cash-equivalent / m²")}</dt>
+          <dt>{t("Developer today / m², today’s money")}</dt>
           <dd className="num">{money(launch.median_cash_ppm, true)}</dd>
         </div>
         <div>
-          <dt>{t("Typical launch plan")}</dt>
+          <dt>{t("Typical developer plan")}</dt>
           <dd className="num">
-            {t("{down} down, {n} years", { down: percent(launch.median_down_share), n: number(launch.median_plan_years, 1) })}
+            {launch.median_plan_years
+              ? t("{down} down, {n} years", { down: percent(launch.median_down_share), n: number(launch.median_plan_years, 1) })
+              : t("Cash")}
           </dd>
         </div>
         <div>
-          <dt>{t("Latest launch delivery")}</dt>
+          <dt>{t("Latest developer delivery")}</dt>
           <dd className="num">{year(launch.latest_delivery_year)}</dd>
         </div>
         <div>
-          <dt>{t("Launch units compared")}</dt>
-          <dd className="num">{number(launch.units)}</dd>
+          <dt>{t("Developer units / resale units compared")}</dt>
+          <dd className="num">
+            {number(launch.units)} / {number(launch.compared)}
+          </dd>
         </div>
       </dl>
       {launch.phases.length > 0 && (
-        <p className="muted" dir="auto">
-          {t("Phases")}: {launch.phases.join(sep())}
+        <p className="muted">
+          {t("Phases")}: <NameList items={launch.phases} />
         </p>
       )}
       <p className="fineprint">
         {t(
-          "Launch units are priced against the model’s resale value for the same compound, unit type, finishing, delivery date, plan length and size. Launch prices are list prices; negotiated developer discounts are not visible.",
+          "Developer prices are its current units on Nawy. Each resale unit is compared with the developer’s units of the same type, finishing and similar size. Developer prices are list prices; negotiated discounts are not visible.",
         )}
       </p>
     </div>

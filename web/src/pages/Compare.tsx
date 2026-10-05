@@ -1,47 +1,47 @@
+import type { CSSProperties } from "react";
 import { Link } from "react-router-dom";
-import { Building2, Landmark, Scale, X } from "lucide-react";
-import { classLabel, money, number, percent, signed, sep } from "../lib";
+import { Building2, Landmark, Plus, Scale, X } from "lucide-react";
+import { classLabel, money, number, percent, signed, sep, tone, nameOf, place } from "../lib";
 import { t } from "../locale";
 import { useStore } from "../store";
-import { usePinned, type Loaded } from "../entities";
-import type { ClassSummary, Profile } from "../types";
+import { pinnedName, usePinned, type Loaded } from "../entities";
+import type { ClassSummary, Launch, Profile } from "../types";
 import { EmptyState } from "../components/States";
-import { GradeBadge } from "../components/Valuation";
 
-type Row = { label: string; value: (entry: Extract<Loaded, { status: "ready" }>) => React.ReactNode };
+/** Only compounds and developers are compared side by side. */
+type Ready = Extract<Loaded, { status: "ready"; kind: "compound" | "developer" }>;
+type Row = { label: string; value: (entry: Ready) => React.ReactNode };
 
-const profileOf = (entry: Extract<Loaded, { status: "ready" }>): Profile & { units: number; premium: number | null } =>
-  entry.kind === "compound"
-    ? { ...entry.data.compound, premium: entry.data.compound.premium_vs_district }
-    : { ...entry.data, premium: entry.data.premium_vs_district };
+const profileOf = (entry: Ready): Profile & { units: number; good_count: number; launch: Launch | null } =>
+  entry.kind === "compound" ? entry.data.compound : entry.data;
 
-const classOf = (entry: Extract<Loaded, { status: "ready" }>, cls: string): ClassSummary | undefined =>
+const classOf = (entry: Ready, cls: string): ClassSummary | undefined =>
   entry.kind === "compound" ? entry.data.compound.classes.find((c) => c.class === cls) : undefined;
 
 export default function Compare() {
   const { compare, toggleCompare, clearCompare } = useStore();
   const { get, retry } = usePinned(compare);
   const kind = compare[0]?.kind;
-  const rows: Row[] = [
+  const measures: Row[] = [
     ...(kind === "compound"
       ? [
           {
             label: "Developer",
-            value: (e: Extract<Loaded, { status: "ready" }>) =>
+            value: (e: Ready) =>
               e.kind === "compound" && e.data.compound.developer ? (
-                <Link to={`/developers/${encodeURIComponent(e.data.compound.developer.key)}`}>{e.data.compound.developer.name}</Link>
+                <Link to={`/developers/${encodeURIComponent(e.data.compound.developer.key)}`}>{nameOf(e.data.compound.developer)}</Link>
               ) : (
                 "—"
               ),
           },
-          { label: "District", value: (e: Extract<Loaded, { status: "ready" }>) => (e.kind === "compound" ? e.data.compound.district : "—") },
+          { label: "District", value: (e: Ready) => (e.kind === "compound" ? place(e.data.compound.district) : "—") },
           ...(["apartment", "chalet", "house"] as const).map((cls) => ({
-            label: `${classLabel(cls)}${sep()}${t("fair cash / m²")}`,
-            value: (e: Extract<Loaded, { status: "ready" }>) => {
+            label: `${classLabel(cls)}${sep()}${t("resale / developer today, per m²")}`,
+            value: (e: Ready) => {
               const item = classOf(e, cls);
-              return item?.reference_ppm ? (
-                <span className="compare-cell">
-                  <b className="num">{money(item.reference_ppm, true)}</b> <GradeBadge grade={item.grade} />
+              return item ? (
+                <span className="compare-cell num">
+                  <b>{money(item.median_asking_ppm, true)}</b> / {item.developer_ppm ? money(item.developer_ppm, true) : "—"}
                 </span>
               ) : (
                 "—"
@@ -50,36 +50,44 @@ export default function Compare() {
           })),
         ]
       : [
-          { label: "Compounds", value: (e: Extract<Loaded, { status: "ready" }>) => (e.kind === "developer" ? number(e.data.compounds.length) : "—") },
-          { label: "Districts", value: (e: Extract<Loaded, { status: "ready" }>) => (e.kind === "developer" ? number(e.data.districts.length) : "—") },
+          { label: "Compounds", value: (e: Ready) => (e.kind === "developer" ? number(e.data.compounds.length) : "—") },
+          { label: "Districts", value: (e: Ready) => (e.kind === "developer" ? number(e.data.districts.length) : "—") },
         ]),
-    { label: "Premium vs district", value: (e) => <b className="num">{signed(profileOf(e).premium)}</b> },
+    {
+      label: "Resale vs developer",
+      value: (e) => <b className={`num ${tone(profileOf(e).launch?.median_gap)}`}>{signed(profileOf(e).launch?.median_gap)}</b>,
+    },
+    { label: "Strong or good opportunities", value: (e) => <span className="num">{number(profileOf(e).good_count)}</span> },
     { label: "Resale listings", value: (e) => <span className="num">{number(profileOf(e).units)}</span> },
     { label: "Ready to move in", value: (e) => <span className="num">{percent(profileOf(e).ready_share)}</span> },
     {
       label: "Median wait for the rest",
       value: (e) =>
-        profileOf(e).median_years_to_delivery ? t("{n} years", { n: number(profileOf(e).median_years_to_delivery, 1) }) : "—",
+        profileOf(e).median_years_to_delivery ? t("{n} years", { n: number(profileOf(e).median_years_to_delivery, 1), count: profileOf(e).median_years_to_delivery }) : "—",
     },
     { label: "Listed on installment plans", value: (e) => <span className="num">{percent(profileOf(e).plan_share)}</span> },
     { label: "Median share still owed", value: (e) => <span className="num">{percent(profileOf(e).median_remaining_share)}</span> },
     { label: "Headline above cash value by", value: (e) => <span className="num">{percent(profileOf(e).median_plan_discount)}</span> },
     {
-      label: "Priced below / within / above range",
-      value: (e) => {
-        const v = profileOf(e).verdicts;
-        const total = (v.below ?? 0) + (v.within ?? 0) + (v.above ?? 0);
-        return total ? (
-          <span className="num">
-            {percent((v.below ?? 0) / total)}{sep()}{percent((v.within ?? 0) / total)}{sep()}{percent((v.above ?? 0) / total)}
-          </span>
-        ) : (
-          "—"
-        );
-      },
+      label: "Main source",
+      value: (e) => (
+        <>
+          <bdi>{profileOf(e).scope.sources[0]?.name ?? "—"}</bdi>
+          {sep()}
+          <span className="num">{percent(profileOf(e).scope.sources[0]?.share)}</span>
+        </>
+      ),
     },
-    { label: "Main source", value: (e) => `${profileOf(e).scope.sources[0]?.name ?? "—"}${sep()}${percent(profileOf(e).scope.sources[0]?.share)}` },
   ];
+  // With one source (AqarExit) the main-source row says nothing.
+  const rows = measures.filter(
+    (row) =>
+      row.label !== "Main source" ||
+      compare.some((item) => {
+        const entry = get(item);
+        return entry.status === "ready" && profileOf(entry as Ready).scope.sources.length > 1;
+      }),
+  );
 
   return (
     <div className="compare page-enter">
@@ -90,7 +98,7 @@ export default function Compare() {
             {t("Side by side,")} <em>{t("like for like.")}</em>
           </h1>
           <p className="lede">
-            {t("Compare up to three compounds, or up to three developers, on fair value, delivery and payment structure.")}
+            {t("Compare up to three compounds, or up to three developers, on prices against the developer, opportunities, delivery and payment structure.")}
           </p>
           {compare.length > 0 && (
             <button className="btn btn-sm" onClick={clearCompare}>
@@ -118,7 +126,7 @@ export default function Compare() {
           />
         ) : (
           <div className="ledger compare-table">
-            <table>
+            <table style={{ "--columns": compare.length } as CSSProperties}>
               <caption className="sr-only">{t("Comparison")}</caption>
               <thead>
                 <tr>
@@ -129,11 +137,11 @@ export default function Compare() {
                     <th scope="col" key={item.key}>
                       <span className="compare-head">
                         <Link to={`/${item.kind === "compound" ? "compounds" : "developers"}/${encodeURIComponent(item.key)}`} dir="auto">
-                          {item.name}
+                          {pinnedName(item, get(item))}
                         </Link>
                         <button
                           className="btn btn-sm btn-icon btn-ghost"
-                          aria-label={t("Remove {name} from comparison", { name: item.name })}
+                          aria-label={t("Remove {name} from comparison", { name: pinnedName(item, get(item)) })}
                           onClick={() => toggleCompare(item)}
                         >
                           <X size={15} />
@@ -150,9 +158,9 @@ export default function Compare() {
                     {compare.map((item) => {
                       const entry = get(item);
                       return (
-                        <td key={item.key} dir="auto">
+                        <td key={item.key}>
                           {entry.status === "ready" ? (
-                            row.value(entry)
+                            row.value(entry as Ready)
                           ) : entry.status === "error" ? (
                             <button className="link-arrow" onClick={retry}>
                               {t("Unavailable · retry")}
@@ -168,6 +176,13 @@ export default function Compare() {
               </tbody>
             </table>
           </div>
+        )}
+        {compare.length > 0 && compare.length < 3 && (
+          <p className="compare-more">
+            <Link className="link-arrow" to={kind === "developer" ? "/developers" : "/compounds"}>
+              <Plus size={15} /> {t(kind === "developer" ? "Add another developer" : "Add another compound")}
+            </Link>
+          </p>
         )}
       </div>
     </div>

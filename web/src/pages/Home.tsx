@@ -1,28 +1,67 @@
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, ArrowUpRight, Banknote, Building2, Link2, Scale, Target } from "lucide-react";
-import type { Overview } from "../types";
-import { date, number, percent, useCatalog } from "../lib";
+import { ArrowRight, ArrowUpRight, Banknote, Building2, Landmark, Link2, PlayCircle, Scale, Users, type LucideIcon } from "lucide-react";
+import type { Overview, Page, Unit } from "../types";
+import { date, number, percent, sep, signed, useApi, useCatalog, nameOf } from "../lib";
 import { t } from "../locale";
 import { ErrorState, Loading } from "../components/States";
-import { PremiumBars, ScopeNote } from "../components/Valuation";
+import { DivergingBars, ScopeNote } from "../components/Opportunity";
+import { UnitTable } from "../components/UnitTable";
+import { Explainer, explainerLength, type ExplainerHandle } from "../components/Explainer";
+
+const GROUP_SIZE = 5;
+
+/** One ranking of the best opportunities, by a single comparison. */
+function BestGroup({ id, icon: Icon, title, note, items, caption, to, more }: {
+  id: string;
+  icon: LucideIcon;
+  title: string;
+  note: string;
+  items: Unit[];
+  caption: string;
+  to: string;
+  more: string;
+}) {
+  if (!items.length) return null;
+  return (
+    <div className="best-group" role="group" aria-labelledby={id}>
+      <div className="best-group-head">
+        <h3 id={id}>
+          <Icon size={20} /> {t(title)}
+        </h3>
+        <p>{t(note)}</p>
+      </div>
+      <UnitTable items={items} caption={caption} />
+      <div className="section-foot best-group-foot">
+        <Link className="link-arrow" to={to}>
+          {t(more)} <ArrowUpRight size={16} className="flip-rtl" />
+        </Link>
+      </div>
+    </div>
+  );
+}
 
 export default function Home({ data, error, retry }: { data: Overview | null; error: string; retry: () => void }) {
   const navigate = useNavigate();
+  const explainer = useRef<ExplainerHandle>(null);
   const catalog = useCatalog();
+  // Two rankings, never one: "below the developer" and "below similar resale units" answer different questions.
+  const belowDeveloper = useApi<Page<Unit>>(`/units?sort=launch_gap&page_size=${GROUP_SIZE}`);
+  const belowPeers = useApi<Page<Unit>>(`/units?sort=peer_gap&page_size=${GROUP_SIZE}`);
   const [compound, setCompound] = useState("");
   const submit = (event: FormEvent) => {
     event.preventDefault();
     const value = compound.trim();
-    const match = catalog?.compounds.find((c) => c.name.toLocaleLowerCase() === value.toLocaleLowerCase());
+    const match = catalog?.compounds.find((c) =>
+      [c.name, c.name_ar].some((name) => name?.toLocaleLowerCase() === value.toLocaleLowerCase()),
+    );
     navigate(match ? `/evaluate?compound=${encodeURIComponent(match.name)}` : value ? `/compounds?q=${encodeURIComponent(value)}` : "/evaluate");
   };
-  const premiums = data?.developer_premiums ?? [];
-  const spread = [...premiums.slice(0, 5), ...premiums.slice(-5)].filter(
+  const gaps = data?.developer_gaps ?? [];
+  const spread = [...gaps.slice(0, 5), ...gaps.slice(-5)].filter(
     (item, index, all) => all.findIndex((other) => other.key === item.key) === index,
   );
-  const backtest = data?.backtest;
-  const naive = backtest?.naive_baseline;
+  const good = data ? (data.opportunities.strong ?? 0) + (data.opportunities.good ?? 0) : 0;
 
   return (
     <div className="home">
@@ -32,17 +71,18 @@ export default function Home({ data, error, retry }: { data: Overview | null; er
           <div className="hero-copy page-enter">
             <span className="hero-live">
               <span className="live-dot" />
-              {t("Resale fair-value index")} ·{" "}
+              {t("Resale opportunity index")}
+              {sep()}
               {data ? t("observed {date}", { date: date(data.last_updated) }) : t("loading…")}
             </span>
             <h1 className="display">
-              {t("What is it")}
+              {t("Is it really")}
               <br />
-              <em>{t("really worth?")}</em>
+              <em>{t("a good deal?")}</em>
             </h1>
             <p className="hero-lede">
               {t(
-                "Qayem values Egypt’s resale units by compound, developer, delivery date and payment plan, not by area alone, and tells you how sure it is.",
+                "Qayem compares every resale unit with what you could buy instead today: the developer’s own current price and the similar units listed in the same compound, both in today’s money.",
               )}
             </p>
             <form className="hero-search" onSubmit={submit} role="search">
@@ -56,33 +96,47 @@ export default function Home({ data, error, retry }: { data: Overview | null; er
                 maxLength={200}
               />
               <datalist id="home-compounds">
-                {catalog?.compounds.map((c) => <option key={c.key} value={c.name} />)}
+                {catalog?.compounds.map((c) => <option key={c.key} value={nameOf(c)} />)}
               </datalist>
               <button type="submit" className="btn btn-brass">
-                {t("Value a unit")} <ArrowRight size={16} className="flip-rtl" />
+                {t("Compare a unit")} <ArrowRight size={16} className="flip-rtl" />
               </button>
             </form>
-            <Link className="hero-alt" to="/evaluate?mode=link">
-              <Link2 size={15} /> {t("Or paste a listing link")}
-            </Link>
+            <div className="hero-alts">
+              <Link className="hero-alt" to="/evaluate?mode=link">
+                <Link2 size={15} /> {t("Or paste a listing link")}
+              </Link>
+              {data && !error && (
+                <a
+                  className="hero-alt"
+                  href="#explainer"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    explainer.current?.play();
+                  }}
+                >
+                  <PlayCircle size={15} /> {t("Watch how it works")} <span className="num">{explainerLength()}</span>
+                </a>
+              )}
+            </div>
           </div>
-          {data && backtest && (
+          {data && (
             <dl className="hero-stats page-enter">
               <div>
-                <dt>{t("Resale units valued")}</dt>
-                <dd className="num">{number(data.valued_count)}</dd>
+                <dt>{t("Resale units compared")}</dt>
+                <dd className="num">{number(data.rated_count)}</dd>
               </div>
               <div>
-                <dt>{t("Median error on held-out units")}</dt>
-                <dd className="num">{percent(backtest.median_abs_error, 1)}</dd>
+                <dt>{t("Strong or good opportunities")}</dt>
+                <dd className="num">{number(good)}</dd>
               </div>
               <div>
-                <dt>{t("Compounds")}</dt>
-                <dd className="num">{number(data.compound_count)}</dd>
+                <dt>{t("Compounds with developer prices")}</dt>
+                <dd className="num">{number(data.launch.compounds)}</dd>
               </div>
               <div>
-                <dt>{t("Developers")}</dt>
-                <dd className="num">{number(data.developer_count)}</dd>
+                <dt>{t("Developer prices since the contracts")}</dt>
+                <dd className="num">{t("{annual} a year", { annual: signed(data.since_contract.median_annual, 1) })}</dd>
               </div>
             </dl>
           )}
@@ -93,23 +147,61 @@ export default function Home({ data, error, retry }: { data: Overview | null; er
         <div className="page">
           <ErrorState message={error} retry={retry} />
         </div>
-      ) : !data || !backtest || !naive ? (
+      ) : !data ? (
         <div className="page">
           <Loading />
         </div>
       ) : (
         <>
-          <section className="page section" aria-labelledby="area-heading">
+          {((belowDeveloper.data?.items.length ?? 0) > 0 || (belowPeers.data?.items.length ?? 0) > 0) && (
+            <section className="page section" aria-labelledby="best-heading">
+              <div className="section-head">
+                <div>
+                  <span className="eyebrow">{t("Best opportunities now")}</span>
+                  <h2 id="best-heading" className="display">
+                    {t("Cheaper than")} <em>{t("what you could buy instead.")}</em>
+                  </h2>
+                </div>
+                <p className="lede">
+                  {t(
+                    "Two different comparisons, ranked separately. A unit cheaper than both the developer and similar resale units is marked “Cheaper on both”.",
+                  )}
+                </p>
+              </div>
+              <BestGroup
+                id="best-developer"
+                icon={Landmark}
+                title="Cheaper than the developer today"
+                note="Below what the developer asks today for a unit of the same type, finishing and similar size in the same compound. Mostly older contracts: developer prices have risen since the seller signed."
+                items={belowDeveloper.data?.items ?? []}
+                caption="Resale units furthest below the developer’s price today"
+                to="/units?sort=launch_gap"
+                more="All units, furthest below the developer"
+              />
+              <BestGroup
+                id="best-peers"
+                icon={Users}
+                title="Cheaper than other resale units"
+                note="Below the typical price of at least four similar resale units listed in the same compound, as listed and in today’s money."
+                items={belowPeers.data?.items ?? []}
+                caption="Resale units furthest below similar units in their compound"
+                to="/units?sort=peer_gap"
+                more="All units, furthest below similar units"
+              />
+            </section>
+          )}
+
+          <section className="page section" aria-labelledby="developers-heading">
             <div className="section-head">
               <div>
-                <span className="eyebrow">{t("Why area alone misleads")}</span>
-                <h2 id="area-heading" className="display">
-                  {t("Same district.")} <em>{t("Different price.")}</em>
+                <span className="eyebrow">{t("Resale against the developer")}</span>
+                <h2 id="developers-heading" className="display">
+                  {t("Same unit.")} <em>{t("Different price.")}</em>
                 </h2>
               </div>
               <p className="lede">
                 {t(
-                  "In Egypt the developer and the compound set the price per m² as much as the neighbourhood does. Here is how each developer’s resale units price against comparable units in the same districts.",
+                  "AqarExit sellers transfer their contract at the price they paid. Developers have raised their prices since, so an old contract can cost well below buying the same unit new.",
                 )}
               </p>
             </div>
@@ -117,47 +209,40 @@ export default function Home({ data, error, retry }: { data: Overview | null; er
               <div className="chart-card">
                 <div className="chart-head">
                   <div>
-                    <span className="eyebrow">{t("Developer premium vs district norm")}</span>
-                    <h3>{t("Highest and lowest")}</h3>
+                    <span className="eyebrow">{t("Resale vs the developer’s prices today")}</span>
+                    <h3>{t("By developer")}</h3>
                   </div>
-                  <Link className="link-arrow" to="/developers?sort=premium_desc">
-                    {t("All developers")} <ArrowUpRight size={16} />
+                  <Link className="link-arrow" to="/developers?sort=gap_asc">
+                    {t("All developers")} <ArrowUpRight size={16} className="flip-rtl" />
                   </Link>
                 </div>
-                <PremiumBars
-                  items={spread.map((item) => ({
-                    key: item.key,
-                    label: item.name,
-                    meta: t("{n} listings", { n: number(item.units) }),
-                    value: item.premium,
-                    to: `/developers/${encodeURIComponent(item.key)}`,
-                  }))}
-                />
+                {spread.length > 0 ? (
+                  <DivergingBars
+                    items={spread.map((item) => ({
+                      key: item.key,
+                      label: nameOf(item)!,
+                      meta: t("{n} units compared", { n: number(item.units), count: item.units }),
+                      value: item.gap,
+                      to: `/developers/${encodeURIComponent(item.key)}`,
+                    }))}
+                  />
+                ) : (
+                  <p className="muted">{t("Not enough like-for-like developer prices yet.")}</p>
+                )}
                 <p className="fineprint">
-                  {t("Adjusted for unit type, finishing, delivery and size. Developers with at least 40 resale listings.")}
+                  {t(
+                    "Median gap of each developer’s resale units against its own current units of the same type, finishing and similar size. Developers with at least 20 such units.",
+                  )}
                 </p>
               </div>
               <div className="accuracy">
-                <span className="eyebrow">{t("Held-out accuracy")}</span>
-                <h3>{t("Typical valuation error")}</h3>
-                <div className="accuracy-bars">
-                  <div>
-                    <span>{t("District median per m²")}</span>
-                    <i style={{ width: "100%" }} className="is-naive" />
-                    <b className="num">{percent(naive.median_abs_error, 1)}</b>
-                  </div>
-                  <div>
-                    <span>{t("Qayem model")}</span>
-                    <i
-                      style={{ width: `${((naive.model_median_abs_error ?? 0) / (naive.median_abs_error || 1)) * 100}%` }}
-                    />
-                    <b className="num">{percent(naive.model_median_abs_error, 1)}</b>
-                  </div>
-                </div>
+                <span className="eyebrow">{t("Since the sellers signed")}</span>
+                <h3>{t("Developer list prices per m²")}</h3>
+                <strong className="since-figure num">{t("{annual} a year", { annual: signed(data.since_contract.median_annual, 1) })}</strong>
                 <p className="fineprint">
                   {t(
-                    "Median gap between each unit’s cash-equivalent asking price and the value predicted without it, across {n} units.",
-                    { n: number(naive.evaluated) },
+                    "Median yearly change between the price per m² a seller signed for and the developer’s price today for a similar unit in the same compound, across {n} units.",
+                    { n: number(data.since_contract.units) },
                   )}
                 </p>
               </div>
@@ -167,11 +252,12 @@ export default function Home({ data, error, retry }: { data: Overview | null; er
           <section className="weigh" aria-labelledby="cash-heading">
             <div className="page">
               <div className="section-head section-head-center">
-                <span className="eyebrow">{t("How a unit is valued")}</span>
+                <span className="eyebrow">{t("How a unit is judged")}</span>
                 <h2 id="cash-heading" className="display">
                   {t("Three steps,")} <em>{t("every unit.")}</em>
                 </h2>
               </div>
+              <Explainer ref={explainer} />
               <div className="weigh-steps">
                 <article className="weigh-step">
                   <span className="weigh-index num">01</span>
@@ -188,32 +274,32 @@ export default function Home({ data, error, retry }: { data: Overview | null; er
                 <article className="weigh-step">
                   <span className="weigh-index num">02</span>
                   <h3>
-                    <Building2 size={18} /> {t("Price the compound, not the map")}
+                    <Landmark size={18} /> {t("Against the developer today")}
                   </h3>
                   <p>
                     {t(
-                      "Each unit starts from its district, then its developer, then its compound, and is adjusted for unit type, finishing, delivery date and size.",
+                      "What the developer asks now for a unit of the same type, finishing and similar size in the same compound, from its current listings on Nawy.",
                     )}
                   </p>
                 </article>
                 <article className="weigh-step">
                   <span className="weigh-index num">03</span>
                   <h3>
-                    <Target size={18} /> {t("Say how sure we are")}
+                    <Users size={18} /> {t("Against similar units now")}
                   </h3>
                   <p>
                     {t(
-                      "Every value carries an evidence grade and a range measured on held-out units. When the evidence is thin, we say so instead of guessing.",
+                      "Where the unit ranks among at least four similar units listed in the same compound. A unit is an opportunity only if it is cheaper both as listed and in today’s money.",
                     )}
                   </p>
                 </article>
               </div>
               <div className="section-foot section-foot-center">
                 <Link className="btn btn-ink" to="/evaluate">
-                  <Scale size={16} /> {t("Evaluate a unit")}
+                  <Scale size={16} /> {t("Compare a unit")}
                 </Link>
                 <Link className="link-arrow" to="/methodology">
-                  {t("Read the methodology")} <ArrowUpRight size={16} />
+                  {t("Read the methodology")} <ArrowUpRight size={16} className="flip-rtl" />
                 </Link>
               </div>
             </div>
@@ -228,7 +314,7 @@ export default function Home({ data, error, retry }: { data: Overview | null; er
                 </h2>
               </div>
               <Link className="link-arrow" to="/methodology#coverage">
-                {t("See source coverage")} <ArrowUpRight size={16} />
+                {t("See source coverage")} <ArrowUpRight size={16} className="flip-rtl" />
               </Link>
             </div>
             <div className="evidence-grid">
@@ -236,7 +322,9 @@ export default function Home({ data, error, retry }: { data: Overview | null; er
                 <ScopeNote scope={data.scope} />
                 <p>
                   {t(
-                    "Most identified resale listings come from one source. Figures describe the listings we index, not the whole Egyptian market.",
+                    data.sources.length === 1 && data.sources[0].id === "aqarexit"
+                      ? "Every listing comes from AqarExit, a marketplace of contract transfers (تنازل) with the paid amount, the balance and the installments per unit. Figures describe the listings we index, not the whole Egyptian market."
+                      : "Most identified resale listings come from one source. Figures describe the listings we index, not the whole Egyptian market.",
                   )}
                 </p>
               </article>
@@ -245,14 +333,15 @@ export default function Home({ data, error, retry }: { data: Overview | null; er
                 <p>
                   {t(
                     "Days of observation so far. Price trends, time on market and delivery delays are shown only once there are at least eight weeks of history.",
+                    { count: data.observation_days },
                   )}
                 </p>
               </article>
               <article>
-                <strong className="num">{t("Asking")}</strong>
+                <strong className="num">{t("No fair price")}</strong>
                 <p>
                   {t(
-                    "Prices are what sellers ask, not what buyers paid. Egypt publishes no resale transaction prices, so a fair value is where comparable asking prices sit.",
+                    "Egypt publishes no resale sale prices, and AqarExit prices are the sellers’ old contract prices. So Qayem does not estimate what a unit is worth: it compares it with what you could buy instead today.",
                   )}
                 </p>
               </article>

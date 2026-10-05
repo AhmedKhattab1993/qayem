@@ -366,6 +366,7 @@ def test_aqarexit_detail_carries_the_full_payment_position():
     assert unit.raw["unit_code"] == "U-18340" and unit.raw["floor"] == "3"
     assert unit.raw["installment_every_months"] == 3 and unit.raw["lastmod"] == "2026-09-20T00:00:00Z"
     assert "أوفر" in unit.raw["overpayment_note"]
+    assert len(unit.images) == 2 and all(u.startswith("https://") and u.endswith(".jpg") for u in unit.images)
     other = aqx_parse_detail((FIXTURES / "aqarexit_detail_note.html").read_text(), "x" * 36)
     assert other.property_type == "chalet" and other.finishing == "finished" and other.raw["floor"] is None
 
@@ -451,3 +452,16 @@ def test_semsar_description_template():
         "finishing": "core_shell", "price_negotiable": True,
     }
     assert parse_description("شقة للبيع في القاهرة مصر، 2 غرفة (غرفتين) 100 م² متشطب لوكس")["bedrooms"] == 2
+
+
+def test_aqarexit_term_is_derived_when_years_left_is_missing():
+    from qayem.sources.aqarexit import plan_months, terms_from_raw
+    assert plan_months(5, 3_760_000, 188_000, 3) == 60  # published years win
+    assert plan_months(30, 12_500_000, 175_250, 1) == 72  # ...unless implausible: derived from the installment
+    assert plan_months(30, 12_500_000, None, None) is None
+    assert plan_months(None, 3_760_000, 188_000, 3) == 60  # 20 quarterly installments
+    assert plan_months(None, 9_377_559, 200_000, 3) is None  # 141 months: balloon payments likely, not trusted
+    assert plan_months(None, 0, 200_000, 3) is None and plan_months(None, 1_000_000, None, 3) is None
+    raw = {"years_left": None, "remaining_to_developer": 1_200_000, "installment": 100_000, "installment_every_months": 6}
+    assert terms_from_raw(raw) == {"installment_months": 72}
+    assert terms_from_raw({}) == {}

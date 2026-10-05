@@ -118,6 +118,26 @@ def developer_key(name: str | None) -> str:
     return stripped or re.sub(r"[^\w؀-ۿ]+", "", lowered)
 
 
+_ARABIC_FOLD = str.maketrans({"أ": "ا", "إ": "ا", "آ": "ا", "ٱ": "ا", "ى": "ي", "ة": "ه", "ؤ": "و", "ئ": "ي",
+                              **{chr(0x0660 + d): str(d) for d in range(10)}, **{chr(0x06F0 + d): str(d) for d in range(10)}})
+_DIACRITICS = re.compile(r"[ً-ٰٟـ]")
+_COMPOUND_WORDS = re.compile(r"\b(compound|كمبوند|كومبوند|كمباوند|مشروع|project)\b")
+
+
+def fold(text: str | None) -> str:
+    """Spelling-insensitive form: Arabic letter variants, diacritics, case and separators ignored."""
+    if not text:
+        return ""
+    folded = _DIACRITICS.sub("", text.casefold()).translate(_ARABIC_FOLD)
+    return re.sub(r"[\W_]+", "", _COMPOUND_WORDS.sub(" ", folded))
+
+
+def alias_key(compound: str | None, developer: str | None) -> str | None:
+    """Key of one compound/developer spelling pair in the entity_aliases table."""
+    compound_part = fold(compound)
+    return f"{compound_part}|{fold(developer_key(developer))}" if compound_part else None
+
+
 def canonical_district(name: str | None) -> str | None:
     if not name:
         return None

@@ -1,36 +1,75 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, ExternalLink } from "lucide-react";
-import { date, deliveryLabel, money, number, safeExternalUrl, titleCase, useApi, sep } from "../lib";
+import { ArrowLeft, Bookmark, ExternalLink, Share2 } from "lucide-react";
+import { year, date, money, number, safeExternalUrl, titleCase, useApi, useTitle, sep, nameOf, place } from "../lib";
 import { t } from "../locale";
 import type { UnitDetail } from "../types";
 import { ErrorState, Loading } from "../components/States";
-import { BreakdownView, PaymentFacts, Unknowns, ValuationSummary } from "../components/Valuation";
-import { UnitTable, unitName } from "../components/UnitTable";
+import { OpportunitySummary, PaymentFacts, PeerPanel, Unknowns } from "../components/Opportunity";
+import { Comparables, termsLabel, unitName } from "../components/UnitTable";
+import { isPinned, useStore } from "../store";
+import { NameList } from "../components/Names";
+import { DeveloperPrice } from "../components/DeveloperPrice";
+import { Gallery } from "../components/Gallery";
+import { Glance } from "../components/Glance";
+
+/** The pipeline records why a listing counts as resale in its own shorthand; say it in words. */
+function evidenceText(raw: string) {
+  const keyword = /keyword '([^']+)'/.exec(raw)?.[1];
+  if (keyword) return t("The listing says «{word}» (resale).", { word: keyword });
+  const known: [RegExp, string][] = [
+    [/saleType=resale/, "Listed in Nawy’s resale section."],
+    [/verified by AqarExit/, "A contract transfer (تنازل). AqarExit verified the contract and receipts."],
+    [/contract-transfer/, "Listed on a contract-transfer (تنازل) marketplace."],
+    [/تمليك/, "The listing says «تمليك» (freehold), wording used for resale."],
+    [/\/resale catalogue/, "Listed in GPM’s resale catalogue."],
+    [/owner-direct/, "Sold directly by the owner."],
+    [/isResaleInstallment/, "Aqarmap marks it as a resale on installments."],
+    [/^description$/, "The listing description says it is a resale."],
+  ];
+  const match = known.find(([pattern]) => pattern.test(raw));
+  return match ? t(match[1]) : raw;
+}
 
 export default function UnitPage() {
   const { id } = useParams();
   const valid = id && /^\d+$/.test(id);
-  const { data, error, retry } = useApi<UnitDetail>(valid ? `/units/${id}` : null);
+  const { data, error, missing, retry } = useApi<UnitDetail>(valid ? `/units/${id}` : null);
   const [fullText, setFullText] = useState(false);
-  if (!valid) return <ErrorState message="This page is not available." />;
+  const { toast, watch, toggleWatch } = useStore();
+  useTitle(data && [unitName(data.unit), nameOf(data.unit.compound)].filter(Boolean).join(sep()));
+  if (!valid)
+    return (
+      <div className="page">
+        <ErrorState message="This page is not available." missing />
+      </div>
+    );
   if (error)
     return (
       <div className="page">
-        <ErrorState message={error} retry={retry} />
+        <ErrorState message={error} retry={retry} missing={missing} />
       </div>
     );
-  if (!data) return <Loading label="Valuing the unit…" />;
-  const { unit, breakdown, comparables } = data;
+  if (!data) return <Loading label="Comparing the unit…" />;
+  const { unit, comparables } = data;
   const source = safeExternalUrl(unit.source_url);
+  const saved = isPinned(watch, "unit", String(unit.id));
+  const share = async () => {
+    const url = window.location.href;
+    const title = `${unitName(unit)}${unit.compound ? `${sep()}${nameOf(unit.compound)}` : ""}`;
+    try {
+      if (navigator.share) return await navigator.share({ title, url });
+      await navigator.clipboard.writeText(url);
+      toast("Link copied");
+    } catch (error) {
+      if ((error as Error).name !== "AbortError") toast("Copy the link from the address bar to share this unit.");
+    }
+  };
   const facts: [string, string][] = [
+    // Area, rooms, price per m² and delivery are in the tiles above.
     ["Unit type", titleCase(unit.property_type)],
-    ["Area", `${number(unit.area_m2)} ${t("m²")}`],
-    ["Bedrooms", unit.bedrooms == null ? t("Not provided") : unit.bedrooms === 0 ? t("Studio") : number(unit.bedrooms)],
-    ["Bathrooms", number(unit.bathrooms)],
     ["Finishing", titleCase(unit.finishing_class === "unknown" ? null : unit.finishing_class)],
-    ["Delivery", `${deliveryLabel(unit.delivery.bucket, unit.delivery.years)}${unit.delivery.date ? `${sep()}${date(unit.delivery.date, "month")}` : ""}`],
-    ["Asking price per m²", money(unit.price_per_m2)],
+    ...(unit.contract_year ? ([["Contract signed", year(unit.contract_year)]] as [string, string][]) : []),
     ["Last observed", date(unit.last_seen_at)],
   ];
 
@@ -42,19 +81,24 @@ export default function UnitPage() {
             <ArrowLeft size={15} className="flip-rtl" /> {t("All units")}
           </Link>
           <span className="eyebrow">
-            {t("Unit valuation")} <span className="num">#{unit.id}</span>
+            {t("Unit")} <span className="num">#{unit.id}</span>
           </span>
           <h1 className="display unit-title">{unitName(unit)}</h1>
-          <p className="unit-place" dir="auto">
-            {unit.compound && <Link to={`/compounds/${encodeURIComponent(unit.compound.key)}`}>{unit.compound.name}</Link>}
-            {unit.developer && (
-              <>
-                <span aria-hidden="true">{sep()}</span>
-                <Link to={`/developers/${encodeURIComponent(unit.developer.key)}`}>{unit.developer.name}</Link>
-              </>
-            )}
-            {unit.district && <span>{sep()}{unit.district}</span>}
+          <p className="unit-place">
+            <NameList
+              items={[
+                unit.compound && <Link to={`/compounds/${encodeURIComponent(unit.compound.key)}`}>{nameOf(unit.compound)}</Link>,
+                unit.developer && (
+                  <Link to={`/developers/${encodeURIComponent(unit.developer.key)}`}>{nameOf(unit.developer)}</Link>
+                ),
+                place(unit.district),
+              ]}
+            />
           </p>
+          <div className="unit-price">
+            <strong className="num">{money(unit.price)}</strong>
+            <span className="muted">{termsLabel(unit)}</span>
+          </div>
           <div className="tags">
             <span className="tag">{unit.source_name}</span>
             <span className={`tag ${unit.is_resale ? "tag-nile" : ""}`}>
@@ -63,9 +107,32 @@ export default function UnitPage() {
             {unit.resale_evidence?.includes("verified by AqarExit") && (
               <span className="tag tag-nile">{t("Contract and receipts verified by AqarExit")}</span>
             )}
+            <span className="unit-actions">
+              <button
+                type="button"
+                className={`btn btn-sm${saved ? " btn-ink" : ""}`}
+                aria-pressed={saved}
+                onClick={() => toggleWatch({ kind: "unit", key: String(unit.id), name: unitName(unit) })}
+              >
+                <Bookmark size={15} fill={saved ? "currentColor" : "none"} /> {t(saved ? "Saved" : "Save")}
+              </button>
+              <button type="button" className="btn btn-sm" onClick={share}>
+                <Share2 size={15} /> {t("Share")}
+              </button>
+            </span>
           </div>
         </div>
       </header>
+
+      {unit.images.length > 0 && (
+        <div className="page">
+          <Gallery images={unit.images} title={unitName(unit)} source={unit.source_name} />
+        </div>
+      )}
+
+      <div className="page">
+        <Glance unit={unit} />
+      </div>
 
       <div className="page unit-grid">
         <div className="unit-main">
@@ -84,22 +151,28 @@ export default function UnitPage() {
             {unit.resale_evidence && (
               <p className="evidence">
                 <span>{t("Resale evidence")}</span>
-                <q dir="auto">{unit.resale_evidence}</q>
+                <span>{evidenceText(unit.resale_evidence)}</span>
               </p>
             )}
           </section>
+          {unit.launch && (
+            <section className="result-section">
+              <h2>{t("Against the developer’s price today")}</h2>
+              <DeveloperPrice unit={unit} />
+            </section>
+          )}
+          {unit.peers && (
+            <section className="result-section">
+              <h2>{t("Against similar units listed now")}</h2>
+              <PeerPanel peers={unit.peers} price_per_m2={unit.price_per_m2} />
+            </section>
+          )}
           <section className="result-section">
             <h2>{t("The payment plan, in today’s money")}</h2>
             <PaymentFacts payment={unit.payment} price={unit.price} />
           </section>
-          {breakdown && (
-            <section className="result-section">
-              <h2>{t("How the fair value was built")}</h2>
-              <BreakdownView breakdown={breakdown} cls={unit.class} />
-            </section>
-          )}
           <section className="result-section">
-            <h2>{t("What this valuation cannot see")}</h2>
+            <h2>{t("What this comparison cannot see")}</h2>
             <Unknowns items={unit.unknowns} />
           </section>
           {unit.description && (
@@ -117,7 +190,7 @@ export default function UnitPage() {
           )}
         </div>
         <aside className="unit-aside">
-          <ValuationSummary valuation={unit.valuation} price={unit.price} />
+          <OpportunitySummary unit={unit} />
           {source ? (
             <a className="btn btn-nile btn-block" href={source} target="_blank" rel="noopener noreferrer">
               {t("View on {source}", { source: unit.source_name })} <ExternalLink size={15} />
@@ -125,20 +198,23 @@ export default function UnitPage() {
           ) : (
             <p className="fineprint">{t("An original source link was not provided.")}</p>
           )}
-          <Link
-            className="btn btn-block"
-            to={`/evaluate?${new URLSearchParams({
-              property_type: unit.property_type,
-              area: String(unit.area_m2),
-              price: String(unit.price),
-              ...(unit.compound ? { compound: unit.compound.name } : unit.district ? { district: unit.district } : {}),
-              ...(unit.payment.terms === "plan" && unit.down_payment != null && unit.installment_months
-                ? { down_payment: String(unit.down_payment), installment_years: String(unit.installment_months / 12) }
-                : {}),
-            })}`}
-          >
-            {t("Adjust the details and re-value")}
-          </Link>
+          {unit.compound && (
+            <Link
+              className="btn btn-block"
+              to={`/evaluate?${new URLSearchParams({
+                property_type: unit.property_type,
+                area: String(unit.area_m2),
+                price: String(unit.price),
+                compound: unit.compound.name,
+                ...(unit.finishing_class !== "unknown" ? { finishing: unit.finishing_class } : {}),
+                ...(unit.payment.terms === "plan" && unit.down_payment != null && unit.installment_months
+                  ? { down_payment: String(unit.down_payment), installment_years: String(unit.installment_months / 12) }
+                  : {}),
+              })}`}
+            >
+              {t("Adjust the details and compare again")}
+            </Link>
+          )}
         </aside>
       </div>
 
@@ -147,10 +223,18 @@ export default function UnitPage() {
           <div className="section-row">
             <div>
               <span className="eyebrow">{t("The evidence")}</span>
-              <h2 className="display">{t("Closest comparable listings")}</h2>
+              <h2 className="display">{t(unit.peers ? "The similar units it is ranked against" : "Closest units in the same compound")}</h2>
+              <p className="muted section-note">
+                {t(
+                  unit.peers
+                    ? "All {n}: same compound and unit type, within 1.5× the size, and the same finishing when enough share it. Nearest in size first, with the year each seller signed."
+                    : "Same compound and property class, nearest in size first, with the year each seller signed.",
+                  { n: number(comparables.length) },
+                )}
+              </p>
             </div>
           </div>
-          <UnitTable items={comparables} caption="Comparable listings" />
+          <Comparables items={comparables} caption="Comparable listings" />
         </section>
       )}
     </div>

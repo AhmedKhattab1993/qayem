@@ -22,6 +22,17 @@ export const money = (value: number | null | undefined, short = false) =>
 export const percent = (value: number | null | undefined, digits = 0) =>
   value == null ? "—" : `${number(value * 100, digits)}${getLanguage() === "ar" ? "٪" : "%"}`;
 
+/** Smooth scrolling, unless the reader asked the system for less motion. */
+export const scrollBehavior = (): ScrollBehavior =>
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+
+/** The browser tab's title for a page about one unit, compound or developer. */
+export function useTitle(text: string | null | undefined) {
+  useEffect(() => {
+    if (text) document.title = `${text} — ${t("Qayem")}`;
+  }, [text]);
+}
+
 /** A signed share: +12% / −8%. */
 export const signed = (value: number | null | undefined, digits = 0) => {
   if (value == null) return "—";
@@ -29,6 +40,44 @@ export const signed = (value: number | null | undefined, digits = 0) => {
   if (rounded === 0) return percent(0);
   return `${rounded > 0 ? "+" : "−"}${percent(Math.abs(value), digits)}`;
 };
+
+/** Colour class for a signed share; anything that rounds to 0% stays neutral. */
+export const tone = (value: number | null | undefined) =>
+  value == null || Math.abs(value) < 0.005 ? "" : value > 0 ? "is-up" : "is-down";
+
+/** A compound's or developer's name in the interface language: the Arabic name where known. */
+export const nameOf = (entity: { name: string; name_ar?: string | null } | null | undefined) =>
+  entity ? (getLanguage() === "ar" && entity.name_ar ? entity.name_ar : entity.name) : undefined;
+
+const districtAr: Record<string, string> = {
+  "New Cairo": "القاهرة الجديدة",
+  "New Capital City": "العاصمة الإدارية الجديدة",
+  "North Coast": "الساحل الشمالي",
+  "6th of October City": "مدينة ٦ أكتوبر",
+  "Mostakbal City": "مدينة المستقبل",
+  "Ras El Hekma": "رأس الحكمة",
+  "New Zayed": "زايد الجديدة",
+  Madinaty: "مدينتي",
+  "El Sheikh Zayed": "الشيخ زايد",
+  "Al Alamein": "العلمين",
+  "October Gardens": "حدائق أكتوبر",
+  "Ain Sokhna": "العين السخنة",
+  "El Shorouk": "الشروق",
+  "Nasr City": "مدينة نصر",
+  "6th settlement": "التجمع السادس",
+  "New Heliopolis": "هليوبوليس الجديدة",
+  Alexandria: "الإسكندرية",
+  Maadi: "المعادي",
+  "Northern Expansion": "التوسعات الشمالية",
+  "Ras Sudr": "رأس سدر",
+  Makadi: "مكادي",
+  "Sidi Abdel Rahman": "سيدي عبد الرحمن",
+  "Borg el arab": "برج العرب",
+  "Al Dabaa": "الضبعة",
+};
+/** A district's name in the interface language (districts come from the sources in English or Arabic). */
+export const place = (name: string | null | undefined) =>
+  name ? (getLanguage() === "ar" ? (districtAr[name] ?? name) : name) : undefined;
 
 /** List separator. A middle dot reads as the Arabic zero (٠), so Arabic uses a comma. */
 export const sep = () => (getLanguage() === "ar" ? "، " : " · ");
@@ -79,24 +128,46 @@ export async function api<T>(path: string, signal?: AbortSignal): Promise<T> {
 
 /** Fetch on mount and whenever `path` changes; `null` path skips. */
 export function useApi<T>(path: string | null) {
-  const [state, setState] = useState<{ data: T | null; error: string; path: string | null }>({
+  const [state, setState] = useState<{ data: T | null; latest: T | null; error: string; status: number; path: string | null }>({
     data: null,
+    latest: null,
     error: "",
+    status: 0,
     path: null,
   });
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     if (!path) return;
     const controller = new AbortController();
-    setState((current) => ({ data: current.path === path ? current.data : null, error: "", path }));
+    setState((current) => ({
+      data: current.path === path ? current.data : null,
+      latest: current.data ?? current.latest,
+      error: "",
+      status: 0,
+      path,
+    }));
     api<T>(path, controller.signal)
-      .then((data) => setState({ data, error: "", path }))
-      .catch((cause) => cause.name !== "AbortError" && setState({ data: null, error: cause.message, path }));
+      .then((data) => setState({ data, latest: data, error: "", status: 200, path }))
+      .catch(
+        (cause) =>
+          cause.name !== "AbortError" &&
+          setState((current) => ({
+            data: null,
+            latest: current.latest,
+            error: cause.message,
+            status: cause instanceof ApiError ? cause.status : 0,
+            path,
+          })),
+      );
     return () => controller.abort();
   }, [path, attempt]);
   return {
     data: state.path === path ? state.data : null,
+    /** The last data loaded, even for a previous path: keeps a list on screen while its next page loads. */
+    latest: state.latest,
     error: state.path === path ? state.error : "",
+    /** The API said this thing does not exist; retrying will not help. */
+    missing: state.path === path && state.status === 404,
     retry: () => setAttempt((n) => n + 1),
   };
 }
