@@ -106,45 +106,47 @@ export default function Developers() {
           <EmptyState title={t("No developers match.")} text={t("Try a different name.")} />
         ) : (
           <>
-            <div className={`ledger stack row-link grid-cards${data ? "" : " is-busy"}`}>
-              <table>
-                <caption className="sr-only">{t("Developers with their resale units against their prices today")}</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">{t("Developer")}</th>
-                    <th scope="col">{t("Resale vs developer")}</th>
-                    <th scope="col">{t("Opportunities")}</th>
-                    <th scope="col">{t("Compounds")}</th>
-                    <th scope="col">{t("Listings")}</th>
-                    <th scope="col">{t("Ready")}</th>
-                    <th scope="col">{t("On plans")}</th>
-                    <th scope="col">{t("Plan discount")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {list.items.map((developer) => (
-                    <tr key={developer.key}>
-                      <th scope="row">
-                        <Link className="ledger-title" to={`/developers/${encodeURIComponent(developer.key)}`}>
-                          <strong dir="auto">{nameOf(developer)}</strong>
-                          <small>
-                            <NameList items={developer.districts.slice(0, 2).map((d) => place(d.name))} />
-                          </small>
-                        </Link>
-                      </th>
-                      <td data-label={t("Resale vs developer")} className={`num ledger-strong ${tone(developer.launch?.median_gap)}`}>
-                        {signed(developer.launch?.median_gap)}
-                      </td>
-                      <td data-label={t("Opportunities")} className="num">{developer.good_count ? number(developer.good_count) : "—"}</td>
-                      <td data-label={t("Compounds")} className="num">{number(developer.compounds.length)}</td>
-                      <td data-label={t("Listings")} className="num">{number(developer.units)}</td>
-                      <td data-label={t("Ready")} className="num">{percent(developer.ready_share)}</td>
-                      <td data-label={t("On plans")} className="num">{percent(developer.plan_share)}</td>
-                      <td data-label={t("Plan discount")} className="num">{percent(developer.median_plan_discount)}</td>
+            <div className="ledger-frame">
+              <div className={`ledger stack row-link grid-cards${data ? "" : " is-busy"}`}>
+                <table>
+                  <caption className="sr-only">{t("Developers with their resale units against their prices today")}</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">{t("Developer")}</th>
+                      <th scope="col">{t("Resale vs developer")}</th>
+                      <th scope="col">{t("Opportunities")}</th>
+                      <th scope="col">{t("Compounds")}</th>
+                      <th scope="col">{t("Listings")}</th>
+                      <th scope="col">{t("Ready")}</th>
+                      <th scope="col">{t("On plans")}</th>
+                      <th scope="col">{t("Plan discount")}</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {list.items.map((developer) => (
+                      <tr key={developer.key}>
+                        <th scope="row">
+                          <Link className="ledger-title" to={`/developers/${encodeURIComponent(developer.key)}`}>
+                            <strong dir="auto">{nameOf(developer)}</strong>
+                            <small>
+                              <NameList items={developer.districts.slice(0, 2).map((d) => place(d.name))} />
+                            </small>
+                          </Link>
+                        </th>
+                        <td data-label={t("Resale vs developer")} className={`num ledger-strong ${tone(developer.launch?.median_gap)}`}>
+                          {signed(developer.launch?.median_gap)}
+                        </td>
+                        <td data-label={t("Opportunities")} className="num">{developer.good_count ? number(developer.good_count) : "—"}</td>
+                        <td data-label={t("Compounds")} className="num">{number(developer.compounds.length)}</td>
+                        <td data-label={t("Listings")} className="num">{number(developer.units)}</td>
+                        <td data-label={t("Ready")} className="num">{percent(developer.ready_share)}</td>
+                        <td data-label={t("On plans")} className="num">{percent(developer.plan_share)}</td>
+                        <td data-label={t("Plan discount")} className="num">{percent(developer.median_plan_discount)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
             <Pager
               page={list.page}

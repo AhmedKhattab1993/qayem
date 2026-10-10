@@ -33,6 +33,7 @@ const enOne: Record<string, string> = {
   "{n} sources": "{n} source",
   "{n} years": "{n} year",
   "Left, over {n} years": "Left, over {n} year",
+  "Left: ≈ {amount} a quarter for {n} years": "Left: ≈ {amount} a quarter for {n} year",
   "{n} further compounds have too few listings for a premium.": "{n} further compound has too few listings for a premium.",
   "{n} further compounds have no like-for-like developer price.": "{n} further compound has no like-for-like developer price.",
   "{n} units compared": "{n} unit compared",

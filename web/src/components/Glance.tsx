@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Banknote, BedDouble, CalendarClock, Coins, Grid2x2, KeyRound, Ruler, Tag, Wallet } from "lucide-react";
-import { compact, date, number } from "../lib";
+import { compact, date, money, number, quarterly } from "../lib";
 import { getLanguage, t } from "../locale";
 import type { UnitFull } from "../types";
 
@@ -59,7 +59,13 @@ export function Glance({ unit }: { unit: UnitFull }) {
           icon: CalendarClock,
           label:
             payment.years != null
-              ? t("Left, over {n} years", { n: number(payment.years, 1), count: payment.years })
+              ? quarterly(payment) != null
+                ? t("Left: ≈ {amount} a quarter for {n} years", {
+                    amount: money(quarterly(payment), true),
+                    n: number(payment.years, 1),
+                    count: payment.years,
+                  })
+                : t("Left, over {n} years", { n: number(payment.years, 1), count: payment.years })
               : t("Still owed"),
           value: egp(payment.remaining!),
         }

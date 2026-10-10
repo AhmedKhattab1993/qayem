@@ -46,6 +46,10 @@ def clients(database, tmp_path):
     "/api/units?q=Garden", "/api/units?q=القاهرة%20الجديدة", "/api/units?q=%25",
     "/api/units?district=New%20Cairo&compound=garden", "/api/units?developer=Nile",
     "/api/units?source=nawy&property_type=apartment&level=strong",
+    "/api/units?price_max=5000000", "/api/units?cash_max=4000000&sort=price_desc", "/api/units?signing_max=1500000",
+    "/api/units?area_min=100&area_max=160", "/api/units?bedrooms_min=3", "/api/units?bedrooms_min=0",
+    "/api/units?delivery=ready", "/api/units?delivery=2028", "/api/units?sort=newest&newer_than=10",
+    "/api/units?delivery=soon", "/api/units?price_max=-1", "/api/units?cash_max=nan",
     "/api/units/1", "/api/units/17", "/api/units/30", "/api/units/24",
     "/api/compounds", "/api/compounds?sort=name", "/api/compounds?sort=gap_asc",
     *[f"/api/{kind}?sort={sort}&page_size=1&page=2" for kind in ("compounds", "developers")
@@ -111,3 +115,24 @@ def test_retention_protects_an_older_active_version_after_rollback(clients):
         assert {row[0] for row in db.execute("SELECT version FROM datasets")} == {"first", "copy2", "copy3"}
         assert db.execute("SELECT count(*) FROM units WHERE version='first'").fetchone()[0] > 0
         assert db.execute("SELECT count(*) FROM documents WHERE version='copy0'").fetchone()[0] == 0
+
+
+def test_budget_sql_matches_the_local_rule_for_every_published_figure():
+    from qayem.cloud_web import budget_clauses
+    from qayem.web_common import within
+    records = [{"id": i, "price": price, "area_m2": area, "bedrooms": beds,
+                "payment": {"cash_equivalent": cash, "remaining": remaining},
+                "delivery": {"bucket": bucket, "date": when, "years": None}}
+               for i, (price, area, beds, cash, remaining, bucket, when) in enumerate([
+                   (5e6, 120, 3, 4e6, 3e6, "2_3y", "2028-06-30"), (3e6, 90, 2, 3e6, 0, "ready", None),
+                   (9e6, 200, None, None, None, "unknown", None), (7e6, 150, 0, 5e6, 6e6, "3y_plus", "2031-01-01")], 1)]
+    with sqlite3.connect(":memory:") as db:
+        db.execute("CREATE TABLE units (id INTEGER, price REAL, area REAL, public TEXT)")
+        db.executemany("INSERT INTO units VALUES (?,?,?,?)",
+                       [(r["id"], r["price"], r["area_m2"], json.dumps(r)) for r in records])
+        for limits in [{"price_max": 5e6}, {"cash_max": 4e6}, {"signing_max": 2e6}, {"area_min": 100, "area_max": 160},
+                       {"bedrooms_min": 2}, {"bedrooms_min": 0}, {"delivery": "ready"}, {"delivery": "2028"},
+                       {"delivery": "2040"}, {"newer_than": 2}]:
+            clauses, params = budget_clauses(**limits)
+            found = {row[0] for row in db.execute(f"SELECT id FROM units WHERE {' AND '.join(clauses)}", params)}
+            assert found == {r["id"] for r in records if within(r, **limits)}, limits

@@ -204,30 +204,32 @@ export default function Methodology({ overview, error, retry }: { overview: Over
             )}
           </p>
         </div>
-        <div className="ledger stack">
-          <table>
-            <caption className="sr-only">{t("Opportunity levels and their rules")}</caption>
-            <thead>
-              <tr>
-                <th scope="col">{t("Level")}</th>
-                <th scope="col">{t("Rule")}</th>
-                <th scope="col">{t("Units")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {levels.map((level) => (
-                <tr key={level}>
-                  <th scope="row">
-                    <LevelBadge level={level} />
-                  </th>
-                  <td data-label={t("Rule")}>{levelRule[level]}</td>
-                  <td data-label={t("Units")} className="num ledger-strong">
-                    {number(overview.opportunities[level] ?? 0)}
-                  </td>
+        <div className="ledger-frame">
+          <div className="ledger stack">
+            <table>
+              <caption className="sr-only">{t("Opportunity levels and their rules")}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">{t("Level")}</th>
+                  <th scope="col">{t("Rule")}</th>
+                  <th scope="col">{t("Units")}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {levels.map((level) => (
+                  <tr key={level}>
+                    <th scope="row">
+                      <LevelBadge level={level} />
+                    </th>
+                    <td data-label={t("Rule")}>{levelRule[level]}</td>
+                    <td data-label={t("Units")} className="num ledger-strong">
+                      {number(overview.opportunities[level] ?? 0)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 

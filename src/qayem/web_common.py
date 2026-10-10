@@ -1,4 +1,6 @@
 """Small shared request helpers for the local and Cloudflare APIs."""
+from typing import Literal
+
 from .valuation import DISTRICT_ALIASES
 
 RANK_MIN_COMPOUND, RANK_MIN_DEVELOPER = 5, 20
@@ -33,3 +35,31 @@ def page_of(items: list, page: int, page_size: int) -> dict:
     start = (page - 1) * page_size
     return {"items": items[start:start + page_size], "total": len(items), "page": page,
             "page_size": page_size, "pages": (len(items) + page_size - 1) // page_size}
+
+
+Sort = Literal["opportunity", "launch_gap", "peer_gap", "price_asc", "price_desc", "area_desc", "cash_ppm_asc", "newest"]
+# "ready", or a year: ready by the end of it (a unit already delivered counts)
+DELIVERY_PATTERN = r"^(|ready|\d{4})$"
+
+
+def signing(record: dict) -> float | None:
+    """What leaves the buyer's account at signing: the headline less the balance still owed."""
+    remaining = record["payment"]["remaining"]
+    return None if remaining is None else record["price"] - remaining
+
+
+def within(record: dict, *, price_max=None, cash_max=None, signing_max=None, area_min=None, area_max=None,
+           bedrooms_min=None, delivery="", newer_than=None) -> bool:
+    """A buyer's budget and needs. A figure the listing does not publish never matches a limit on it.
+    The Cloudflare API applies the same rules in SQL (`cloud_web.budget_clauses`)."""
+    cash, paid = record["payment"]["cash_equivalent"], signing(record)
+    when = record.get("delivery") or {}
+    return ((price_max is None or record["price"] <= price_max)
+            and (cash_max is None or (cash is not None and cash <= cash_max))
+            and (signing_max is None or (paid is not None and paid <= signing_max))
+            and (area_min is None or record["area_m2"] >= area_min)
+            and (area_max is None or record["area_m2"] <= area_max)
+            and (bedrooms_min is None or (record["bedrooms"] is not None and record["bedrooms"] >= bedrooms_min))
+            and (not delivery or when.get("bucket") == "ready"
+                 or (delivery != "ready" and bool(when.get("date")) and when["date"][:4] <= delivery))
+            and (newer_than is None or record["id"] > newer_than))

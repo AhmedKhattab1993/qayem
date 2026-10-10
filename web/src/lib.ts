@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getLanguage, t } from "./locale";
-import type { Catalog } from "./types";
+import type { Catalog, Payment } from "./types";
 
 const locale = () => (getLanguage() === "ar" ? "ar-EG" : "en-GB");
 
@@ -21,6 +21,13 @@ export const money = (value: number | null | undefined, short = false) =>
 
 export const percent = (value: number | null | undefined, digits = 0) =>
   value == null ? "—" : `${number(value * 100, digits)}${getLanguage() === "ar" ? "٪" : "%"}`;
+
+/** What leaves the buyer's account at signing: the headline less the balance still owed. */
+export const atSigning = (price: number, payment: Payment) => (payment.remaining == null ? null : price - payment.remaining);
+
+/** Each installment if the balance is paid in equal quarterly installments, as the today's-money conversion assumes. */
+export const quarterly = (payment: Payment) =>
+  payment.terms === "plan" && payment.remaining && payment.years ? payment.remaining / (payment.years * 4) : null;
 
 /** Smooth scrolling, unless the reader asked the system for less motion. */
 export const scrollBehavior = (): ScrollBehavior =>

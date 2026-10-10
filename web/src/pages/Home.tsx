@@ -121,22 +121,22 @@ export default function Home({ data, error, retry }: { data: Overview | null; er
             </div>
           </div>
           {data && (
-            <dl className="hero-stats page-enter">
+            <dl className="hero-stats hero-stats-2 page-enter">
               <div>
                 <dt>{t("Resale units compared")}</dt>
                 <dd className="num">{number(data.rated_count)}</dd>
+                <dd className="hero-stat-note num">{t("of {n} listed", { n: number(data.total_resale) })}</dd>
               </div>
               <div>
                 <dt>{t("Strong or good opportunities")}</dt>
-                <dd className="num">{number(good)}</dd>
-              </div>
-              <div>
-                <dt>{t("Compounds with developer prices")}</dt>
-                <dd className="num">{number(data.launch.compounds)}</dd>
-              </div>
-              <div>
-                <dt>{t("Developer prices since the contracts")}</dt>
-                <dd className="num">{t("{annual} a year", { annual: signed(data.since_contract.median_annual, 1) })}</dd>
+                <dd className="num">
+                  <Link to="/units">{number(good)}</Link>
+                </dd>
+                <dd className="hero-stat-note">
+                  <Link to="/units">
+                    {t("See them, best first")} <ArrowRight size={13} className="flip-rtl" />
+                  </Link>
+                </dd>
               </div>
             </dl>
           )}
@@ -294,6 +294,16 @@ export default function Home({ data, error, retry }: { data: Overview | null; er
                   </p>
                 </article>
               </div>
+              <div className="home-evidence">
+                <ScopeNote scope={data.scope} />
+                <p className="fineprint">
+                  {t(
+                    "{days} days of observation. Comparisons use listed contract prices and developer list prices: there is no fair price, and trends wait for eight weeks of history.",
+                    { days: number(data.observation_days) },
+                  )}{" "}
+                  <Link to="/methodology#coverage">{t("See source coverage")}</Link>
+                </p>
+              </div>
               <div className="section-foot section-foot-center">
                 <Link className="btn btn-ink" to="/evaluate">
                   <Scale size={16} /> {t("Compare a unit")}
@@ -305,48 +315,6 @@ export default function Home({ data, error, retry }: { data: Overview | null; er
             </div>
           </section>
 
-          <section className="page section" aria-labelledby="scope-heading">
-            <div className="section-head">
-              <div>
-                <span className="eyebrow">{t("Know the evidence")}</span>
-                <h2 id="scope-heading" className="display">
-                  {t("What this is built on,")} <em>{t("plainly.")}</em>
-                </h2>
-              </div>
-              <Link className="link-arrow" to="/methodology#coverage">
-                {t("See source coverage")} <ArrowUpRight size={16} className="flip-rtl" />
-              </Link>
-            </div>
-            <div className="evidence-grid">
-              <article>
-                <ScopeNote scope={data.scope} />
-                <p>
-                  {t(
-                    data.sources.length === 1 && data.sources[0].id === "aqarexit"
-                      ? "Every listing comes from AqarExit, a marketplace of contract transfers (تنازل) with the paid amount, the balance and the installments per unit. Figures describe the listings we index, not the whole Egyptian market."
-                      : "Most identified resale listings come from one source. Figures describe the listings we index, not the whole Egyptian market.",
-                  )}
-                </p>
-              </article>
-              <article>
-                <strong className="num">{number(data.observation_days)}</strong>
-                <p>
-                  {t(
-                    "Days of observation so far. Price trends, time on market and delivery delays are shown only once there are at least eight weeks of history.",
-                    { count: data.observation_days },
-                  )}
-                </p>
-              </article>
-              <article>
-                <strong className="num">{t("No fair price")}</strong>
-                <p>
-                  {t(
-                    "Egypt publishes no resale sale prices, and AqarExit prices are the sellers’ old contract prices. So Qayem does not estimate what a unit is worth: it compares it with what you could buy instead today.",
-                  )}
-                </p>
-              </article>
-            </div>
-          </section>
         </>
       )}
     </div>

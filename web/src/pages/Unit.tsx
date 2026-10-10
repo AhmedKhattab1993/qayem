@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Bookmark, ExternalLink, Share2 } from "lucide-react";
+import { ArrowLeft, Bookmark, Check, ExternalLink, Plus, Share2 } from "lucide-react";
 import { year, date, money, number, safeExternalUrl, titleCase, useApi, useTitle, sep, nameOf, place } from "../lib";
 import { t } from "../locale";
 import type { UnitDetail } from "../types";
@@ -36,7 +36,7 @@ export default function UnitPage() {
   const valid = id && /^\d+$/.test(id);
   const { data, error, missing, retry } = useApi<UnitDetail>(valid ? `/units/${id}` : null);
   const [fullText, setFullText] = useState(false);
-  const { toast, watch, toggleWatch } = useStore();
+  const { toast, watch, toggleWatch, compare, toggleCompare } = useStore();
   useTitle(data && [unitName(data.unit), nameOf(data.unit.compound)].filter(Boolean).join(sep()));
   if (!valid)
     return (
@@ -54,6 +54,7 @@ export default function UnitPage() {
   const { unit, comparables } = data;
   const source = safeExternalUrl(unit.source_url);
   const saved = isPinned(watch, "unit", String(unit.id));
+  const comparing = isPinned(compare, "unit", String(unit.id));
   const share = async () => {
     const url = window.location.href;
     const title = `${unitName(unit)}${unit.compound ? `${sep()}${nameOf(unit.compound)}` : ""}`;
@@ -116,6 +117,14 @@ export default function UnitPage() {
               >
                 <Bookmark size={15} fill={saved ? "currentColor" : "none"} /> {t(saved ? "Saved" : "Save")}
               </button>
+              <button
+                type="button"
+                className={`btn btn-sm${comparing ? " btn-ink" : ""}`}
+                aria-pressed={comparing}
+                onClick={() => toggleCompare({ kind: "unit", key: String(unit.id), name: unitName(unit) })}
+              >
+                {comparing ? <Check size={15} /> : <Plus size={15} />} {t(comparing ? "In comparison" : "Compare")}
+              </button>
               <button type="button" className="btn btn-sm" onClick={share}>
                 <Share2 size={15} /> {t("Share")}
               </button>
@@ -124,17 +133,40 @@ export default function UnitPage() {
         </div>
       </header>
 
-      {unit.images.length > 0 && (
-        <div className="page">
-          <Gallery images={unit.images} title={unitName(unit)} source={unit.source_name} />
-        </div>
-      )}
+      <div className="page unit-verdict">
+        <OpportunitySummary unit={unit} wide>
+          {source ? (
+            <a className="btn btn-nile" href={source} target="_blank" rel="noopener noreferrer">
+              {t("View on {source}", { source: unit.source_name })} <ExternalLink size={15} />
+            </a>
+          ) : (
+            <p className="fineprint">{t("An original source link was not provided.")}</p>
+          )}
+          {unit.compound && (
+            <Link
+              className="btn"
+              to={`/evaluate?${new URLSearchParams({
+                property_type: unit.property_type,
+                area: String(unit.area_m2),
+                price: String(unit.price),
+                compound: unit.compound.name,
+                ...(unit.finishing_class !== "unknown" ? { finishing: unit.finishing_class } : {}),
+                ...(unit.payment.terms === "plan" && unit.down_payment != null && unit.installment_months
+                  ? { down_payment: String(unit.down_payment), installment_years: String(unit.installment_months / 12) }
+                  : {}),
+              })}`}
+            >
+              {t("Adjust the details and compare again")}
+            </Link>
+          )}
+        </OpportunitySummary>
+      </div>
 
       <div className="page">
         <Glance unit={unit} />
       </div>
 
-      <div className="page unit-grid">
+      <div className={`page unit-grid${unit.images.length ? "" : " no-aside"}`}>
         <div className="unit-main">
           <section className="result-section">
             <h2>{t("The unit")}</h2>
@@ -153,6 +185,19 @@ export default function UnitPage() {
                 <span>{t("Resale evidence")}</span>
                 <span>{evidenceText(unit.resale_evidence)}</span>
               </p>
+            )}
+            {unit.description && (
+              <figure className="unit-quote">
+                <figcaption>{t("In the listing’s own words")}</figcaption>
+                <blockquote className={`unit-text${fullText ? "" : " is-clamped"}`} dir="auto">
+                  {unit.description}
+                </blockquote>
+                {unit.description.length > 420 && (
+                  <button className="link-arrow" aria-expanded={fullText} onClick={() => setFullText((v) => !v)}>
+                    {t(fullText ? "Show less" : "Read full description")}
+                  </button>
+                )}
+              </figure>
             )}
           </section>
           {unit.launch && (
@@ -175,47 +220,12 @@ export default function UnitPage() {
             <h2>{t("What this comparison cannot see")}</h2>
             <Unknowns items={unit.unknowns} />
           </section>
-          {unit.description && (
-            <section className="result-section">
-              <h2>{t("In the listing’s own words")}</h2>
-              <p className={`unit-text${fullText ? "" : " is-clamped"}`} dir="auto">
-                {unit.description}
-              </p>
-              {unit.description.length > 420 && (
-                <button className="link-arrow" aria-expanded={fullText} onClick={() => setFullText((v) => !v)}>
-                  {t(fullText ? "Show less" : "Read full description")}
-                </button>
-              )}
-            </section>
-          )}
         </div>
-        <aside className="unit-aside">
-          <OpportunitySummary unit={unit} />
-          {source ? (
-            <a className="btn btn-nile btn-block" href={source} target="_blank" rel="noopener noreferrer">
-              {t("View on {source}", { source: unit.source_name })} <ExternalLink size={15} />
-            </a>
-          ) : (
-            <p className="fineprint">{t("An original source link was not provided.")}</p>
-          )}
-          {unit.compound && (
-            <Link
-              className="btn btn-block"
-              to={`/evaluate?${new URLSearchParams({
-                property_type: unit.property_type,
-                area: String(unit.area_m2),
-                price: String(unit.price),
-                compound: unit.compound.name,
-                ...(unit.finishing_class !== "unknown" ? { finishing: unit.finishing_class } : {}),
-                ...(unit.payment.terms === "plan" && unit.down_payment != null && unit.installment_months
-                  ? { down_payment: String(unit.down_payment), installment_years: String(unit.installment_months / 12) }
-                  : {}),
-              })}`}
-            >
-              {t("Adjust the details and compare again")}
-            </Link>
-          )}
-        </aside>
+        {unit.images.length > 0 && (
+          <aside className="unit-aside">
+            <Gallery images={unit.images} title={unitName(unit)} source={unit.source_name} />
+          </aside>
+        )}
       </div>
 
       {comparables.length > 0 && (

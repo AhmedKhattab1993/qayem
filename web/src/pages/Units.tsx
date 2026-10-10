@@ -1,20 +1,41 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
-import { ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
-import { number, titleCase, useApi, useCatalog, sep, nameOf, place } from "../lib";
+import { BellPlus, BellRing, ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
+import { api, money, number, titleCase, useApi, useCatalog, sep, nameOf, place, year } from "../lib";
+import { useStore } from "../store";
+import { searchQuery } from "../searches";
 import { t } from "../locale";
 import type { Page, Unit } from "../types";
 import { EmptyState, ErrorState, Loading } from "../components/States";
 import { Pager, UnitTable, scrollToResults, type UnitSort } from "../components/UnitTable";
 import { levelText } from "../components/Opportunity";
 
-const KEYS = ["q", "district", "compound", "developer", "property_type", "level", "terms", "launch", "sort", "page"];
+/** A buyer's budget and needs first, then where and what. */
+const BUDGET = ["price_max", "cash_max", "signing_max", "bedrooms_min", "area_min", "area_max", "delivery"];
+const FILTERS = [...BUDGET, "district", "developer", "property_type", "level", "terms", "launch"];
+const KEYS = ["q", "compound", ...FILTERS, "sort", "page"];
+const thisYear = new Date().getFullYear();
+const AREAS: [number | null, number | null][] = [[null, 100], [100, 150], [150, 200], [200, 300], [300, null]];
+const upTo = (amounts: number[]) => amounts.map((value) => ({ value: String(value), label: t("Up to {amount}", { amount: money(value, true) }) }));
 
 export default function Units() {
   const [params, setParams] = useSearchParams();
   const catalog = useCatalog();
   const [search, setSearch] = useState(params.get("q") ?? "");
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const { searches, toggleSearch, toast } = useStore();
+  const saved = searchQuery(params);
+  const isSaved = searches.some((item) => item.query === saved);
+  const save = async () => {
+    if (isSaved) return toggleSearch(saved, 0);
+    try {
+      // what counts as new later: listings indexed after the newest one matching now
+      const newest = await api<Page<Unit>>(`/units?${saved}${saved ? "&" : ""}sort=newest&page_size=1`);
+      toggleSearch(saved, newest.items[0]?.id ?? 0);
+    } catch {
+      toast("We could not save this search. Please try again.");
+    }
+  };
   useEffect(() => setSearch(params.get("q") ?? ""), [params]);
   const query = useMemo(() => {
     const next = new URLSearchParams();
@@ -64,7 +85,9 @@ export default function Units() {
     );
   };
   const filtered = KEYS.some((key) => key !== "sort" && key !== "page" && params.get(key));
-  const active = ["district", "developer", "property_type", "level", "terms", "launch"].filter((key) => params.get(key)).length;
+  // the two ends of the area range are one filter
+  const active = FILTERS.filter((key) => key !== "area_max" && params.get(key)).length + (!params.get("area_min") && params.get("area_max") ? 1 : 0);
+  const area = `${params.get("area_min") ?? ""}-${params.get("area_max") ?? ""}`;
   const compoundKey = params.get("compound");
   const compound = compoundKey ? catalog?.compounds.find((c) => c.key === compoundKey) : undefined;
 
@@ -131,8 +154,52 @@ export default function Units() {
             { value: "price_desc", label: t("Price, high to low") },
             { value: "cash_ppm_asc", label: t("Cheapest per m² in today’s money") },
             { value: "area_desc", label: t("Largest first") },
+            { value: "newest", label: t("Newest listings first") },
           ], "Best opportunities first")}
           <div className={`filters${filtersOpen ? " is-open" : ""}`} id="unit-filters">
+            {select("price_max", "Asking price", "Any price", upTo([3e6, 5e6, 7.5e6, 10e6, 15e6, 20e6, 30e6, 50e6]))}
+            {select("cash_max", "Cash today", "Any amount", upTo([2e6, 3e6, 5e6, 7.5e6, 10e6, 15e6, 20e6]))}
+            {select("signing_max", "Paid at signing", "Any amount", upTo([5e5, 1e6, 1.5e6, 2e6, 3e6, 5e6, 7.5e6]))}
+            {select(
+              "bedrooms_min",
+              "Bedrooms",
+              "Any",
+              [1, 2, 3, 4, 5].map((n) => ({ value: String(n), label: t("{n}+ bedrooms", { n: number(n) }) })),
+            )}
+            <label className="field field-area">
+              <span className="field-label">{t("Area")}</span>
+              <span className="select">
+                <select
+                  value={area === "-" ? "" : area}
+                  onChange={(event) => {
+                    const [min = "", max = ""] = event.target.value.split("-");
+                    update({ area_min: min, area_max: max });
+                  }}
+                >
+                  <option value="">{t("Any size")}</option>
+                  {area !== "-" && !AREAS.some(([min, max]) => `${min ?? ""}-${max ?? ""}` === area) && (
+                    <option value={area}>{area} {t("m²")}</option>
+                  )}
+                  {AREAS.map(([min, max]) => (
+                    <option key={`${min}-${max}`} value={`${min ?? ""}-${max ?? ""}`}>
+                      {min == null
+                        ? t("Under {n} m²", { n: number(max) })
+                        : max == null
+                          ? t("{n} m² or more", { n: number(min) })
+                          : t("{min}–{max} m²", { min: number(min), max: number(max) })}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown size={15} />
+              </span>
+            </label>
+            {select("delivery", "Delivery", "Any time", [
+              { value: "ready", label: t("Ready now") },
+              ...Array.from({ length: 6 }, (_, i) => ({
+                value: String(thisYear + i),
+                label: t("By {year}", { year: year(thisYear + i) }),
+              })),
+            ])}
             {select(
               "district",
               "District",
@@ -183,6 +250,11 @@ export default function Units() {
                 </>
               )}
             </p>
+            {saved && (
+              <button type="button" className={`btn btn-sm${isSaved ? " btn-ink" : ""}`} aria-pressed={isSaved} onClick={save}>
+                {isSaved ? <BellRing size={15} /> : <BellPlus size={15} />} {t(isSaved ? "Search saved" : "Save this search")}
+              </button>
+            )}
             {filtered && (
               <button
                 className="link-arrow"

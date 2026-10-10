@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from qayem.db import init_db
 from qayem.models import ParseRun, Property, PropertyVersion
 from qayem.web import create_app
+from qayem.web_common import within
 from qayem.website_data import opportunity_key
 
 SEEN = datetime(2026, 9, 21, tzinfo=timezone.utc)
@@ -160,6 +161,49 @@ def test_units_filters_and_sorting(client: TestClient):
     assert client.get("/api/units", params={"source": "GPM"}).json()["total"] == 1
     assert client.get("/api/units", params={"developer": "Nile Developments"}).json()["total"] >= 8
     assert client.get("/api/units", params={"q": "%' OR 1=1 --"}).json()["total"] == 0
+
+
+def test_units_fit_a_buyers_budget_and_needs(client: TestClient):
+    every = client.get("/api/units", params={"page_size": 100}).json()["items"]
+
+    def ids(**params):
+        return {item["id"] for item in client.get("/api/units", params={"page_size": 100, **params}).json()["items"]}
+
+    def paid(item):
+        remaining = item["payment"]["remaining"]
+        return None if remaining is None else item["price"] - remaining
+
+    assert ids(price_max=5_000_000) == {i["id"] for i in every if i["price"] <= 5_000_000}
+    # unknown terms have no cash value or signing amount, so they never fit a limit on either
+    assert ids(cash_max=4_000_000) == {i["id"] for i in every
+                                       if i["payment"]["cash_equivalent"] is not None
+                                       and i["payment"]["cash_equivalent"] <= 4_000_000}
+    signing = ids(signing_max=1_500_000)
+    assert signing == {i["id"] for i in every if paid(i) is not None and paid(i) <= 1_500_000}
+    assert 19 not in signing and 20 not in signing  # unknown and partial terms
+    assert ids(area_min=100, area_max=160) == {i["id"] for i in every if 100 <= i["area_m2"] <= 160}
+    assert ids(bedrooms_min=3) == {i["id"] for i in every if (i["bedrooms"] or -1) >= 3}
+    ready = ids(delivery="ready")
+    assert ready == {i["id"] for i in every if i["delivery"]["bucket"] == "ready"}
+    assert ready <= ids(delivery="2030")
+    newest = client.get("/api/units", params={"sort": "newest", "newer_than": 10, "page_size": 100}).json()["items"]
+    assert [i["id"] for i in newest] == sorted((i["id"] for i in every if i["id"] > 10), reverse=True)
+    assert client.get("/api/units", params={"delivery": "soon"}).status_code == 422
+
+
+def test_bedrooms_and_delivery_limits_never_match_what_a_listing_does_not_publish():
+    def record(bedrooms=None, bucket="unknown", when=None):
+        return {"id": 1, "price": 5e6, "area_m2": 120, "bedrooms": bedrooms,
+                "payment": {"cash_equivalent": None, "remaining": None},
+                "delivery": {"bucket": bucket, "date": when, "years": None}}
+
+    assert within(record(bedrooms=3), bedrooms_min=3) and within(record(bedrooms=0), bedrooms_min=0)
+    assert not within(record(bedrooms=2), bedrooms_min=3) and not within(record(), bedrooms_min=0)
+    assert within(record(bucket="ready"), delivery="ready") and within(record(bucket="ready"), delivery="2027")
+    assert within(record(bucket="2_3y", when="2028-06-30"), delivery="2028")
+    assert not within(record(bucket="2_3y", when="2028-06-30"), delivery="2027")
+    assert not within(record(bucket="2_3y", when="2028-06-30"), delivery="ready")
+    assert not within(record(), delivery="2040")  # an unpublished date is not "ready by 2040"
 
 
 def test_a_unit_cheaper_on_both_comparisons_outranks_one_checked_once():

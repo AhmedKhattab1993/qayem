@@ -6,7 +6,15 @@ export interface Pinned {
   key: string;
   name: string;
 }
+/** A Units search kept in this browser, with the newest listing seen when it was last opened. */
+export interface SavedSearch {
+  query: string;
+  seen: number;
+}
 interface Store {
+  searches: SavedSearch[];
+  toggleSearch: (query: string, newest: number) => void;
+  markSeen: (query: string, newest: number) => void;
   watch: Pinned[];
   compare: Pinned[];
   toggleWatch: (item: Pinned) => void;
@@ -33,7 +41,18 @@ function read(key: string, limit: number): Pinned[] {
     return [];
   }
 }
-function persist(key: string, items: Pinned[]) {
+function readSearches(): SavedSearch[] {
+  try {
+    const values: unknown = JSON.parse(localStorage.getItem("qayem:searches") || "[]");
+    if (!Array.isArray(values)) return [];
+    return values
+      .filter((v): v is SavedSearch => v && typeof v.query === "string" && typeof v.seen === "number")
+      .slice(0, 20);
+  } catch {
+    return [];
+  }
+}
+function persist(key: string, items: unknown[]) {
   try {
     localStorage.setItem(key, JSON.stringify(items));
     return true;
@@ -45,6 +64,7 @@ function persist(key: string, items: Pinned[]) {
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [watch, setWatch] = useState(() => read("qayem:watch", 100));
   const [compare, setCompare] = useState(() => read("qayem:compare-entities", 3));
+  const [searches, setSearches] = useState(readSearches);
   const [message, setMessage] = useState("");
   const toast = useCallback((text: string) => setMessage(text), []);
   const toggleWatch = (item: Pinned) => {
@@ -60,7 +80,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const removing = compare.some((c) => same(c, item));
     if (!removing && compare.length >= 3) return setMessage("You can compare up to 3. Remove one to add another.");
     if (!removing && compare.length && compare[0].kind !== item.kind)
-      return setMessage("Compare compounds with compounds, and developers with developers.");
+      return setMessage("Compare compounds with compounds, developers with developers, and units with units.");
     const next = removing ? compare.filter((c) => !same(c, item)) : [...compare, item];
     setCompare(next);
     setMessage(
@@ -71,12 +91,29 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         : storageNotice,
     );
   };
+  const toggleSearch = (query: string, newest: number) => {
+    const removing = searches.some((item) => item.query === query);
+    if (!removing && searches.length >= 20) return setMessage("You can save up to 20 searches.");
+    const next = removing ? searches.filter((item) => item.query !== query) : [...searches, { query, seen: newest }];
+    setSearches(next);
+    setMessage(persist("qayem:searches", next) ? (removing ? "Search removed" : "Search saved to your watchlist") : storageNotice);
+  };
+  const markSeen = useCallback((query: string, newest: number) => {
+    setSearches((current) => {
+      if (!current.some((item) => item.query === query && item.seen < newest)) return current;
+      const next = current.map((item) => (item.query === query ? { ...item, seen: newest } : item));
+      persist("qayem:searches", next);
+      return next;
+    });
+  }, []);
   const clearCompare = () => {
     setCompare([]);
     if (!persist("qayem:compare-entities", [])) setMessage(storageNotice);
   };
   return (
-    <Context.Provider value={{ watch, compare, toggleWatch, toggleCompare, clearCompare, toast, message }}>
+    <Context.Provider
+      value={{ searches, toggleSearch, markSeen, watch, compare, toggleWatch, toggleCompare, clearCompare, toast, message }}
+    >
       {children}
     </Context.Provider>
   );

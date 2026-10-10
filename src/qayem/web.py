@@ -16,7 +16,7 @@ from .config import crawled_sources, db_path as configured_db_path
 from .valuation import developer_key, slug
 from .website_data import Catalog, CatalogUnavailable, detail, evaluate, opportunity_key, public_unit, url_key
 
-from .web_common import RANK_MIN_COMPOUND, RANK_MIN_DEVELOPER, matches, page_of, sort_entities
+from .web_common import DELIVERY_PATTERN, RANK_MIN_COMPOUND, RANK_MIN_DEVELOPER, Sort, matches, page_of, sort_entities, within
 
 Level = Literal["", "strong", "good", "in_line", "mixed", "pricier", "check", "unrated"]
 
@@ -71,8 +71,15 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
         source: str = Query("", max_length=32),
         resale: Literal["true", "all"] = "true",
         launch: Literal["", "true"] = "",
-        sort: Literal["opportunity", "launch_gap", "peer_gap", "price_asc", "price_desc", "area_desc",
-                      "cash_ppm_asc"] = "opportunity",
+        sort: Sort = "opportunity",
+        price_max: float | None = Query(None, ge=0, le=1_000_000_000, allow_inf_nan=False),
+        cash_max: float | None = Query(None, ge=0, le=1_000_000_000, allow_inf_nan=False),
+        signing_max: float | None = Query(None, ge=0, le=1_000_000_000, allow_inf_nan=False),
+        area_min: float | None = Query(None, ge=0, le=100_000, allow_inf_nan=False),
+        area_max: float | None = Query(None, ge=0, le=100_000, allow_inf_nan=False),
+        bedrooms_min: int | None = Query(None, ge=0, le=12),
+        delivery: str = Query("", pattern=DELIVERY_PATTERN),
+        newer_than: int | None = Query(None, ge=0),
         page: int = Query(1, ge=1, le=100_000),
         page_size: int = Query(25, ge=1, le=100),
     ) -> dict:
@@ -101,6 +108,10 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
             items = [r for r in items if r["source"] == source.strip().casefold()]
         if launch or sort == "launch_gap":  # only units with a current developer price for a similar unit
             items = [r for r in items if r.get("launch")]
+        budget = {"price_max": price_max, "cash_max": cash_max, "signing_max": signing_max, "area_min": area_min,
+                  "area_max": area_max, "bedrooms_min": bedrooms_min, "delivery": delivery, "newer_than": newer_than}
+        if any(value not in (None, "") for value in budget.values()):
+            items = [r for r in items if within(r, **budget)]
         if sort == "opportunity":
             items.sort(key=opportunity_key)
         elif sort == "launch_gap":  # like for like only: a listing error or an unfinished unit is not a deal
@@ -112,6 +123,8 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
         elif sort == "cash_ppm_asc":
             items = [r for r in items if r["payment"]["cash_equivalent"]]
             items.sort(key=lambda r: (r["payment"]["cash_equivalent"] / r["area_m2"], r["id"]))
+        elif sort == "newest":
+            items.sort(key=lambda r: -r["id"])
         else:
             key = {"price_asc": "price", "price_desc": "price", "area_desc": "area_m2"}[sort]
             direction = -1 if sort in {"price_desc", "area_desc"} else 1

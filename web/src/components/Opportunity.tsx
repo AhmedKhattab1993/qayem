@@ -1,6 +1,7 @@
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { AlertTriangle, ArrowDownRight, ArrowUpRight, Bookmark, Check, CheckCheck, ChevronsDown, Equal, HelpCircle, Plus, Shuffle } from "lucide-react";
-import { money, number, percent, signed, sep, tone } from "../lib";
+import { money, number, percent, quarterly, signed, sep, tone } from "../lib";
 import { t } from "../locale";
 import { isPinned, useStore, type EntityKind } from "../store";
 import type { Level, Opportunity, Payment, Peers, Scope, Unit } from "../types";
@@ -49,16 +50,27 @@ const levelNote: Record<Level, string> = {
   unrated: "No like-for-like developer price and fewer than five similar units listed, so there is no verdict. The facts are below.",
 };
 
-/** The unit's verdict and the comparisons behind it. */
-export function OpportunitySummary({ unit }: { unit: Pick<Unit, "opportunity" | "launch" | "peers"> }) {
+/** The unit's verdict and the comparisons behind it. `wide` lays it out as the band that opens a unit page,
+ * with the page's actions (children) under it. */
+export function OpportunitySummary({
+  unit,
+  wide = false,
+  children,
+}: {
+  unit: Pick<Unit, "opportunity" | "launch" | "peers">;
+  wide?: boolean;
+  children?: ReactNode;
+}) {
   const { opportunity, launch, peers } = unit;
   return (
-    <div className="valuation opportunity">
-      <span className="eyebrow no-rule">{t("Opportunity")}</span>
-      <LevelBadge level={opportunity.level} />
-      <BothTag opportunity={opportunity} />
-      <p className="opportunity-note">{t(levelNote[opportunity.level])}</p>
-      <dl className="facts facts-single">
+    <section className={`valuation opportunity${wide ? " opportunity-wide" : ""}`} aria-label={t("Opportunity")}>
+      <div className="opportunity-verdict">
+        <span className="eyebrow no-rule">{t("Opportunity")}</span>
+        <LevelBadge level={opportunity.level} />
+        <BothTag opportunity={opportunity} />
+        <p className="opportunity-note">{t(levelNote[opportunity.level])}</p>
+      </div>
+      <dl className={wide ? "opportunity-figures" : "facts facts-single"}>
         <div>
           <dt>{t("Vs the developer today")}</dt>
           <dd className={`num ${launch?.same_finishing ? tone(launch.gap) : ""}`}>
@@ -73,15 +85,18 @@ export function OpportunitySummary({ unit }: { unit: Pick<Unit, "opportunity" | 
         </div>
         {peers && (
           <div>
-            <dt>{t("Rank in today’s money")}</dt>
-            <dd className="num">{t("{rank} of {n}, cheapest first", { rank: number(peers.rank), n: number(peers.count) })}</dd>
+            <dt>{t(wide ? "Rank in today’s money, cheapest first" : "Rank in today’s money")}</dt>
+            <dd className="num">
+              {t(wide ? "{rank} of {n}" : "{rank} of {n}, cheapest first", { rank: number(peers.rank), n: number(peers.count) })}
+            </dd>
           </div>
         )}
       </dl>
       <p className="fineprint">
         {t("Each gap is the less favourable of the listed price and the price in today’s money. There is no fair price: Egypt publishes no resale sale prices.")}
       </p>
-    </div>
+      {children && <div className="opportunity-actions">{children}</div>}
+    </section>
   );
 }
 
@@ -149,6 +164,9 @@ export function PaymentFacts({ payment, price }: { payment: Payment; price: numb
           ["Paid at signing", money(price - (payment.remaining ?? 0))],
           ["Still owed", `${money(payment.remaining)}${sep()}${percent(payment.remaining_share)}`],
           ["Over", t("{n} years", { n: number(payment.years, 1), count: payment.years })],
+          ...(quarterly(payment) != null
+            ? ([["Each quarter, if paid evenly", `≈ ${money(quarterly(payment))}`]] as [string, string][])
+            : []),
           ["Worth today", money(payment.cash_equivalent)],
           ["Plan discount", percent(payment.discount, 1)],
         ]

@@ -155,50 +155,52 @@ export default function Compounds() {
           <EmptyState title={t("No compounds match.")} text={t("Try a different name or district.")} />
         ) : (
           <>
-            <div className={`ledger stack row-link grid-cards${data ? "" : " is-busy"}`}>
-              <table>
-                <caption className="sr-only">{t("Compounds with their prices and opportunities")}</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">{t("Compound")}</th>
-                    <th scope="col">{t("Main class")}</th>
-                    <th scope="col">{t("Resale / m²")}</th>
-                    <th scope="col">{t("Developer today / m²")}</th>
-                    <th scope="col">{t("Resale vs developer")}</th>
-                    <th scope="col">{t("Opportunities")}</th>
-                    <th scope="col">{t("Ready")}</th>
-                    <th scope="col">{t("Listings")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {list.items.map((compound) => {
-                    const main = [...compound.classes].sort((a, b) => b.units - a.units)[0];
-                    return (
-                      <tr key={compound.key}>
-                        <th scope="row">
-                          <Link className="ledger-title" to={`/compounds/${encodeURIComponent(compound.key)}`}>
-                            <strong dir="auto">{nameOf(compound)}</strong>
-                            <small>
-                              <NameList items={[nameOf(compound.developer), place(compound.district)]} />
-                            </small>
-                          </Link>
-                        </th>
-                        <td data-label={t("Main class")}>{main ? classLabel(main.class) : "—"}</td>
-                        <td data-label={t("Resale / m²")} className="num ledger-strong">{money(main?.median_asking_ppm, true)}</td>
-                        <td data-label={t("Developer today / m²")} className="num">
-                          {main?.developer_ppm ? money(main.developer_ppm, true) : "—"}
-                        </td>
-                        <td data-label={t("Resale vs developer")} className={`num ${tone(compound.launch?.median_gap)}`}>
-                          {signed(compound.launch?.median_gap)}
-                        </td>
-                        <td data-label={t("Opportunities")} className="num">{compound.good_count ? number(compound.good_count) : "—"}</td>
-                        <td data-label={t("Ready")} className="num">{percent(compound.ready_share)}</td>
-                        <td data-label={t("Listings")} className="num">{number(compound.units)}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            <div className="ledger-frame">
+              <div className={`ledger stack row-link grid-cards${data ? "" : " is-busy"}`}>
+                <table>
+                  <caption className="sr-only">{t("Compounds with their prices and opportunities")}</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">{t("Compound")}</th>
+                      <th scope="col">{t("Main class")}</th>
+                      <th scope="col">{t("Resale / m²")}</th>
+                      <th scope="col">{t("Developer today / m²")}</th>
+                      <th scope="col">{t("Resale vs developer")}</th>
+                      <th scope="col">{t("Opportunities")}</th>
+                      <th scope="col">{t("Ready")}</th>
+                      <th scope="col">{t("Listings")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {list.items.map((compound) => {
+                      const main = [...compound.classes].sort((a, b) => b.units - a.units)[0];
+                      return (
+                        <tr key={compound.key}>
+                          <th scope="row">
+                            <Link className="ledger-title" to={`/compounds/${encodeURIComponent(compound.key)}`}>
+                              <strong dir="auto">{nameOf(compound)}</strong>
+                              <small>
+                                <NameList items={[nameOf(compound.developer), place(compound.district)]} />
+                              </small>
+                            </Link>
+                          </th>
+                          <td data-label={t("Main class")}>{main ? classLabel(main.class) : "—"}</td>
+                          <td data-label={t("Resale / m²")} className="num ledger-strong">{money(main?.median_asking_ppm, true)}</td>
+                          <td data-label={t("Developer today / m²")} className="num">
+                            {main?.developer_ppm ? money(main.developer_ppm, true) : "—"}
+                          </td>
+                          <td data-label={t("Resale vs developer")} className={`num ${tone(compound.launch?.median_gap)}`}>
+                            {signed(compound.launch?.median_gap)}
+                          </td>
+                          <td data-label={t("Opportunities")} className="num">{compound.good_count ? number(compound.good_count) : "—"}</td>
+                          <td data-label={t("Ready")} className="num">{percent(compound.ready_share)}</td>
+                          <td data-label={t("Listings")} className="num">{number(compound.units)}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
             <Pager
               page={list.page}

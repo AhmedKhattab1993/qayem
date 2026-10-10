@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowRight, ChevronDown, Link2, Scale } from "lucide-react";
-import { year as formatYear, api, ApiError, money, number, percent, titleCase, useApi, useCatalog, scrollBehavior, sep, nameOf, place } from "../lib";
+import { year as formatYear, api, ApiError, money, number, percent, quarterly, titleCase, useApi, useCatalog, scrollBehavior, sep, nameOf, place } from "../lib";
 import { t } from "../locale";
 import type { Evaluation, Payment } from "../types";
 import { ErrorState, Loading } from "../components/States";
@@ -367,6 +367,7 @@ function Result({ data }: { data: Evaluation }) {
       ) : (
         <>
           <OpportunitySummary unit={data} />
+          <CostCalculator price={inputs.price} payment={data.payment} ready={inputs.delivery?.bucket === "ready"} />
           {data.launch && (
             <section className="result-section">
               <h3>{t("Against the developer’s price today")}</h3>
@@ -387,11 +388,14 @@ function Result({ data }: { data: Evaluation }) {
         <h3>{t("The payment plan, in today’s money")}</h3>
         <PaymentFacts payment={data.payment} price={inputs.price} />
       </section>
-      <CostCalculator price={inputs.price} payment={data.payment} ready={inputs.delivery?.bucket === "ready"} />
+      {data.status === "compound_not_found" && (
+        <CostCalculator price={inputs.price} payment={data.payment} ready={inputs.delivery?.bucket === "ready"} />
+      )}
       {data.status === "compared" && (
         <section className="result-section">
           <h3>{t("What this comparison cannot see")}</h3>
-          <Unknowns items={data.unknowns} />
+          {/* The fees are assumptions entered in the cost above; they are confirmed there, not repeated here. */}
+          <Unknowns items={data.unknowns.filter((item) => !CALCULATED.includes(item))} />
           <p className="fineprint">{t("Ask the seller and the developer about each of these before you commit.")}</p>
         </section>
       )}
@@ -407,6 +411,8 @@ function Result({ data }: { data: Evaluation }) {
 }
 
 const DEFAULTS = { transfer: 5, brokerage: 2.5, maintenance: 8, registration: 0 };
+/** Unknowns the cost calculator asks about. */
+const CALCULATED = ["transfer_fee", "maintenance_deposit"];
 
 /** All-in cost of buying: what leaves your account now, later, and in today’s money. */
 function CostCalculator({ price, payment, ready }: { price: number; payment: Payment; ready: boolean }) {
@@ -454,7 +460,12 @@ function CostCalculator({ price, payment, ready }: { price: number; payment: Pay
         </div>
         <div>
           <dt>{t("Paid later")}</dt>
-          <dd className="num">{money(later)}</dd>
+          <dd className="num">
+            {money(later)}
+            {quarterly(payment) != null && (
+              <small className="muted cost-each">{t("≈ {amount} a quarter", { amount: money(quarterly(payment)) })}</small>
+            )}
+          </dd>
         </div>
         <div className="cost-today">
           <dt>{t("All-in cost in today’s money")}</dt>
@@ -465,6 +476,9 @@ function CostCalculator({ price, payment, ready }: { price: number; payment: Pay
           <dd className="num">{percent((fees + fee("maintenance")) / price, 1)}</dd>
         </div>
       </dl>
+      <p className="fineprint">
+        {t("Ask the developer for its transfer fee, and the seller whether the maintenance deposit is already paid.")}
+      </p>
     </section>
   );
 }

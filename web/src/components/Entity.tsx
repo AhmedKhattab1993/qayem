@@ -26,10 +26,6 @@ export function ClassCards({ classes }: { classes: ClassSummary[] }) {
           </span>
           <dl>
             <div>
-              <dt>{t("Resale in today’s money / m²")}</dt>
-              <dd className="num">{money(item.median_cash_ppm, true)}</dd>
-            </div>
-            <div>
               <dt>{t("Developer today / m²")}</dt>
               <dd className="num">{item.developer_ppm ? money(item.developer_ppm, true) : t("Not selling")}</dd>
             </div>
@@ -40,6 +36,16 @@ export function ClassCards({ classes }: { classes: ClassSummary[] }) {
               </div>
             )}
           </dl>
+          {item.median_cash_ppm != null && (
+            <p className="class-cash fineprint num">
+              {item.developer_cash_ppm
+                ? t("In today’s money, plans discounted: resale {resale}, developer {developer} per m².", {
+                    resale: money(item.median_cash_ppm, true),
+                    developer: money(item.developer_cash_ppm, true),
+                  })
+                : t("In today’s money, plans discounted: resale {resale} per m².", { resale: money(item.median_cash_ppm, true) })}
+            </p>
+          )}
         </article>
       ))}
     </div>

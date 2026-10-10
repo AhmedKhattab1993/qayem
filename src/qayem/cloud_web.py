@@ -9,7 +9,7 @@ from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 
 from .valuation import developer_key, slug
-from .web_common import RANK_MIN_COMPOUND, RANK_MIN_DEVELOPER, search_query
+from .web_common import DELIVERY_PATTERN, RANK_MIN_COMPOUND, RANK_MIN_DEVELOPER, Sort, search_query
 from .website_data import Snapshot, evaluate, peer_groups, url_key
 
 Level = Literal["", "strong", "good", "in_line", "mixed", "pricier", "check", "unrated"]
@@ -17,6 +17,25 @@ Level = Literal["", "strong", "good", "in_line", "mixed", "pricier", "check", "u
 
 class Unavailable(Exception):
     pass
+
+
+def budget_clauses(*, price_max=None, cash_max=None, signing_max=None, area_min=None, area_max=None,
+                   bedrooms_min=None, delivery="", newer_than=None) -> tuple[list[str], list]:
+    """`web_common.within` in SQL, over each unit's published JSON. NULL never satisfies a limit."""
+    cash, remaining = "json_extract(public,'$.payment.cash_equivalent')", "json_extract(public,'$.payment.remaining')"
+    rules = [(price_max, "price<=?"), (cash_max, f"{cash}<=?"), (signing_max, f"price-{remaining}<=?"),
+             (area_min, "area>=?"), (area_max, "area<=?"), (bedrooms_min, "json_extract(public,'$.bedrooms')>=?"),
+             (newer_than, "id>?")]
+    clauses = [sql for value, sql in rules if value is not None]
+    params = [value for value, _ in rules if value is not None]
+    if delivery:
+        ready = "json_extract(public,'$.delivery.bucket')='ready'"
+        if delivery == "ready":
+            clauses.append(ready)
+        else:
+            clauses.append(f"({ready} OR substr(json_extract(public,'$.delivery.date'),1,4)<=?)")
+            params.append(delivery)
+    return clauses, params
 
 
 class D1:
@@ -161,9 +180,14 @@ def create_cloud_app(database=None):
         property_type: str = Query("", max_length=64), level: Level = "",
         terms: Literal["", "cash", "plan", "partial", "unknown"] = "",
         source: str = Query("", max_length=32), resale: Literal["true", "all"] = "true",
-        launch: Literal["", "true"] = "",
-        sort: Literal["opportunity", "launch_gap", "peer_gap", "price_asc", "price_desc", "area_desc",
-                      "cash_ppm_asc"] = "opportunity",
+        launch: Literal["", "true"] = "", sort: Sort = "opportunity",
+        price_max: float | None = Query(None, ge=0, le=1_000_000_000, allow_inf_nan=False),
+        cash_max: float | None = Query(None, ge=0, le=1_000_000_000, allow_inf_nan=False),
+        signing_max: float | None = Query(None, ge=0, le=1_000_000_000, allow_inf_nan=False),
+        area_min: float | None = Query(None, ge=0, le=100_000, allow_inf_nan=False),
+        area_max: float | None = Query(None, ge=0, le=100_000, allow_inf_nan=False),
+        bedrooms_min: int | None = Query(None, ge=0, le=12),
+        delivery: str = Query("", pattern=DELIVERY_PATTERN), newer_than: int | None = Query(None, ge=0),
         page: int = Query(1, ge=1, le=100_000), page_size: int = Query(25, ge=1, le=100),
         data=Depends(store),
     ):
@@ -185,9 +209,14 @@ def create_cloud_app(database=None):
         if q.strip():
             clauses.append("NOT EXISTS (SELECT 1 FROM json_each(?) term WHERE instr(search,term.value)=0)")
             params.append(json.dumps(search_query(q).split()))
+        extra, values = budget_clauses(price_max=price_max, cash_max=cash_max, signing_max=signing_max,
+                                       area_min=area_min, area_max=area_max, bedrooms_min=bedrooms_min,
+                                       delivery=delivery, newer_than=newer_than)
+        clauses.extend(extra)
+        params.extend(values)
         order = {"opportunity": "opportunity_rank", "launch_gap": "launch_gap,id", "peer_gap": "peer_gap,id",
                  "cash_ppm_asc": "cash_ppm,id", "price_asc": "price,id", "price_desc": "price DESC,id",
-                 "area_desc": "area DESC,id"}[sort]
+                 "area_desc": "area DESC,id", "newest": "id DESC"}[sort]
         if launch or sort == "launch_gap":
             clauses.append("launch_gap IS NOT NULL")
         if sort == "launch_gap":

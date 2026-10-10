@@ -138,6 +138,11 @@
 .opportunity .level-unrated {
   padding: 0;
 }
+.opportunity-verdict {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
 .opportunity-note {
   margin: 0;
   color: var(--ink-2);
@@ -899,6 +904,138 @@
   white-space: pre-line;
   color: var(--ink-2);
 }
+/* ——— Unit page: the verdict opens the page ——— */
+.unit-verdict {
+  margin-top: 28px;
+}
+.opportunity-wide {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 18px 40px;
+  align-items: start;
+}
+.opportunity-wide .opportunity-verdict {
+  grid-row: span 2;
+}
+.opportunity-figures {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  justify-self: stretch;
+  margin: 0;
+}
+.opportunity-figures > div {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--sand);
+}
+.opportunity-figures dt {
+  color: var(--ink-3);
+  font-size: 13.5px;
+  line-height: 1.35;
+}
+.opportunity-figures dd {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(20px, 2vw, 26px);
+  font-weight: 600;
+  line-height: 1.2;
+}
+.opportunity-figures dd.is-down {
+  color: var(--nile);
+}
+.opportunity-figures dd.is-up {
+  color: var(--clay);
+}
+.opportunity-wide > .fineprint {
+  grid-column: 2;
+}
+.opportunity-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  grid-column: 1 / -1;
+  justify-self: stretch;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-soft);
+}
+.opportunity-actions .fineprint {
+  margin: 0;
+  align-self: center;
+}
+/* the listing's own words, quoted inside "The unit" rather than as a section of their own */
+.unit-quote {
+  display: grid;
+  gap: 6px;
+  margin: 16px 0 0;
+}
+.unit-quote figcaption {
+  color: var(--ink-3);
+  font-size: 13px;
+  font-weight: 600;
+}
+.unit-quote blockquote {
+  margin: 0;
+}
+.unit-quote .link-arrow {
+  justify-self: start;
+}
+.unit-grid.no-aside {
+  grid-template-columns: minmax(0, 860px);
+}
+/* Beside the detail, the photos are one large picture over a row of small ones. */
+@media (min-width: 721px) {
+  .unit-aside .gallery {
+    margin-top: 0;
+  }
+  .unit-aside .gallery .gallery-track {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: auto;
+    height: auto;
+    border-radius: 20px;
+  }
+  .unit-aside .gallery .gallery-item {
+    grid-row: auto;
+    grid-column: span 1;
+    aspect-ratio: 1;
+  }
+  .unit-aside .gallery .gallery-item:first-child {
+    grid-column: 1 / -1;
+    aspect-ratio: 4 / 3;
+    max-height: 440px;
+  }
+  .unit-aside .gallery-1 .gallery-item:first-child {
+    aspect-ratio: 4 / 3;
+  }
+}
+@media (max-width: 900px) {
+  .opportunity-wide {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .opportunity-wide .opportunity-verdict {
+    grid-row: auto;
+  }
+  .opportunity-wide > .fineprint {
+    grid-column: 1;
+  }
+}
+@media (max-width: 560px) {
+  .opportunity-figures {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .opportunity-figures > div:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+  .opportunity-figures > div {
+    padding: 12px 14px;
+  }
+  .opportunity-actions .btn {
+    flex: 1 1 100%;
+  }
+}
 .unit-text.is-clamped {
   display: -webkit-box;
   -webkit-line-clamp: 6;
@@ -1035,6 +1172,11 @@
 .cost-totals dd small {
   font-size: 13.5px;
 }
+.cost-totals .cost-each {
+  display: block;
+  margin-top: 2px;
+  font-weight: 400;
+}
 .cost-totals .cost-today {
   background: var(--night);
   color: var(--on-night);
@@ -1111,6 +1253,32 @@
 .compare-head a:hover {
   text-decoration: underline;
 }
+.compare-head > a {
+  flex: 1;
+  min-width: 0;
+}
+.compare-head .thumb {
+  width: 48px;
+  height: 40px;
+}
+.compare-sub {
+  display: block;
+  font-size: 13px;
+}
+.compare-more {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+}
+/* the lowest figure across the columns, where lower is better */
+.compare-table td.is-best {
+  background: var(--nile-soft);
+}
+.compare-table td.is-best b,
+.compare-table td.is-best > .num {
+  color: var(--nile);
+  font-weight: 600;
+}
 .compare-cell {
   display: inline-flex;
   align-items: center;
@@ -1160,6 +1328,36 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+.watch-section {
+  margin-top: 26px;
+}
+.watch-section h2 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+}
+.watch-section > p {
+  margin: 4px 0 0;
+}
+.watch-section .watch-list {
+  margin-top: 14px;
+}
+.watch-icon.is-fresh {
+  background: var(--brass-soft);
+  color: #7a5717;
+}
+.fresh-tag {
+  color: var(--nile);
+  font-weight: 600;
+}
+@media (max-width: 560px) {
+  .watch-list li {
+    flex-wrap: wrap;
+  }
+  .watch-compare-label {
+    display: none;
+  }
 }
 
 /* ——— Methodology ——— */

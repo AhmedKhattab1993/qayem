@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight } from "lucide-react";
-import { money, number, scrollBehavior, signed, titleCase, tone, sep, nameOf, place, year } from "../lib";
+import { money, number, quarterly, scrollBehavior, signed, titleCase, tone, sep, nameOf, place, year } from "../lib";
 import { t } from "../locale";
 import type { Unit } from "../types";
 import { BothTag, LevelBadge } from "./Opportunity";
 import { NameList } from "./Names";
 import { Thumb } from "./Gallery";
 
-export type UnitSort = "opportunity" | "launch_gap" | "peer_gap" | "price_asc" | "price_desc" | "area_desc" | "cash_ppm_asc";
+export type UnitSort = "opportunity" | "launch_gap" | "peer_gap" | "price_asc" | "price_desc" | "area_desc" | "cash_ppm_asc" | "newest";
 
 /** Type · area · bedrooms. Each part keeps its number and unit on one line. */
 export const unitName = (unit: Pick<Unit, "property_type" | "bedrooms" | "area_m2">) =>
@@ -59,80 +59,85 @@ export function UnitTable({
   // With a single source (AqarExit) a source column repeats the same name on every row.
   const sources = new Set(items.map((unit) => unit.source_name)).size > 1;
   return (
-    <div className={`ledger stack row-link unit-ledger${busy ? " is-busy" : ""}`}>
-      <table>
-        <caption className="sr-only">{t(caption)}</caption>
-        <thead>
-          <tr>
-            <th scope="col">{t("Unit")}</th>
-            {header("Asking price", ["price_asc", "price_desc"])}
-            {header("Cash today", ["cash_ppm_asc"])}
-            {header("Vs developer", ["launch_gap"])}
-            {header("Vs similar units", ["peer_gap"])}
-            {header("Opportunity", ["opportunity"])}
-            {sources && <th scope="col">{t("Source")}</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((unit) => (
-            <tr key={unit.id}>
-              <th scope="row">
-                <Link className="ledger-title has-thumb" to={`/units/${unit.id}`}>
-                  <Thumb url={unit.photo} />
-                  <strong>{unitName(unit)}</strong>
-                  <small>
-                    <NameList
-                      items={[
-                        nameOf(unit.compound),
-                        place(unit.district),
-                        unit.contract_year ? t("signed {year}", { year: year(unit.contract_year) }) : null,
-                      ]}
-                    />
-                  </small>
-                </Link>
-              </th>
-              <td data-label={t("Asking price")} className="num ledger-strong cell-price">{money(unit.price, true)}</td>
-              <td data-label={t("Cash today")} className="cell-cash">
-                <span className="ledger-stack">
-                  <span className="num">
-                    {unit.payment.cash_equivalent != null ? money(unit.payment.cash_equivalent, true) : "—"}
-                  </span>
-                  <small>{termsLabel(unit)}</small>
-                </span>
-              </td>
-              <td data-label={t("Vs developer")} className={`num cell-gap ${unit.launch?.same_finishing ? tone(unit.launch.gap) : ""}`}>
-                {unit.launch ? (
-                  <span className="ledger-stack">
-                    <span>{signed(unit.launch.gap)}</span>
-                    {!unit.launch.same_finishing && <small>{t("other finishing")}</small>}
-                  </span>
-                ) : (
-                  "—"
-                )}
-              </td>
-              <td data-label={t("Vs similar units")} data-short={t("Vs similar")} className={`num cell-gap ${unit.peers ? tone(unit.peers.gap) : ""}`}>
-                {unit.peers ? (
-                  <span className="ledger-stack">
-                    <span>{signed(unit.peers.gap)}</span>
-                    <small>{t("{rank} of {n}", { rank: number(unit.peers.rank), n: number(unit.peers.count) })}</small>
-                  </span>
-                ) : (
-                  "—"
-                )}
-              </td>
-              <td data-label={t("Opportunity")} className="cell-level">
-                <LevelBadge level={unit.opportunity.level} />
-                <BothTag opportunity={unit.opportunity} />
-              </td>
-              {sources && (
-                <td data-label={t("Source")} className="ledger-muted cell-source">
-                  {unit.source_name}
-                </td>
-              )}
+    <div className="ledger-frame">
+      <div className={`ledger stack row-link unit-ledger${busy ? " is-busy" : ""}`}>
+        <table>
+          <caption className="sr-only">{t(caption)}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{t("Unit")}</th>
+              {header("Asking price", ["price_asc", "price_desc"])}
+              {header("Cash today", ["cash_ppm_asc"])}
+              {header("Vs developer", ["launch_gap"])}
+              {header("Vs similar units", ["peer_gap"])}
+              {header("Opportunity", ["opportunity"])}
+              {sources && <th scope="col">{t("Source")}</th>}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {items.map((unit) => (
+              <tr key={unit.id}>
+                <th scope="row">
+                  <Link className="ledger-title has-thumb" to={`/units/${unit.id}`}>
+                    <Thumb url={unit.photo} />
+                    <strong>{unitName(unit)}</strong>
+                    <small>
+                      <NameList
+                        items={[
+                          nameOf(unit.compound),
+                          place(unit.district),
+                          unit.contract_year ? t("signed {year}", { year: year(unit.contract_year) }) : null,
+                        ]}
+                      />
+                    </small>
+                  </Link>
+                </th>
+                <td data-label={t("Asking price")} className="num ledger-strong cell-price">{money(unit.price, true)}</td>
+                <td data-label={t("Cash today")} className="cell-cash">
+                  <span className="ledger-stack">
+                    <span className="num">
+                      {unit.payment.cash_equivalent != null ? money(unit.payment.cash_equivalent, true) : "—"}
+                    </span>
+                    <small>{termsLabel(unit)}</small>
+                    {quarterly(unit.payment) != null && (
+                      <small>{t("≈ {amount} a quarter", { amount: money(quarterly(unit.payment), true) })}</small>
+                    )}
+                  </span>
+                </td>
+                <td data-label={t("Vs developer")} className={`num cell-gap ${unit.launch?.same_finishing ? tone(unit.launch.gap) : ""}`}>
+                  {unit.launch ? (
+                    <span className="ledger-stack">
+                      <span>{signed(unit.launch.gap)}</span>
+                      {!unit.launch.same_finishing && <small>{t("other finishing")}</small>}
+                    </span>
+                  ) : (
+                    "—"
+                  )}
+                </td>
+                <td data-label={t("Vs similar units")} data-short={t("Vs similar")} className={`num cell-gap ${unit.peers ? tone(unit.peers.gap) : ""}`}>
+                  {unit.peers ? (
+                    <span className="ledger-stack">
+                      <span>{signed(unit.peers.gap)}</span>
+                      <small>{t("{rank} of {n}", { rank: number(unit.peers.rank), n: number(unit.peers.count) })}</small>
+                    </span>
+                  ) : (
+                    "—"
+                  )}
+                </td>
+                <td data-label={t("Opportunity")} className="cell-level">
+                  <LevelBadge level={unit.opportunity.level} />
+                  <BothTag opportunity={unit.opportunity} />
+                </td>
+                {sources && (
+                  <td data-label={t("Source")} className="ledger-muted cell-source">
+                    {unit.source_name}
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
