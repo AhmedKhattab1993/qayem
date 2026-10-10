@@ -77,7 +77,7 @@ def parse_count(text: str | None) -> int | None:
 _PROPERTY_TYPE_PATTERNS: list[tuple[str, str]] = [
     (r"twin\s*house|توين", "twinhouse"),
     (r"town\s*house|تاون", "townhouse"),
-    (r"pent\s*house|بينت|بنت هاوس", "penthouse"),
+    (r"pent\s*house|بينت|بنتا?\s*هاوس", "penthouse"),
     (r"duplex|دوبلكس|دوبلكس", "duplex"),
     (r"studio|ستوديو", "studio"),
     (r"villa|فيلا", "villa"),

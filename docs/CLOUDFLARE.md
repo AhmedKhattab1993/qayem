@@ -5,7 +5,7 @@ Qayem's public backend is an async Python Worker with a dedicated D1 database,
 The website uses the existing `/api/*` contract. The Worker runs the same Python
 comparison functions as the local API; no second valuation implementation is maintained.
 
-Crawling, Pi enrichment (`zai-coding-cn/glm-5.3-flash`) and entity resolution run
+Crawling and Pi entity resolution (`zai-coding-cn/glm-5.3-flash`) run
 in the separate Cloudflare update service described in
 [CLOUD_UPDATES.md](CLOUD_UPDATES.md). Private R2 checkpoints preserve the canonical
 SQLite database, including raw source payloads and change history. D1 contains
@@ -35,7 +35,7 @@ From the repository root, pull a verified copy of the saved cloud database:
 This downloads the private R2 checkpoint into the ignored
 `.artifacts/development/qayem.db`, preserving the existing local `qayem.db`.
 Checksums and SQLite integrity are verified before replacement. The copy includes
-saved enrichment and entity results; pulling does not crawl or call AI. Repeating
+saved entity results; pulling does not crawl or call AI. Repeating
 the command checks the small current-pointer object and skips the checkpoint
 download when it is unchanged.
 
@@ -62,7 +62,7 @@ to staging only. It skips another D1 publication if the source snapshot, Python
 comparison/export code and filters are unchanged and that version is still active.
 Python comparison changes or new data require a fresh projection; frontend-only
 changes need only the deployment command. Refreshes
-are manual and never run another crawl, enrichment or production publication.
+are manual and never run another crawl, entity resolution or production publication.
 Separate staging assets and import artifacts prevent staging builds from
 overwriting the production build. Deployment runs Python tests, the frontend
 typecheck/build and live staging identity, catalogue and isolation checks.
@@ -74,7 +74,7 @@ bash scripts/deploy-cloudflare.sh production
 ```
 
 This updates the production Worker and assets while continuing to use production's
-active cloud dataset. Changes to crawling, enrichment or comparison code also
+active cloud dataset. Changes to crawling, entity resolution or comparison code also
 require deploying the updater and publishing a new projection; follow
 [CLOUD_UPDATES.md](CLOUD_UPDATES.md). Avoid local production publication during
 ordinary development. No automatic Git push or production release is configured.

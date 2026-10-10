@@ -12,9 +12,27 @@ from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .enrichment import description_hash, is_missing, listing_text
 from .models import Property, PropertyEnrichment, PropertyVersion, utcnow
 from .sources.base import NormalizedListing
+
+# Stored description-enrichment fills (property_enrichments, no longer produced) are kept
+# while the listing's text is unchanged; these match how they were recorded.
+def listing_text(title: str | None, description: str | None) -> str:
+    return f"{title or ''}\n{description or ''}".strip()
+
+
+def description_hash(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def is_missing(field: str, value: object) -> bool:
+    if value is None:
+        return True
+    if isinstance(value, str):
+        stripped = value.strip().casefold()
+        return not stripped or stripped in {"-", "unknown", "n/a", "null"}
+    return False
+
 
 # Fields that participate in change detection. Anything here changing marks
 # the listing 'updated'; metadata columns (first_seen_at etc.) never do.

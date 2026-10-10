@@ -7,9 +7,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from qayem.db import init_db
-from qayem.models import Property, PropertyVersion
+from qayem.models import Property, PropertyEnrichment, PropertyVersion
 from qayem.sources.base import NormalizedListing
-from qayem.upsert import content_hash, mark_removals, renormalize, upsert_listing
+from qayem.upsert import (
+    content_hash, description_hash, listing_text, mark_removals, renormalize, upsert_listing,
+)
 
 
 @pytest.fixture()
@@ -200,7 +202,7 @@ def test_backfill_fills_only_empty_columns_and_next_parse_records_no_version(tmp
     from sqlalchemy import create_engine, func, select
     from sqlalchemy.orm import Session
     from qayem.db import init_db
-    from qayem.models import Property, PropertyVersion
+    from qayem.models import Property, PropertyEnrichment, PropertyVersion
     from qayem.sources.base import NormalizedListing
     from qayem.sources.semsar import parse_description
     from qayem.upsert import backfill_from_description, upsert_listing
@@ -223,3 +225,47 @@ def test_backfill_fills_only_empty_columns_and_next_parse_records_no_version(tmp
         assert upsert_listing(session, "semsar", new_parse) == "unchanged"
         session.commit()
         assert session.scalar(select(func.count()).select_from(PropertyVersion)) == 1  # only "created"
+
+
+def stored_fill(session, prop, text, applied):
+    """A description-enrichment record as earlier runs left it (no new ones are made)."""
+    session.add(PropertyEnrichment(
+        property_id=prop.id, status="done", done=True, claimed_at=prop.first_seen_at,
+        description_hash=description_hash(text), model="glm-5.3-flash",
+        reasoning_effort="low", applied=applied,
+    ))
+
+
+def test_stored_fills_survive_updates_only_while_the_text_is_unchanged(session):
+    def text_listing(price, title="Listing"):
+        return NormalizedListing(source_listing_id="A1", title=title, description="شقة 120 متر",
+                                 price=price, property_type=None, purpose="sale", currency="EGP")
+
+    upsert_listing(session, "opensooq", text_listing(1_000_000))
+    session.flush()
+    prop = session.query(Property).one()
+    prop.property_type = "apartment"
+    stored_fill(session, prop, listing_text("Listing", "شقة 120 متر"), {"property_type": "apartment"})
+    session.commit()
+
+    upsert_listing(session, "opensooq", text_listing(900_000))
+    session.commit()
+    assert session.query(Property).one().property_type == "apartment"
+
+    upsert_listing(session, "opensooq", text_listing(800_000, title="Changed"))
+    session.commit()
+    assert session.query(Property).one().property_type is None
+
+
+def test_fills_recorded_before_titles_were_sent_still_reapply(session):
+    upsert_listing(session, "opensooq", NormalizedListing(
+        source_listing_id="A1", title="T", description="شقة", price=1.0))
+    session.flush()
+    prop = session.query(Property).one()
+    prop.property_type = "apartment"
+    stored_fill(session, prop, "شقة", {"property_type": "apartment"})
+    session.commit()
+    upsert_listing(session, "opensooq", NormalizedListing(
+        source_listing_id="A1", title="T", description="شقة", price=2.0))
+    session.commit()
+    assert session.query(Property).one().property_type == "apartment"

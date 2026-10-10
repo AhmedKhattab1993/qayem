@@ -11,14 +11,14 @@ Egypt publishes no resale sale prices.
 
 **Sources in use.** AqarExit is the only complete record of the secondary market
 (paid amount, balance and installments for every unit), so the website, the model,
-the nightly crawl and description enrichment use AqarExit only. The other parsers
+the nightly crawl and name resolution use AqarExit only. The other parsers
 below still work and their rows stay in the database, unused. `QAYEM_SOURCES`
 changes the selection: `QAYEM_SOURCES=aqarexit,nawy` or `QAYEM_SOURCES=all`.
 
 **Developer prices.** Nawy's developer-sale units (`nawy_primary`: each developer's
 current price and payment plan, per unit) are crawled nightly as a price benchmark
-(`QAYEM_BENCHMARK_SOURCES`, `none` turns it off). They are never listed, fitted or
-enriched; the website compares each AqarExit unit with the developer's current price
+(`QAYEM_BENCHMARK_SOURCES`, `none` turns it off). They are never listed or
+fitted; the website compares each AqarExit unit with the developer's current price
 for a similar unit in the same compound. AqarExit's compound and developer names are
 free text («باديا», «Badya», «بادية»), so `qayem resolve-entities` maps each spelling to
 a canonical compound, its Arabic name and Nawy's name for it (`src/qayem/entities.py`).
@@ -98,15 +98,6 @@ qayem list --status removed         # what disappeared from sources
 qayem show 42                       # one property + full change history
 qayem removed --since 2026-09-01    # removal audit
 
-qayem enrich-descriptions --dry-run  # preview the next batch of 40 listings
-qayem enrich-descriptions            # one batch: 40 listings in one headless Pi call
-qayem enrich-descriptions --batches 5 --source opensooq
-qayem enrich-descriptions --batches 0  # continue until no eligible rows remain
-qayem enrich-descriptions --retry-failed --batches 0 --workers 4  # retry recorded failures
-qayem enrich-descriptions --since 2026-09-26 --batches 0  # only listings first seen since
-qayem enrich-revoke --dry-run        # fills from earlier prompt versions that would be undone
-qayem enrich-status                  # claimed / done / failed counts
-
 qayem resolve-entities --dry-run     # spelling pairs waiting for canonical names
 qayem resolve-entities               # resolve them (glm-5.3-flash, 120 pairs per Pi call)
 ```
@@ -114,53 +105,19 @@ qayem resolve-entities               # resolve them (glm-5.3-flash, 120 pairs pe
 Every `parse` prints a summary: pages fetched, seen / created / updated /
 unchanged / relisted / removed counts.
 
-`enrich-descriptions` sends **only each listing's title and description** —
-40 listings per fresh headless Pi call — to `zai-coding-cn/glm-5.3-flash`
-with low reasoning effort. The extraction rules in
-`src/qayem/enrichment_spec.md` and a sparse JSON schema constrain the response.
-The runner disables tools, extensions, skills, project context and session storage;
-it checks the returned provider, model, completion status and JSON schema before
-accepting any facts. Configure this provider in Pi locally and verify it with
+`resolve-entities` sends only spelling pairs to `zai-coding-cn/glm-5.3-flash` through a
+headless Pi call with tools, extensions, skills, project context and session storage
+disabled. Configure this provider in Pi locally and verify it with
 `pi auth check --provider zai-coding-cn --model glm-5.3-flash`.
 
-The older Codex precision benchmark in `bench/enrichment/RESULTS.md` is historical;
-it is not an accuracy measurement for GLM. Live Arabic and English extraction
-fixtures have been checked with the new runner and the same grounding validators.
-
-Only listings the website could show are sent, newest first: active,
-not Nawy (its title and description are generated from the payload the
-parser already reads), for sale in EGP within the website's price
-range, a unit type the valuation covers (or none yet), at least one missing
-field the website or valuation uses (unit type, area, resale, finishing,
-delivery, compound, down payment, plan length), and text that mentions one of
-them. This cut the candidates from 29,114 to about 3.6k; on the benchmark the
-text pre-filter kept 261 of 266 extractable facts.
-
-Every proposed value must then be grounded in the listing's own text: the
-unit type, finishing and delivery wording must appear, names must appear as
-written, amounts and plan lengths must match numbers in the text, and room
-counts must sit next to their label. Only columns the source left empty are
-filled; a known source value is never overwritten. Multi-unit ads (projects,
-several units) get nothing applied, and a stated down payment equal to the
-listing's price is refused and noted, since that price is probably the down
-payment. Listings missing from a batch answer are asked once more, then
-recorded as failed. By default one batch runs; `--batches 0` processes all
-eligible active listings. The Pi CLI must be installed and authenticated
-on the machine running the job.
-
-The `property_enrichments` table stores the latest durable outcome per
-property, with the model, reasoning effort and prompt version used. Each
-property is claimed before its call, and ordinary later runs skip it whether
-the result fills fields, returns no clear facts, fails, or is interrupted.
-`--retry-failed` explicitly reclaims only failed rows; successful results
-remain untouched. A timed-out call is retried once (600 seconds per attempt).
-`enrich-status` shows the outcomes; a `claimed` row after interruption is
-intentionally skipped. `enrich-revoke` undoes fills from earlier prompt
-versions (a column is reset only while it still holds the old value; every
-reverted value is written to `logs/enrich-revoke-*.json` first) and makes
-those listings eligible again. Accepted values are reapplied on a later source parse
-only while the listing's title and description are unchanged and the source
-still leaves that field missing.
+**Description enrichment was retired** (October 2026). It filled fields a source left
+empty from the listing's title and description with GLM. Since Qayem reads AqarExit only,
+whose pages are structured, nothing remained for it to fill: from 6 to 10 October 2026 it
+found no eligible listing. Its stored results stay in effect: the `property_enrichments`
+table keeps earlier fills on a listing while its title and description are unchanged and
+the source still leaves that field empty, and the website still hides listings flagged
+`price_is_down_payment`. No new records are created. The code is in Git history
+(before `src/qayem/enrichment.py` was removed).
 
 ## State tracking
 
@@ -200,14 +157,14 @@ column so data can be re-normalized later without re-fetching.
 For website changes, use local development, then
 [Cloudflare staging](docs/CLOUDFLARE.md#development-and-staging), then production.
 Staging has a separate database and manual refresh from saved cloud data, reusing
-existing enrichment instead of running another crawl or AI batch.
+saved entity names instead of running another crawl or AI batch.
 
 
 ## Cloudflare backend
 
 The React site and an async Python Workers API can serve the same endpoints from
-Cloudflare D1. The isolated cloud updater schedules crawling, entity resolution
-and Pi enrichment at 02:30 Africa/Cairo. Its canonical SQLite database is restored
+Cloudflare D1. The isolated cloud updater schedules crawling and entity
+resolution at 02:30 Africa/Cairo. Its canonical SQLite database is restored
 from and checkpointed to private R2; complete, healthy catalogues are published
 to D1. See [cloud updates and commissioning status](docs/CLOUD_UPDATES.md) and
 [website deployment](docs/CLOUDFLARE.md). Website releases use the active cloud

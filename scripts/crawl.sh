@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Nightly crawl of the sources in use (QAYEM_SOURCES, AqarExit by default) and the price benchmarks
-# (QAYEM_BENCHMARK_SOURCES, Nawy's developer sales), then name resolution and description enrichment
+# (QAYEM_BENCHMARK_SOURCES, Nawy's developer sales), then name resolution
 # (run by cron; safe to run by hand).
 # One crawl at a time: a second invocation exits while the first holds the lock.
 # Logs: logs/crawl-YYYY-MM-DD.log (kept 30 days). Health: logs/health.json.
@@ -9,7 +9,7 @@ QAYEM_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$QAYEM_ROOT"
 mkdir -p logs
 export COLUMNS=140 TERM=dumb PYTHONUNBUFFERED=1
-# cron's PATH lacks the user's tools; description enrichment needs the Pi CLI
+# cron's PATH lacks the user's tools; name resolution needs the Pi CLI
 export PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
 
 exec 9>logs/crawl.lock
@@ -31,9 +31,6 @@ log="logs/crawl-$(date +%F).log"
   # canonical names for new compound/developer spellings (matches resale to the developers' prices)
   .venv/bin/qayem resolve-entities --workers 4 --max-minutes "${QAYEM_ENTITY_MINUTES:-30}"
   echo "== entities exit $? at $(date -Is)"
-  # fill missing fields of new listings from their text; failures never fail the crawl
-  .venv/bin/qayem enrich-descriptions --batches 0 --workers 4 --max-minutes "${QAYEM_ENRICH_MINUTES:-120}"
-  echo "== enrich exit $? at $(date -Is)"
   .venv/bin/qayem health --write logs/health.json
   echo "== health exit $?"
   if [[ "${QAYEM_CLOUDFLARE_SYNC:-0}" == "1" ]]; then

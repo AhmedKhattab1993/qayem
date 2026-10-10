@@ -371,6 +371,11 @@ def test_aqarexit_detail_carries_the_full_payment_position():
     assert other.property_type == "chalet" and other.finishing == "finished" and other.raw["floor"] is None
 
 
+def test_aqarexit_penthouse_written_as_one_word_is_a_penthouse():
+    page = (FIXTURES / "aqarexit_detail.html").read_text().replace("شقة", "بنتهاوس")
+    assert aqx_parse_detail(page, UNIT_A).property_type == "penthouse"
+
+
 def test_aqarexit_fetches_only_new_or_changed_units_and_confirms_the_rest():
     detail = (FIXTURES / "aqarexit_detail.html").read_text()
     changed, same, new = "c" * 8 + UNIT_A[8:], "d" * 8 + UNIT_A[8:], UNIT_A

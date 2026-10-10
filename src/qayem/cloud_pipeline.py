@@ -226,10 +226,8 @@ class Pipeline:
             if self.command("crawl", ["crawl"], 4 * 3600):
                 raise RuntimeError("Crawler failed")
             self.command("entities", ["resolve-entities", "--workers", "4", "--max-minutes", "30"], 45 * 60)
-            self.command("enrichment", ["enrich-descriptions", "--batches", "0", "--workers", "4",
-                                      "--max-minutes", "120"], 135 * 60)
             if self.command("health", ["health", "--write", str(self.directory / "health.json")], 120):
-                raise RuntimeError("Source or enrichment health needs attention; previous catalogue retained")
+                raise RuntimeError("Source health needs attention; previous catalogue retained")
             self.status["stage"] = "publish"
             # Freeze the canonical state in R2 before making any public version active.
             self.stop_checkpoints.set()
@@ -274,7 +272,7 @@ class Pipeline:
 def configure_pi():
     key = os.environ.get("GLM_API_KEY")
     if not key:
-        raise RuntimeError("Cloud enrichment credential is missing")
+        raise RuntimeError("Cloud entity-resolution credential is missing")
     directory = Path.home() / ".pi" / "agent"
     directory.mkdir(parents=True, exist_ok=True, mode=0o700)
     shutil.copyfile("/app/pi-models.json", directory / "models.json")

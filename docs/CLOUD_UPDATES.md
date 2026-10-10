@@ -20,6 +20,9 @@ enrichment rows and 4,950 aliases. The local nightly LaunchAgent was unloaded
 after publication verification and its plist renamed to `.plist.disabled`.
 Verification evidence is saved privately under `.artifacts/cloud-updater/`.
 
+Description enrichment was removed from the nightly run in October 2026; its stored
+records remain in the canonical database and still apply (see the README).
+
 ## Schedule and operation
 
 The service starts at **02:30 Africa/Cairo every day**, including daylight-saving
@@ -30,8 +33,8 @@ so overlapping manual and scheduled jobs cannot write competing checkpoints.
 
 The container restores `canonical/current.json` from R2 and checks the compressed
 and restored database hashes plus SQLite integrity. It never creates an empty
-replacement if its checkpoint is missing or damaged. The existing crawler,
-entity resolution and GLM description enrichment run with their existing source
+replacement if its checkpoint is missing or damaged. The existing crawler
+and GLM entity resolution run with their existing source
 rules, request pacing and time budgets. Blocks are not bypassed. Checkpoints use
 SQLite's backup API, include committed WAL rows, and alternate between two objects
 per run so long jobs do not create an unbounded number of snapshots.
@@ -41,7 +44,7 @@ The backup uses a fresh SQLite destination so its transaction counter cannot mak
 unchanged data look different. Failed uploads remain eligible for retry.
 
 AqarExit checks sitemap modification dates and fetches only new or changed detail
-pages. Saved entity aliases and completed description enrichments survive in R2
+pages. Saved entity aliases survive in R2
 and are reused; normal runs process only pending work and bounded retries. Nawy's
 search inventory is refreshed nightly to detect price and availability changes.
 The public D1 catalogue is still published as one complete, verified snapshot,
@@ -56,7 +59,7 @@ the Python process running as PID 1 cannot ignore a stop signal and keep the
 instance running between updates. A stopped instance loses its
 filesystem, but the next run restores the last saved cloud checkpoint.
 
-Source or enrichment health failures retain the preceding public catalogue.
+Source health failures retain the preceding public catalogue.
 Publication sends bounded, idempotent insert batches to the Worker's D1 binding.
 Only a dataset whose unit, launch, document-part and entity counts match can be
 marked ready and selected as active. A partial transfer cannot move the pointer.

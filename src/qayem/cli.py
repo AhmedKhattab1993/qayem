@@ -14,11 +14,8 @@ from sqlalchemy import func, select
 
 from .config import DEFAULT_MIN_INTERVAL
 from .db import get_engine, init_db, session_scope
-from .enrichment import (
-    BATCH_SIZE, PROMPT_VERSION, claim_batch, count_eligible, enrichment_health, revoke_outdated, run_batches,
-)
 from .http_client import Fetcher
-from .models import ParseRun, Property, PropertyEnrichment, PropertyVersion, utcnow
+from .models import ParseRun, Property, PropertyVersion, utcnow
 from .sources import SOURCE_REGISTRY
 from .upsert import (
     SyncStats, backfill_from_description, known_versions, mark_removals, renormalize, touch_present,
@@ -90,119 +87,6 @@ def renormalize_command(
     with session_scope(engine) as session:
         rows, changed = renormalize(session, source, getattr(import_module(module), name))
     console.print(f"[green]{source}:[/green] re-parsed {rows} stored payloads, {changed} rows changed")
-
-
-@app.command("enrich-descriptions")
-def enrich_descriptions(
-    batches: int = typer.Option(1, min=0, help=f"Number of {BATCH_SIZE}-listing batches; 0 runs until exhausted."),
-    source: str | None = typer.Option(None, help="Limit to one source, such as opensooq."),
-    retry_failed: bool = typer.Option(False, help="Explicitly retry only failed listings; successful listings stay untouched."),
-    workers: int = typer.Option(4, min=1, max=16, help="Maximum concurrent Pi calls (one batch each)."),
-    dry_run: bool = typer.Option(False, help="Show the next batch without invoking Pi or claiming rows."),
-    since: datetime | None = typer.Option(None, formats=["%Y-%m-%d"], help="Only listings first seen on or after this date."),
-    max_minutes: float | None = typer.Option(None, min=1, help="Start no new batch after this many minutes."),
-) -> None:
-    """Fill missing listing facts from title and description (GLM-5.3-Flash, batched).
-
-    Only listings the website could show are sent: free-text sources, for
-    sale in EGP within the price range, a valued unit type, a missing
-    website/valuation field, and text that mentions it. Newest first.
-    """
-    from .config import db_path
-
-    if source and source not in SOURCE_REGISTRY:
-        raise typer.BadParameter(f"unknown source {source!r}. Available: {', '.join(SOURCE_REGISTRY)}")
-    if not db_path().is_file():
-        console.print(f"[red]Database not found:[/red] {db_path().resolve()}")
-        raise typer.Exit(1)
-    engine = get_engine()
-    if dry_run:
-        tasks = claim_batch(engine, source, dry_run=True, retry_failed=retry_failed, since=since)
-        for task in tasks:
-            console.print(f"{task.property_id}: {', '.join(task.missing)}")
-        console.print(f"[dim]{len(tasks)} of {BATCH_SIZE} candidates in the next batch[/dim]")
-        if not retry_failed:
-            console.print(f"[dim]{count_eligible(engine, source, since)} listings eligible in total[/dim]")
-        return
-    init_db(engine)  # adds the durable enrichment table to an existing database
-
-    def report_batch(number, batch_results) -> None:
-        completed = sum(result.status == "done" for result in batch_results)
-        filled = sum(result.applied for result in batch_results)
-        console.print(f"Batch {number}: {len(batch_results)} listings, "
-                      f"{completed} done, {filled} columns filled.")
-
-    try:
-        results = run_batches(
-            engine, batches, source, on_batch=report_batch,
-            retry_failed=retry_failed, workers=workers, since=since,
-            deadline=time.monotonic() + max_minutes * 60 if max_minutes else None,
-            on_stop=lambda reason: console.print(f"[yellow]Stopping: {reason}[/yellow]"),
-        )
-    except RuntimeError as exc:
-        console.print(f"[red]{exc}[/red]")
-        raise typer.Exit(1) from exc
-    done = sum(result.status == "done" for result in results)
-    failed = len(results) - done
-    filled = sum(result.applied for result in results)
-    console.print(f"Processed {len(results)} listings in batches of {BATCH_SIZE}: "
-                  f"{done} done, {failed} failed, {filled} columns filled.")
-    for result in results:
-        if result.error:
-            console.print(f"  [yellow]{result.property_id}:[/yellow] {result.error}")
-
-
-@app.command("enrich-revoke")
-def enrich_revoke(
-    dry_run: bool = typer.Option(False, help="Only report what would be reverted."),
-) -> None:
-    """Undo fills from earlier enrichment prompts and make those listings eligible again.
-
-    A column is reset only while it still holds the value the old enrichment
-    wrote. Every reverted value is written to logs/enrich-revoke-*.json first.
-    """
-    from .config import db_path
-
-    if not db_path().is_file():
-        console.print(f"[red]Database not found:[/red] {db_path().resolve()}")
-        raise typer.Exit(1)
-    engine = get_engine()
-    init_db(engine)
-    preview = revoke_outdated(engine, dry_run=True)
-    with session_scope(engine) as session:
-        records = session.scalar(
-            select(func.count()).select_from(PropertyEnrichment)
-            .where((PropertyEnrichment.prompt_version.is_(None))
-                   | (PropertyEnrichment.prompt_version != PROMPT_VERSION)))
-    console.print(f"{records} records from earlier prompts; {len(preview)} filled values to revert.")
-    if dry_run or not records:
-        return
-    audit = Path("logs") / f"enrich-revoke-{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}.json"
-    audit.parent.mkdir(exist_ok=True)
-    audit.write_text(json.dumps(preview, ensure_ascii=False, indent=1), encoding="utf-8")
-    reverted = revoke_outdated(engine)
-    console.print(f"Reverted {len(reverted)} values and removed {records} records. Audit: {audit}")
-
-
-@app.command("enrich-status")
-def enrich_status() -> None:
-    """Show durable description-enrichment attempt counts."""
-    from .config import db_path
-
-    if not db_path().is_file():
-        console.print(f"[red]Database not found:[/red] {db_path().resolve()}")
-        raise typer.Exit(1)
-    engine = get_engine()
-    init_db(engine)
-    with session_scope(engine) as session:
-        counts = session.execute(
-            select(PropertyEnrichment.status, func.count())
-            .group_by(PropertyEnrichment.status)
-        ).all()
-        for state, count in counts:
-            console.print(f"{state}: {count}")
-        if not counts:
-            console.print("No properties invoked yet.")
 
 
 @app.command("resolve-entities")
@@ -509,16 +393,12 @@ def health(
                       item.last_run.strftime("%Y-%m-%d %H:%M") if item.last_run else "-",
                       item.last_status or "-",
                       item.last_success.strftime("%Y-%m-%d %H:%M") if item.last_success else "-", item.detail)
-    enrichment = enrichment_health(engine, now)
-    table.add_row("enrichment", f"[{colors[enrichment['state']]}]{enrichment['state']}[/]",
-                  (enrichment["last_finished"] or "-")[:16].replace("T", " "), "-", "-", enrichment["detail"])
     console.print(table)
     if write:
         write.parent.mkdir(parents=True, exist_ok=True)
         write.write_text(json.dumps({"checked_at": now.isoformat(),
-                                     "sources": [item.as_dict() for item in report],
-                                     "enrichment": enrichment}, indent=2))
-    if any(item.state not in ("ok", "running") for item in report) or enrichment["state"] != "ok":
+                                     "sources": [item.as_dict() for item in report]}, indent=2))
+    if any(item.state not in ("ok", "running") for item in report):
         raise typer.Exit(1)
 
 
