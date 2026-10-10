@@ -13,6 +13,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from .models import Property, PropertyEnrichment, PropertyVersion, utcnow
+from .normalization import CANONICAL_PROPERTY_TYPES, detect_property_type
 from .sources.base import NormalizedListing
 
 # Stored description-enrichment fills (property_enrichments, no longer produced) are kept
@@ -236,6 +237,22 @@ def renormalize(session: Session, source: str, parse) -> tuple[int, int]:
         _assign(listing, prop, _enriched(session, prop, listing))
         changed += before != _snapshot(prop)
     return rows, changed
+
+
+def canonicalize_property_types(session: Session, source: str) -> int:
+    """Map type text a parser kept verbatim (AqarExit's «بنتهاوس») to the type its pattern now knows.
+
+    For sources whose stored payload no longer holds the page. Canonical types are left alone;
+    like renormalize, a parser fix: no version rows. → rows changed.
+    """
+    changed = 0
+    for prop in session.execute(select(Property).where(
+            Property.source == source, Property.property_type.not_in(CANONICAL_PROPERTY_TYPES))).scalars():
+        canonical = detect_property_type(prop.property_type)
+        if canonical and canonical != prop.property_type:
+            prop.property_type = canonical
+            changed += 1
+    return changed
 
 
 def known_versions(session: Session, source: str) -> dict[str, str | None]:

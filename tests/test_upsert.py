@@ -10,7 +10,8 @@ from qayem.db import init_db
 from qayem.models import Property, PropertyEnrichment, PropertyVersion
 from qayem.sources.base import NormalizedListing
 from qayem.upsert import (
-    content_hash, description_hash, listing_text, mark_removals, renormalize, upsert_listing,
+    canonicalize_property_types, content_hash, description_hash, listing_text, mark_removals, renormalize,
+    upsert_listing,
 )
 
 
@@ -269,3 +270,15 @@ def test_fills_recorded_before_titles_were_sent_still_reapply(session):
         source_listing_id="A1", title="T", description="شقة", price=2.0))
     session.commit()
     assert session.query(Property).one().property_type == "apartment"
+
+
+def test_type_text_kept_verbatim_becomes_its_canonical_type(session):
+    for pid, kind in (("P1", "بنتهاوس"), ("P2", "apartment"), ("P3", "مجهول")):
+        upsert_listing(session, "aqarexit", NormalizedListing(source_listing_id=pid, title=kind, property_type=kind))
+    upsert_listing(session, "nawy", NormalizedListing(source_listing_id="N1", title="x", property_type="بنتهاوس"))
+    session.commit()
+    assert canonicalize_property_types(session, "aqarexit") == 1
+    types = {(p.source, p.source_listing_id): p.property_type for p in session.query(Property)}
+    assert types == {("aqarexit", "P1"): "penthouse", ("aqarexit", "P2"): "apartment",
+                     ("aqarexit", "P3"): "مجهول", ("nawy", "N1"): "بنتهاوس"}
+    assert session.query(PropertyVersion).filter_by(change_type="updated").count() == 0

@@ -91,6 +91,7 @@ _PROPERTY_TYPE_PATTERNS: list[tuple[str, str]] = [
     (r"عيادة|صيدلية|clinic|pharmacy", "clinic"),
     (r"warehouse|مخزن", "warehouse"),
 ]
+CANONICAL_PROPERTY_TYPES = frozenset(canonical for _, canonical in _PROPERTY_TYPE_PATTERNS)
 
 
 def detect_property_type(text: str | None) -> str | None:

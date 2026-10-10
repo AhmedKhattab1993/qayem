@@ -44,7 +44,8 @@ The backup uses a fresh SQLite destination so its transaction counter cannot mak
 unchanged data look different. Failed uploads remain eligible for retry.
 
 AqarExit checks sitemap modification dates and fetches only new or changed detail
-pages. Saved entity aliases survive in R2
+pages; `qayem renormalize aqarexit` then applies parser fixes to stored units
+without fetching. Saved entity aliases survive in R2
 and are reused; normal runs process only pending work and bounded retries. Nawy's
 search inventory is refreshed nightly to detect price and availability changes.
 The public D1 catalogue is still published as one complete, verified snapshot,

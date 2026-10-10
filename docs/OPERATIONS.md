@@ -23,12 +23,14 @@ crontab -l                             # the line is tagged "# qayem-nightly-cra
 2. runs `qayem crawl`, the production plan in `src/qayem/crawl.py`, limited to the sources in
    use (`QAYEM_SOURCES`, AqarExit by default; `qayem health` follows the same setting)
    and the price benchmarks (`QAYEM_BENCHMARK_SOURCES`, Nawy's developer sales by default);
-3. runs `qayem resolve-entities --max-minutes 30` (override with `QAYEM_ENTITY_MINUTES`), which
+3. runs `qayem renormalize aqarexit`, so parser fixes reach stored AqarExit units whose
+   unchanged pages are never refetched (no fetching, no version rows; about two seconds);
+4. runs `qayem resolve-entities --max-minutes 30` (override with `QAYEM_ENTITY_MINUTES`), which
    gives new compound/developer spellings their canonical names and Nawy match; only new pairs
    are sent, so a night costs a call or two (`pi --print`; `/opt/homebrew/bin` and
    `~/.local/bin` are on cron's PATH);
-4. runs `qayem health --write logs/health.json`;
-5. logs to `logs/crawl-YYYY-MM-DD.log` and deletes logs older than 30 days.
+5. runs `qayem health --write logs/health.json`;
+6. logs to `logs/crawl-YYYY-MM-DD.log` and deletes logs older than 30 days.
 
 ## The crawl plan
 

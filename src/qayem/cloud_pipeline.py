@@ -225,6 +225,8 @@ class Pipeline:
             thread.start()
             if self.command("crawl", ["crawl"], 4 * 3600):
                 raise RuntimeError("Crawler failed")
+            # AqarExit refetches only changed pages; parser fixes reach stored units here (no fetching).
+            self.command("renormalize", ["renormalize", "aqarexit"], 10 * 60)
             self.command("entities", ["resolve-entities", "--workers", "4", "--max-minutes", "30"], 45 * 60)
             if self.command("health", ["health", "--write", str(self.directory / "health.json")], 120):
                 raise RuntimeError("Source health needs attention; previous catalogue retained")

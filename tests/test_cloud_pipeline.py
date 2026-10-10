@@ -173,7 +173,7 @@ def test_health_failure_preserves_private_history_without_publishing(database, t
 
     monkeypatch.setattr(job, "command", command)
     job.run()
-    assert commands == ["crawl", "entities", "health"]
+    assert commands == ["crawl", "renormalize", "entities", "health"]
     assert job.status["status"] == "failed"
     assert "previous catalogue retained" in job.status["error"]
     assert not any("/publish/" in path for _, path, _ in bridge.calls)

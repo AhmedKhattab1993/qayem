@@ -28,6 +28,9 @@ log="logs/crawl-$(date +%F).log"
   echo "== crawl started $(date -Is)"
   .venv/bin/qayem crawl
   echo "== crawl exit $? at $(date -Is)"
+  # parser fixes reach stored AqarExit units, whose unchanged pages are never refetched
+  .venv/bin/qayem renormalize aqarexit
+  echo "== renormalize exit $? at $(date -Is)"
   # canonical names for new compound/developer spellings (matches resale to the developers' prices)
   .venv/bin/qayem resolve-entities --workers 4 --max-minutes "${QAYEM_ENTITY_MINUTES:-30}"
   echo "== entities exit $? at $(date -Is)"

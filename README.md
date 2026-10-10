@@ -89,7 +89,7 @@ qayem crawl                         # the full nightly plan: every scope, each w
 qayem health                        # per-source health; exit 1 if any source needs attention
 qayem renormalize nawy              # re-parse stored payloads with the current parser (no fetching)
 qayem renormalize semsar            # fill empty columns from Semsar's template descriptions
-qayem renormalize aqarexit          # derive missing installment terms from stored AqarExit payloads
+qayem renormalize aqarexit          # derive missing installment terms and unit types from stored AqarExit payloads
 ./scripts/install-cron.sh           # schedule the nightly crawl (02:30); see docs/OPERATIONS.md
 
 qayem status                        # last run per source + DB totals

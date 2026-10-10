@@ -18,8 +18,8 @@ from .http_client import Fetcher
 from .models import ParseRun, Property, PropertyVersion, utcnow
 from .sources import SOURCE_REGISTRY
 from .upsert import (
-    SyncStats, backfill_from_description, known_versions, mark_removals, renormalize, touch_present,
-    upsert_listing,
+    SyncStats, backfill_from_description, canonicalize_property_types, known_versions, mark_removals,
+    renormalize, touch_present, upsert_listing,
 )
 
 app = typer.Typer(
@@ -75,7 +75,9 @@ def renormalize_command(
         init_db(engine)
         with session_scope(engine) as session:
             rows, changed = backfill_from_description(session, source, getattr(import_module(module), name), column)
-        console.print(f"[green]{source}:[/green] read {rows} stored {column} payloads, {changed} rows filled")
+            typed = canonicalize_property_types(session, source) if source in RAW_BACKFILLS else 0
+        console.print(f"[green]{source}:[/green] read {rows} stored {column} payloads, {changed} rows filled, "
+                      f"{typed} unit types recognised")
         return
     if source not in RENORMALIZERS:
         available = ", ".join([*RENORMALIZERS, *DESCRIPTION_BACKFILLS, *RAW_BACKFILLS])
