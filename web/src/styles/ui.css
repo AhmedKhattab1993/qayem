@@ -464,6 +464,10 @@
 .ledger-muted {
   color: var(--ink-3);
 }
+/* The rules are sentences: they wrap instead of widening the table. */
+.level-rules td {
+  white-space: normal;
+}
 /* In a long list the level repeats row after row: a lighter badge keeps the figures readable. */
 .unit-ledger .level-badge {
   min-height: 24px;

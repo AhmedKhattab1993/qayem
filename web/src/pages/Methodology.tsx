@@ -205,7 +205,7 @@ export default function Methodology({ overview, error, retry }: { overview: Over
           </p>
         </div>
         <div className="ledger-frame">
-          <div className="ledger stack">
+          <div className="ledger stack level-rules">
             <table>
               <caption className="sr-only">{t("Opportunity levels and their rules")}</caption>
               <thead>

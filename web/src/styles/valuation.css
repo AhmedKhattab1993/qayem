@@ -1241,6 +1241,15 @@
   .compare-table td + td {
     border-inline-start: 1px solid var(--line-soft);
   }
+  .compare-table thead th {
+    overflow-wrap: break-word;
+  }
+  .compare-head .thumb {
+    display: none;
+  }
+  .compare-table .level-badge {
+    white-space: normal;
+  }
 }
 .compare-head {
   display: flex;

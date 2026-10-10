@@ -60,6 +60,7 @@ const pages = [
   ["evaluate", `/evaluate?${evaluate}`],
   ["evaluate-empty", "/evaluate"],
   ["units", "/units"],
+  ["units-budget", "/units?cash_max=7500000&bedrooms_min=2&delivery=ready"],
   ["unit", `/units/${plan.id}`],
   ["unit-strong", `/units/${unit.id}`],
   ...(unrated ? [["unit-unrated", `/units/${unrated.id}`]] : []),
@@ -144,6 +145,11 @@ for (const [device, options] of Object.entries(viewports)) {
             if (/[A-Za-z]{3,}/.test(text)) latin.push(text.trim().slice(0, 80));
           }
         }
+        // A stacked table must become cards in a narrow column, not hide columns behind a sideways scroll.
+        const clipped = [...document.querySelectorAll(".ledger.stack")]
+          .filter((e) => e.scrollWidth > e.clientWidth + 1)
+          .map((e) => `${e.className} [${e.clientWidth} < ${e.scrollWidth}]`);
+        overflow.push(...clipped);
         return { docWidth: document.documentElement.scrollWidth, width, overflow, small, latin, title: document.title };
       }, [language, dataNames]);
       const shot = `${device}-${language}-${name}.png`;
@@ -183,7 +189,10 @@ await page.getByRole("button", { name: /Filters/ }).click();
 await page.getByLabel("Unit type").selectOption("apartment");
 await page.getByLabel("Sort by").selectOption("price_asc");
 await page.waitForURL(/property_type=apartment.*sort=price_asc|sort=price_asc.*property_type=apartment/);
-await page.locator(".unit-ledger tbody tr").first().click({ position: { x: 300, y: 110 } });
+const card = page.locator(".unit-ledger tbody tr").first();
+// clear of the fixed tab bar: tap the middle of the card
+await card.evaluate((row) => row.scrollIntoView({ block: "center" }));
+await card.click({ position: { x: 300, y: 110 } });
 await page.waitForURL(/\/units\/\d+$/);
 
 // The unit's main figures come first, one tile each: an installment unit shows its value in today's money.
@@ -192,7 +201,55 @@ const glance = page.getByRole("region", { name: "At a glance" });
 for (const label of ["Total price", "Worth in today’s money", "Paid at signing", "Area", "Price per m²"])
   await glance.getByText(label, { exact: true }).waitFor();
 assert.equal(await glance.locator(".glance-tile.is-feature").count(), 1, "one highlighted tile");
+// The verdict opens the page: on a phone it starts on the first screen, before the figures and photos.
+const verdict = await page.locator(".unit-verdict").boundingBox();
+assert.ok(verdict && verdict.y < 844, `the verdict starts on the first screen (${verdict?.y})`);
+assert.ok(verdict.y < (await glance.boundingBox()).y, "the verdict comes before the figures");
 await context.close();
+
+// Interaction: a buyer's budget narrows the list, the search is saved, and the watchlist shows it.
+{
+  const context = await browser.newContext({ ...viewports.desktop });
+  await context.addInitScript(() => localStorage.setItem("qayem:language", "en"));
+  const page = await context.newPage();
+  await page.goto(`${baseURL}/units`, { waitUntil: "networkidle" });
+  await page.getByLabel("Cash today").selectOption("5000000");
+  await page.getByLabel("Bedrooms").selectOption("2");
+  await page.waitForURL(/cash_max=5000000/);
+  await page.waitForURL(/bedrooms_min=2/);
+  await page.waitForLoadState("networkidle");
+  const listed = await page.locator(".unit-ledger tbody tr").count();
+  assert.ok(listed > 0, "units fit a 5M cash budget with 2+ bedrooms");
+  const budget = await api("/units?cash_max=5000000&bedrooms_min=2&page_size=100");
+  assert.ok(budget.items.every((u) => u.payment.cash_equivalent <= 5_000_000 && u.bedrooms >= 2), "the API keeps to the budget");
+  await page.getByRole("button", { name: "Save this search" }).click();
+  await page.getByRole("button", { name: "Search saved" }).waitFor();
+  await page.goto(`${baseURL}/watchlist`, { waitUntil: "networkidle" });
+  await page.getByRole("heading", { name: "Saved searches" }).waitFor();
+  await page.getByRole("link", { name: /Cash today up to/ }).waitFor();
+  await page.screenshot({ path: `${artifacts}flow-saved-search.png`, fullPage: true });
+  await context.close();
+}
+
+// Interaction: saved units side by side, each figure's lowest marked; on a phone too.
+{
+  const two = (await api("/units?terms=plan&page_size=2&sort=peer_gap")).items;
+  for (const [device, options] of Object.entries(viewports)) {
+    const context = await browser.newContext(options);
+    await context.addInitScript((items) => {
+      localStorage.setItem("qayem:language", "en");
+      localStorage.setItem("qayem:compare-entities", JSON.stringify(items));
+    }, two.map((u) => ({ kind: "unit", key: String(u.id), name: "Unit" })));
+    const page = await context.newPage();
+    await page.goto(`${baseURL}/compare`, { waitUntil: "networkidle" });
+    await page.getByRole("rowheader", { name: "Cash today" }).waitFor();
+    assert.ok((await page.locator(".compare-table td.is-best").count()) > 0, "the lowest figures are marked");
+    const width = await page.evaluate(() => [document.documentElement.scrollWidth, innerWidth]);
+    assert.ok(width[0] <= width[1] + 1, `${device} compare has no sideways scroll: ${width}`);
+    await page.screenshot({ path: `${artifacts}flow-compare-units-${device}.png`, fullPage: true });
+    await context.close();
+  }
+}
 
 // The explainer film: only a poster until asked, then the phone-sized file on a phone, and it plays.
 // Safari will not play a video from a server that ignores byte ranges.
@@ -219,4 +276,4 @@ if (failures.length) {
   console.error(JSON.stringify(failures, null, 2));
   process.exit(1);
 }
-console.log(`✓ ${report.length} page checks (${pages.length} pages × desktop/mobile × ar/en) and the evaluate, units and explainer flows passed`);
+console.log(`✓ ${report.length} page checks (${pages.length} pages × desktop/mobile × ar/en) and the evaluate, units, budget, saved-search, unit-compare and explainer flows passed`);

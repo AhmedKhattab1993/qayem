@@ -87,7 +87,7 @@ export default function Watchlist({ overview }: { overview: Overview | null }) {
             </ul>
           </section>
         )}
-        {watch.length === 0 ? (
+        {watch.length === 0 && searches.length > 0 ? null : watch.length === 0 ? (
           <EmptyState
             icon={<Bookmark size={26} />}
             title={t("Nothing on your watchlist yet.")}

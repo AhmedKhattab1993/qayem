@@ -13,7 +13,8 @@ import { Thumb } from "../components/Gallery";
 
 /** Compounds with compounds, developers with developers, units with units. */
 type Ready = Extract<Loaded, { status: "ready" }>;
-/** `best` gives a figure where lower is better; the lowest across the columns is marked. */
+/** `best` gives a like-for-like figure where lower is better (a gap, a price per m²); the lowest is marked.
+ * Totals are not marked: a smaller unit is cheaper without being a better buy. */
 type Row = { label: string; value: (entry: Ready) => React.ReactNode; best?: (entry: Ready) => number | null | undefined };
 
 const profileOf = (entry: Ready): Profile & { units: number; good_count: number; launch: Launch | null } =>
@@ -64,16 +65,14 @@ const unitRows: Row[] = [
     },
     best: (e) => unitOf(e).peers?.gap,
   },
-  { label: "Asking price", value: (e) => <span className="num">{money(unitOf(e).price)}</span>, best: (e) => unitOf(e).price },
+  { label: "Asking price", value: (e) => <span className="num">{money(unitOf(e).price)}</span> },
   {
     label: "Cash today",
     value: (e) => <b className="num">{money(unitOf(e).payment.cash_equivalent)}</b>,
-    best: (e) => unitOf(e).payment.cash_equivalent,
   },
   {
     label: "Paid at signing",
     value: (e) => <span className="num">{money(atSigning(unitOf(e).price, unitOf(e).payment))}</span>,
-    best: (e) => atSigning(unitOf(e).price, unitOf(e).payment),
   },
   {
     label: "Each quarter, if paid evenly",

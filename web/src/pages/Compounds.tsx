@@ -25,9 +25,10 @@ export default function Compounds() {
   }, [params]);
   const { data, latest, error, retry } = useApi<Page<Compound> & { district: District | null }>(query);
   const list = data ?? latest;
+  // From the address bar, not the last render: two quick changes must not drop the first.
   const update = (changes: Record<string, string>) =>
-    setParams((previous) => {
-      const next = new URLSearchParams(previous);
+    setParams(() => {
+      const next = new URLSearchParams(window.location.search);
       for (const [key, value] of Object.entries(changes)) {
         if (value) next.set(key, value);
         else next.delete(key);
