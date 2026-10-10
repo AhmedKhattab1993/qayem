@@ -104,6 +104,8 @@ def test_retention_protects_an_older_active_version_after_rollback(clients):
             version = f"copy{index}"
             db.executescript(export.read_text().replace("'first'", repr(version)))
             db.execute("UPDATE datasets SET generated_at=? WHERE version=?", (f"2026-10-0{index+5}", version))
+        # 'first' is the oldest version, rolled back to; it was exported with today's date
+        db.execute("UPDATE datasets SET generated_at='2026-10-01' WHERE version='first'")
         db.execute("UPDATE state SET value='first' WHERE key='active'")
         db.executescript(retention_sql(2))
         assert {row[0] for row in db.execute("SELECT version FROM datasets")} == {"first", "copy2", "copy3"}
