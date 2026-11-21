@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, NavLink, Route, Routes, useLocation } from "react-router-dom";
-import { ArrowRight, Bookmark, Building2, Calculator, Check, Compass, Landmark, Rows3, Scale, Search, X } from "lucide-react";
+import { ArrowRight, Bookmark, Building2, Calculator, Check, Compass, Landmark, MapPin, Rows3, Scale, Search, X } from "lucide-react";
 import Home from "./pages/Home";
 import Evaluate from "./pages/Evaluate";
 import Units from "./pages/Units";
@@ -12,6 +12,12 @@ import DeveloperPage from "./pages/Developer";
 import Compare from "./pages/Compare";
 import Watchlist from "./pages/Watchlist";
 import Methodology from "./pages/Methodology";
+import DistrictPage from "./pages/District";
+import Districts from "./pages/Districts";
+import Sheet from "./pages/Sheet";
+import Privacy from "./pages/Privacy";
+import { track } from "./track";
+import { keepsServerHead, serverTitle } from "./head";
 import { CommandPalette } from "./components/CommandPalette";
 import { Brand, Mark } from "./components/Brand";
 import { useStore } from "./store";
@@ -23,6 +29,7 @@ const nav = [
   { to: "/evaluate", label: "Compare a unit", short: "Evaluate", icon: Calculator },
   { to: "/compounds", label: "Compounds", short: "Compounds", icon: Building2 },
   { to: "/developers", label: "Developers", short: "Developers", icon: Landmark },
+  { to: "/districts", label: "Districts", short: "Districts", icon: MapPin },
   { to: "/units", label: "Units", short: "Units", icon: Rows3 },
   { to: "/methodology", label: "Methodology", short: "Methodology", icon: Compass },
 ];
@@ -38,6 +45,10 @@ const titles: [RegExp, string][] = [
   [/^\/compare/, "Compare"],
   [/^\/watchlist/, "Watchlist"],
   [/^\/methodology/, "Methodology"],
+  [/^\/districts\/.+/, "District"],
+  [/^\/districts/, "Districts"],
+  [/^\/sheet/, "Deal sheet"],
+  [/^\/privacy/, "Privacy"],
 ];
 
 export default function App() {
@@ -62,10 +73,11 @@ export default function App() {
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
+    track("pageview");
   }, [location.pathname]);
   useEffect(() => {
     const title = titles.find(([pattern]) => pattern.test(location.pathname))?.[1] ?? "Off the map";
-    document.title = `${t(title)} — ${t("Qayem")}`;
+    document.title = keepsServerHead(language) ? serverTitle : `${t(title)} — ${t("Qayem")}`;
   }, [location.pathname, language]);
 
   useEffect(() => {
@@ -166,6 +178,10 @@ export default function App() {
           <Route path="/compare" element={<Compare />} />
           <Route path="/watchlist" element={<Watchlist overview={overview} />} />
           <Route path="/methodology" element={<Methodology overview={overview} error={error} retry={retry} />} />
+          <Route path="/districts" element={<Districts />} />
+          <Route path="/districts/:key" element={<DistrictPage overview={overview} />} />
+          <Route path="/sheet/:id" element={<Sheet />} />
+          <Route path="/privacy" element={<Privacy />} />
           <Route
             path="*"
             element={
@@ -194,7 +210,7 @@ export default function App() {
             <span>{t("Resale units against what you could buy instead, in Egypt’s property market.")}</span>
           </div>
           <nav className="footer-links" aria-label={t("Footer")}>
-            {[...nav, { to: "/watchlist", label: "Watchlist" }, { to: "/compare", label: "Compare" }].map((item) => (
+            {[...nav, { to: "/watchlist", label: "Watchlist" }, { to: "/compare", label: "Compare" }, { to: "/privacy", label: "Privacy" }].map((item) => (
               <Link key={item.to} to={item.to}>
                 {t(item.label)}
               </Link>
@@ -218,7 +234,7 @@ export default function App() {
       </footer>
 
       <nav className="tabbar" aria-label={t("Quick navigation")} key={`t-${language}`}>
-        {[...nav.slice(0, 4), { to: "/watchlist", short: "Watchlist", icon: Bookmark }].map(({ to, short, icon: Icon }) => (
+        {[...nav.filter((item) => item.to !== "/districts").slice(0, 4), { to: "/watchlist", short: "Watchlist", icon: Bookmark }].map(({ to, short, icon: Icon }) => (
           <NavLink key={to} to={to} className={({ isActive }) => (isActive ? "is-active" : "")}>
             <span className="tabbar-icon">
               <Icon size={20} />

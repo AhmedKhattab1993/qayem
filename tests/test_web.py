@@ -442,8 +442,11 @@ def test_spa_routes_and_unknown_api_remain_separate(database: Path, tmp_path: Pa
     (dist / "leak.db").symlink_to(database)
     with TestClient(create_app(database, dist)) as client:
         for route in ("/", "/evaluate", "/units", "/compounds/garden", "/developers", "/methodology"):
-            assert client.get(route).status_code == 200
-            assert "Qayem" in client.get(route).text
+            response = client.get(route)
+            assert response.status_code == 200 and response.text.startswith("<!doctype html><title>")
+        assert "Garden" in client.get("/compounds/garden").text  # the route's own head (seo.py)
+        assert client.get("/compounds/nowhere").status_code == 404  # still the app, which says so
+        assert client.get("/units/999999").status_code == 404
         assert client.get("/brand.svg").status_code == 200
         assert client.get("/missing.js").status_code == 404
         assert client.get("/leak.db").status_code == 404

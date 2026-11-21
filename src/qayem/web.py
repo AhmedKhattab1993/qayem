@@ -9,10 +9,12 @@ from threading import Thread
 from typing import Collection, Literal
 
 from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 
+from . import seo
 from .config import crawled_sources, db_path as configured_db_path
+from .growth import Growth, LocalDatabase, LocalHttp, Settings, client_details, growth_router
 from .valuation import developer_key, slug
 from .website_data import Catalog, CatalogUnavailable, detail, evaluate, opportunity_key, public_unit, url_key
 
@@ -24,8 +26,23 @@ Level = Literal["", "strong", "good", "in_line", "mixed", "pricier", "check", "u
 _CONFIGURED = object()
 
 
+class SnapshotPublic:
+    """The local catalogue for the growth routes (cloud_web.Store in the Worker)."""
+
+    def __init__(self, catalog: Catalog):
+        self.catalog = catalog
+
+    async def newest_unit_id(self) -> int:
+        return max((r["id"] for r in self.catalog.snapshot().default), default=0)
+
+    async def unit(self, unit_id: int) -> dict | None:
+        record = self.catalog.snapshot().records.get(unit_id)
+        return public_unit(record) if record else None
+
+
 def create_app(db_path: str | Path | None = None, static_dir: str | Path | None = None,
-               refresh_seconds: float | None = None, sources: Collection[str] | None | object = _CONFIGURED) -> FastAPI:
+               refresh_seconds: float | None = None, sources: Collection[str] | None | object = _CONFIGURED,
+               leads_db: str | Path | None | object = _CONFIGURED, http=None, settings: Settings | None = None) -> FastAPI:
     if refresh_seconds is None:
         refresh_seconds = float(os.environ.get("QAYEM_REFRESH_SECONDS", "300"))
     if sources is _CONFIGURED:
@@ -41,6 +58,34 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
     app.state.catalog = catalog
     static_root = Path(static_dir) if static_dir is not None else Path(__file__).resolve().parents[2] / "web" / "dist"
     static_root = static_root.resolve()
+    if leads_db is _CONFIGURED:
+        leads_db = os.environ.get("QAYEM_LEADS_DB") or None  # unset: lead capture answers that it is unavailable
+    leads = LocalDatabase(leads_db) if leads_db else None
+    config = settings or Settings.read(lambda name: os.environ.get(name))
+    public = SnapshotPublic(catalog)
+
+    async def growth(request: Request) -> Growth:
+        return Growth(leads, public, config, http or LocalHttp(), **client_details(request))
+
+    async def load(kind: str, key: str):
+        snapshot = catalog.snapshot()
+        if kind == "overview":
+            return snapshot.overview
+        if kind == "unit_detail":
+            record = snapshot.records.get(int(key))
+            return {"unit": public_unit(record, full=True)} if record else None
+        return {"compound": snapshot.compounds, "developer": snapshot.developers,
+                "district": snapshot.districts}[kind].get(key)
+
+    @app.middleware("http")
+    async def headers(request: Request, call_next):
+        target = seo.canonical_redirect(str(request.url))
+        if target and request.method in {"GET", "HEAD"}:
+            return RedirectResponse(target, status_code=301)
+        response = await call_next(request)
+        if request.url.path.startswith("/api"):
+            response.headers.setdefault("X-Robots-Tag", "noindex")
+        return response
 
     @app.exception_handler(CatalogUnavailable)
     async def unavailable_handler(request: Request, exc: CatalogUnavailable) -> JSONResponse:
@@ -80,6 +125,7 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
         bedrooms_min: int | None = Query(None, ge=0, le=12),
         delivery: str = Query("", pattern=DELIVERY_PATTERN),
         newer_than: int | None = Query(None, ge=0),
+        price_dropped: Literal["", "true"] = "",
         page: int = Query(1, ge=1, le=100_000),
         page_size: int = Query(25, ge=1, le=100),
     ) -> dict:
@@ -109,7 +155,8 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
         if launch or sort == "launch_gap":  # only units with a current developer price for a similar unit
             items = [r for r in items if r.get("launch")]
         budget = {"price_max": price_max, "cash_max": cash_max, "signing_max": signing_max, "area_min": area_min,
-                  "area_max": area_max, "bedrooms_min": bedrooms_min, "delivery": delivery, "newer_than": newer_than}
+                  "area_max": area_max, "bedrooms_min": bedrooms_min, "delivery": delivery, "newer_than": newer_than,
+                  "price_dropped": True if price_dropped == "true" else None}
         if any(value not in (None, "") for value in budget.values()):
             items = [r for r in items if within(r, **budget)]
         if sort == "opportunity":
@@ -228,24 +275,46 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
             raise HTTPException(404, "We have not indexed that listing link. Enter its details instead.")
         return {"id": unit_id}
 
+    app.include_router(growth_router(growth))
+
     @app.api_route("/api", methods=["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
     @app.api_route("/api/{path:path}", methods=["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
     def unknown_api(path: str = "") -> None:
         raise HTTPException(404, "API endpoint not found.")
 
+    @app.get("/robots.txt", include_in_schema=False)
+    def robots() -> PlainTextResponse:
+        return PlainTextResponse(seo.robots_txt())
+
+    @app.get("/sitemap.xml", include_in_schema=False)
+    def sitemap() -> Response:
+        snapshot = catalog.snapshot()
+        minimum = seo.SITEMAP_MIN_UNITS
+        paths = seo.sitemap_paths(
+            [k for k, c in snapshot.compounds.items() if c["units"] >= minimum],
+            [k for k, d in snapshot.developers.items() if d["units"] >= minimum],
+            [d["key"] for d in snapshot.catalog["districts"] if d["units"] >= minimum],
+            sorted(r["id"] for r in snapshot.default if r["opportunity"]["level"] != "unrated"))
+        return Response(seo.sitemap_xml(paths, snapshot.today), media_type="application/xml")
+
     if (static_root / "assets").is_dir():
         app.mount("/assets", StaticFiles(directory=static_root / "assets"), name="assets")
 
     @app.get("/{path:path}", include_in_schema=False)
-    def website(path: str) -> FileResponse:
+    async def website(request: Request, path: str) -> Response:
         requested = (static_root / path).resolve()
         if not requested.is_relative_to(static_root):
             raise HTTPException(404, "Page not found.")
-        if requested.is_file():
+        if requested.is_file() and requested.name != "index.html":
             return FileResponse(requested)
         index = static_root / "index.html"
-        if index.is_file() and not Path(path).suffix:
-            return FileResponse(index, media_type="text/html")
+        if index.is_file() and not Path(path).suffix or requested.name == "index.html":
+            html = index.read_text(encoding="utf-8")
+            try:
+                meta = await seo.page_meta("/" + path, dict(request.query_params), load)
+            except Exception:  # the page still loads; the app shows its own retry state
+                return Response(html, media_type="text/html")
+            return Response(seo.render(html, meta), status_code=meta.status, media_type="text/html")
         if not index.is_file():
             raise HTTPException(503, "Website assets are not built. Run npm install and npm run build in web/, then restart the server.")
         raise HTTPException(404, "Page not found.")

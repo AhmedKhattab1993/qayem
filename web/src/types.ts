@@ -63,6 +63,29 @@ export interface UnitLaunch {
   /** The developer's list price per m² today against the seller's contract price (AqarExit sells at contract price). */
   since_contract: { year: number; contract_ppm: number; change: number; annual: number | null } | null;
 }
+/** A listed price change over the last 60 days, from the seller's or developer's own edits. */
+export interface PriceChange {
+  from: number;
+  to: number;
+  change: number;
+  at: string;
+  edits: number;
+}
+/** How fast stock leaves and how prices move, from Qayem's own record of every crawl. */
+export interface History {
+  delisted_30d: number;
+  turnover_30d: number | null;
+  new_30d: number;
+  median_days_listed: number | null;
+  tracked_delisted: number;
+  price_cuts_60d: number;
+  price_rises_60d: number;
+  median_cut: number | null;
+  developer_change_60d: number | null;
+  developer_tracked: number;
+  developer_rising: number;
+  developer_falling: number;
+}
 export interface Unit {
   id: number;
   source: string;
@@ -88,6 +111,7 @@ export interface Unit {
   opportunity: Opportunity;
   contract_year: number | null;
   is_resale: boolean | null;
+  price_change?: PriceChange | null;
 }
 export interface UnitFull extends Unit {
   /** Every photo the source published, in its order. */
@@ -99,6 +123,7 @@ export interface UnitFull extends Unit {
   installment_months: number | null;
   resale_evidence: string | null;
   last_seen_at: string | null;
+  first_seen_at?: string | null;
   unknowns: string[];
   description: string | null;
 }
@@ -171,6 +196,7 @@ export interface Compound extends Profile {
   classes: ClassSummary[];
   area_range: [number, number];
   types: Record<string, number>;
+  history?: History;
 }
 export interface Developer extends Profile {
   launch: Launch | null;
@@ -190,13 +216,26 @@ export interface Developer extends Profile {
   }[];
   districts: { name: string; units: number }[];
   delivery_changes: { tracked_units: number; postponed: number; brought_forward: number };
+  history?: History;
 }
 export interface District extends Profile {
   key: string;
   name: string;
   units: number;
+  good_count?: number;
   classes: ClassSummary[];
   compound_count: number;
+  compounds?: {
+    key: string;
+    name: string;
+    name_ar: string | null;
+    units: number;
+    good_count: number;
+    developer: Ref | null;
+    median_gap: number | null;
+    compared: number;
+  }[];
+  history?: History;
 }
 export interface CompoundDetail {
   compound: Compound;
@@ -245,6 +284,7 @@ export interface Overview {
     check_cheapest: number;
   };
   developer_gaps: { key: string; name: string; name_ar: string | null; gap: number; units: number }[];
+  history?: History & { cohort_start: string | null; liquidity_days: number; price_days: number };
 }
 export interface Catalog {
   districts: { key: string; name: string; units: number }[];

@@ -20,6 +20,7 @@ export const SEARCH_KEYS = [
   "level",
   "terms",
   "launch",
+  "price_dropped",
 ];
 
 /** One spelling per search, so the same filters in another order are the same saved search. */
@@ -68,6 +69,7 @@ export function describeSearch(query: string, catalog: Catalog | null) {
     get("level") && t(levelText[get("level") as Level] ?? get("level")!),
     get("terms") && t(termsText[get("terms")!] ?? get("terms")!),
     get("launch") && t("Developer selling similar units"),
+    get("price_dropped") && t("Price cut recently"),
   ];
   return parts.filter(Boolean).join(sep()) || t("All units");
 }

@@ -80,6 +80,12 @@ const pages = [
   ["compare", "/compare"],
   ["watchlist", "/watchlist"],
   ["methodology", "/methodology"],
+  ["districts", "/districts"],
+  ["district", `/districts/${encodeURIComponent(catalog.districts[0].key)}`],
+  ["sheet", `/sheet/${plan.id}`],
+  ["privacy", "/privacy"],
+  ["evaluate-sell", `/evaluate?mode=sell&${evaluate}`],
+  ["units-price-cut", "/units?price_dropped=true"],
 ];
 const pinned = [
   { kind: "compound", key: compound.key, name: compound.name },
@@ -251,6 +257,43 @@ await context.close();
   }
 }
 
+// Capture: the verdict's card opens a two-field form, and a lead is accepted (needs QAYEM_LEADS_DB locally).
+const growth = await api("/config");
+if (growth.leads) {
+  for (const [device, options] of Object.entries(viewports)) {
+    const context = await browser.newContext(options);
+    await context.addInitScript(() => localStorage.setItem("qayem:language", "en"));
+    const page = await context.newPage();
+    await page.goto(`${baseURL}/units/${plan.id}`, { waitUntil: "networkidle" });
+    const capture = page.locator(".capture").first();
+    await capture.getByRole("button").first().click();
+    await capture.getByRole("button", { name: "Buying to live" }).click();
+    await capture.getByLabel("WhatsApp number").fill("01012345678");
+    await capture.getByRole("button", { name: /Send me/ }).click();
+    await capture.locator(".capture-done").waitFor();
+    const width = await page.evaluate(() => [document.documentElement.scrollWidth, innerWidth]);
+    assert.ok(width[0] <= width[1] + 1, `${device} capture has no sideways scroll: ${width}`);
+    await page.screenshot({ path: `${artifacts}flow-lead-${device}.png`, fullPage: true });
+    // A saved search can become an alert.
+    await page.goto(`${baseURL}/units?bedrooms_min=3`, { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: "Get alerts" }).click();
+    const alert = page.locator(".capture-alert");
+    await alert.getByLabel("WhatsApp number").fill("501234567");
+    await alert.getByLabel("Country").selectOption("+971");
+    await alert.getByRole("button", { name: "Turn on the alert" }).click();
+    await alert.locator(".capture-done").waitFor();
+    await context.close();
+  }
+}
+// The server writes each route's head: a crawler sees the compound's own title and summary.
+{
+  const html = await (await fetch(`${baseURL}/compounds/${encodeURIComponent(compound.key)}`)).text();
+  assert.match(html, /<link rel="canonical" href="https:\/\/qayem\.ai\/compounds\//);
+  assert.match(html, /<div id="root"><div class="seo-summary">/);
+  const sitemap = await (await fetch(`${baseURL}/sitemap.xml`)).text();
+  assert.ok(sitemap.includes(`/compounds/${encodeURIComponent(compound.key)}<`), "the sitemap lists the compound");
+}
+
 // The explainer film: only a poster until asked, then the phone-sized file on a phone, and it plays.
 // Safari will not play a video from a server that ignores byte ranges.
 const film = await fetch(`${baseURL}/media/explainer-v4-720.mp4`, { headers: { Range: "bytes=0-1023" } });
@@ -276,4 +319,4 @@ if (failures.length) {
   console.error(JSON.stringify(failures, null, 2));
   process.exit(1);
 }
-console.log(`✓ ${report.length} page checks (${pages.length} pages × desktop/mobile × ar/en) and the evaluate, units, budget, saved-search, unit-compare and explainer flows passed`);
+console.log(`✓ ${report.length} page checks (${pages.length} pages × desktop/mobile × ar/en) and the evaluate, units, budget, saved-search, unit-compare, capture, page-head and explainer flows passed`);

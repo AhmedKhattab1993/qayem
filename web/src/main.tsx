@@ -15,6 +15,7 @@ import "./styles/shell.css";
 import "./styles/ui.css";
 import "./styles/home.css";
 import "./styles/valuation.css";
+import "./styles/growth.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

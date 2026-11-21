@@ -49,7 +49,7 @@ def signing(record: dict) -> float | None:
 
 
 def within(record: dict, *, price_max=None, cash_max=None, signing_max=None, area_min=None, area_max=None,
-           bedrooms_min=None, delivery="", newer_than=None) -> bool:
+           bedrooms_min=None, delivery="", newer_than=None, price_dropped=False) -> bool:
     """A buyer's budget and needs. A figure the listing does not publish never matches a limit on it.
     The Cloudflare API applies the same rules in SQL (`cloud_web.budget_clauses`)."""
     cash, paid = record["payment"]["cash_equivalent"], signing(record)
@@ -62,4 +62,5 @@ def within(record: dict, *, price_max=None, cash_max=None, signing_max=None, are
             and (bedrooms_min is None or (record["bedrooms"] is not None and record["bedrooms"] >= bedrooms_min))
             and (not delivery or when.get("bucket") == "ready"
                  or (delivery != "ready" and bool(when.get("date")) and when["date"][:4] <= delivery))
-            and (newer_than is None or record["id"] > newer_than))
+            and (newer_than is None or record["id"] > newer_than)
+            and (not price_dropped or bool(record.get("price_change") and record["price_change"]["change"] < 0)))

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Bookmark, Check, ExternalLink, Plus, Share2 } from "lucide-react";
-import { year, date, money, number, safeExternalUrl, titleCase, useApi, useTitle, sep, nameOf, place } from "../lib";
+import { ArrowLeft, Bookmark, Check, ExternalLink, Plus, TrendingDown } from "lucide-react";
+import { year, date, money, number, percent, safeExternalUrl, titleCase, useApi, useTitle, sep, nameOf, place } from "../lib";
 import { t } from "../locale";
 import type { UnitDetail } from "../types";
 import { ErrorState, Loading } from "../components/States";
@@ -12,6 +12,9 @@ import { NameList } from "../components/Names";
 import { DeveloperPrice } from "../components/DeveloperPrice";
 import { Gallery } from "../components/Gallery";
 import { Glance } from "../components/Glance";
+import { LeadCard } from "../components/Capture";
+import { ShareBar, unitShareText } from "../components/Share";
+import { track } from "../track";
 
 /** The pipeline records why a listing counts as resale in its own shorthand; say it in words. */
 function evidenceText(raw: string) {
@@ -36,7 +39,7 @@ export default function UnitPage() {
   const valid = id && /^\d+$/.test(id);
   const { data, error, missing, retry } = useApi<UnitDetail>(valid ? `/units/${id}` : null);
   const [fullText, setFullText] = useState(false);
-  const { toast, watch, toggleWatch, compare, toggleCompare } = useStore();
+  const { watch, toggleWatch, compare, toggleCompare } = useStore();
   useTitle(data && [unitName(data.unit), nameOf(data.unit.compound)].filter(Boolean).join(sep()));
   if (!valid)
     return (
@@ -55,22 +58,16 @@ export default function UnitPage() {
   const source = safeExternalUrl(unit.source_url);
   const saved = isPinned(watch, "unit", String(unit.id));
   const comparing = isPinned(compare, "unit", String(unit.id));
-  const share = async () => {
-    const url = window.location.href;
-    const title = `${unitName(unit)}${unit.compound ? `${sep()}${nameOf(unit.compound)}` : ""}`;
-    try {
-      if (navigator.share) return await navigator.share({ title, url });
-      await navigator.clipboard.writeText(url);
-      toast("Link copied");
-    } catch (error) {
-      if ((error as Error).name !== "AbortError") toast("Copy the link from the address bar to share this unit.");
-    }
-  };
+  const cut = unit.price_change && unit.price_change.change < 0 ? unit.price_change : null;
   const facts: [string, string][] = [
     // Area, rooms, price per m² and delivery are in the tiles above.
     ["Unit type", titleCase(unit.property_type)],
     ["Finishing", titleCase(unit.finishing_class === "unknown" ? null : unit.finishing_class)],
     ...(unit.contract_year ? ([["Contract signed", year(unit.contract_year)]] as [string, string][]) : []),
+    ...(unit.first_seen_at ? ([["First seen by Qayem", date(unit.first_seen_at)]] as [string, string][]) : []),
+    ...(unit.price_change
+      ? ([["Listed price before", `${money(unit.price_change.from)}${sep()}${date(unit.price_change.at)}`]] as [string, string][])
+      : []),
     ["Last observed", date(unit.last_seen_at)],
   ];
 
@@ -108,6 +105,11 @@ export default function UnitPage() {
             {unit.resale_evidence?.includes("verified by AqarExit") && (
               <span className="tag tag-nile">{t("Contract and receipts verified by AqarExit")}</span>
             )}
+            {cut && (
+              <span className="tag tag-cut">
+                <TrendingDown size={13} /> {t("Price cut {cut} on {date}", { cut: percent(Math.abs(cut.change)), date: date(cut.at) })}
+              </span>
+            )}
             <span className="unit-actions">
               <button
                 type="button"
@@ -125,10 +127,10 @@ export default function UnitPage() {
               >
                 {comparing ? <Check size={15} /> : <Plus size={15} />} {t(comparing ? "In comparison" : "Compare")}
               </button>
-              <button type="button" className="btn btn-sm" onClick={share}>
-                <Share2 size={15} /> {t("Share")}
-              </button>
             </span>
+          </div>
+          <div className="unit-share">
+            <ShareBar text={unitShareText(unit)} path={`/units/${unit.id}`} unitId={unit.id} />
           </div>
         </div>
       </header>
@@ -136,7 +138,13 @@ export default function UnitPage() {
       <div className="page unit-verdict">
         <OpportunitySummary unit={unit} wide>
           {source ? (
-            <a className="btn btn-nile" href={source} target="_blank" rel="noopener noreferrer">
+            <a
+              className="btn btn-nile"
+              href={source}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => track("outbound_click", { unit_id: unit.id, entity: unit.compound?.key, meta: { source: unit.source } })}
+            >
               {t("View on {source}", { source: unit.source_name })} <ExternalLink size={15} />
             </a>
           ) : (
@@ -163,6 +171,7 @@ export default function UnitPage() {
       </div>
 
       <div className="page">
+        <LeadCard unit={unit} />
         <Glance unit={unit} />
       </div>
 

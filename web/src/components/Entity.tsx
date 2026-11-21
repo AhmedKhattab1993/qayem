@@ -1,7 +1,7 @@
 import { Clock } from "lucide-react";
-import { year, classLabel, money, number, percent, signed, titleCase, sep, tone } from "../lib";
+import { year, classLabel, date, money, number, percent, signed, titleCase, sep, tone } from "../lib";
 import { t } from "../locale";
-import type { ClassSummary, Launch, Overview, Profile } from "../types";
+import type { ClassSummary, History, Launch, Overview, Profile } from "../types";
 import { NameList } from "./Names";
 
 /** Observed prices per class: what resale units were contracted at, what they cost in today’s money,
@@ -186,5 +186,69 @@ export function LaunchPanel({ launch, scope }: { launch: Launch | null; scope: "
         )}
       </p>
     </div>
+  );
+}
+
+/** Qayem's own record of every crawl: how fast listings leave, and how prices move. */
+export function HistoryPanel({ history, overview }: { history: History | undefined; overview: Overview | null }) {
+  if (!history) return <HistoryPending overview={overview} />;
+  const since = overview?.history?.cohort_start;
+  const any =
+    history.delisted_30d || history.price_cuts_60d || history.price_rises_60d || history.developer_change_60d != null;
+  if (!any) return null;
+  return (
+    <section className="section-tight">
+      <span className="eyebrow">{t("History")}</span>
+      <h2 className="display section-title">{t("How fast it sells, and how prices move")}</h2>
+      <div className="kpis history-kpis">
+        <article>
+          <span>{t("Left the market in 30 days")}</span>
+          <strong className="num">{number(history.delisted_30d)}</strong>
+          <small>
+            {history.turnover_30d != null
+              ? t("{share} of the stock, sold or withdrawn", { share: percent(history.turnover_30d, 1) })
+              : t("Sold or withdrawn")}
+          </small>
+        </article>
+        <article>
+          <span>{t("Typical days on the market")}</span>
+          <strong className="num">
+            {history.median_days_listed != null ? t("{n} days", { n: number(history.median_days_listed), count: history.median_days_listed }) : "—"}
+          </strong>
+          <small>
+            {history.median_days_listed != null
+              ? t("Median for the {n} listings that left after appearing since {date}", { n: number(history.tracked_delisted), date: date(since) })
+              : t("Too few listings have come and gone yet")}
+          </small>
+        </article>
+        <article>
+          <span>{t("Price cuts in 60 days")}</span>
+          <strong className="num">{number(history.price_cuts_60d)}</strong>
+          <small>
+            {history.median_cut != null
+              ? t("Median cut {cut}; {n} raised", { cut: percent(Math.abs(history.median_cut), 1), n: number(history.price_rises_60d) })
+              : t("{n} raised", { n: number(history.price_rises_60d) })}
+          </small>
+        </article>
+        <article>
+          <span>{t("Developer list prices, 60 days")}</span>
+          <strong className={`num ${tone(history.developer_change_60d)}`}>{signed(history.developer_change_60d, 1)}</strong>
+          <small>
+            {history.developer_change_60d != null
+              ? t("Average for the same {n} units; {up} raised, {down} cut", {
+                  n: number(history.developer_tracked),
+                  up: number(history.developer_rising),
+                  down: number(history.developer_falling),
+                })
+              : t("The developer is not selling here, or not for long enough")}
+          </small>
+        </article>
+      </div>
+      <p className="fineprint">
+        {t(
+          "Counted from Qayem’s nightly crawls. A listing that leaves may have sold or been withdrawn; listed prices are not sale prices. Days on the market count only listings first seen after the opening crawls.",
+        )}
+      </p>
+    </section>
   );
 }

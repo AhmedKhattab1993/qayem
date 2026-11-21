@@ -13,13 +13,15 @@
     "directory": "../web/dist",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/api", "/api/*", "/media/*.mp4"]
+    "run_worker_first": ["/api", "/api/*", "/media/*.mp4", "/", "/evaluate", "/units", "/units/*", "/compounds",
+      "/compounds/*", "/developers", "/developers/*", "/districts", "/districts/*", "/methodology", "/privacy",
+      "/compare", "/watchlist", "/sheet/*", "/sitemap.xml", "/robots.txt"]
   },
-  "d1_databases": [{
-    "binding": "DB",
-    "database_name": "qayem-public",
-    "database_id": "3249fecc-5050-4913-afaa-329fa561e0ad"
-  }],
+  "d1_databases": [
+    {"binding": "DB", "database_name": "qayem-public", "database_id": "3249fecc-5050-4913-afaa-329fa561e0ad"},
+    {"binding": "LEADS_DB", "database_name": "qayem-leads", "database_id": "cf37f558-e536-4407-a190-3be940d0856f"}
+  ],
+  "triggers": {"crons": ["17 * * * *"]},
   "observability": {"enabled": true},
   "env": {
     "staging": {
@@ -30,13 +32,15 @@
         "directory": "../web/dist-staging",
         "binding": "ASSETS",
         "not_found_handling": "single-page-application",
-        "run_worker_first": ["/api", "/api/*", "/media/*.mp4"]
+        "run_worker_first": ["/api", "/api/*", "/media/*.mp4", "/", "/evaluate", "/units", "/units/*", "/compounds",
+          "/compounds/*", "/developers", "/developers/*", "/districts", "/districts/*", "/methodology", "/privacy",
+          "/compare", "/watchlist", "/sheet/*", "/sitemap.xml", "/robots.txt"]
       },
-      "d1_databases": [{
-        "binding": "DB",
-        "database_name": "qayem-staging",
-        "database_id": "a5519958-fe4b-40d8-b9ae-7061b73adc3a"
-      }],
+      "d1_databases": [
+        {"binding": "DB", "database_name": "qayem-staging", "database_id": "a5519958-fe4b-40d8-b9ae-7061b73adc3a"},
+        {"binding": "LEADS_DB", "database_name": "qayem-leads-staging",
+         "database_id": "6b5451b1-c549-498e-b983-5fc552c03ba2"}
+      ],
       "triggers": {"crons": []}
     }
   }

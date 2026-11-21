@@ -5,7 +5,7 @@ import { t } from "../locale";
 import type { Developer, Overview } from "../types";
 import { ErrorState, Loading } from "../components/States";
 import { DivergingBars, EntityActions, ScopeNote } from "../components/Opportunity";
-import { HistoryPending, LaunchPanel, ProfileFacts } from "../components/Entity";
+import { HistoryPanel, LaunchPanel, ProfileFacts } from "../components/Entity";
 import { NameList } from "../components/Names";
 
 export default function DeveloperPage({ overview }: { overview: Overview | null }) {
@@ -155,7 +155,7 @@ export default function DeveloperPage({ overview }: { overview: Overview | null 
             </p>
           </div>
         </section>
-        <HistoryPending overview={overview} />
+        <HistoryPanel history={data.history} overview={overview} />
       </div>
     </div>
   );

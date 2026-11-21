@@ -11,7 +11,8 @@ args = parser.parse_args()
 package = root / "build" / "qayem"
 package.mkdir(parents=True, exist_ok=True)
 (package / "__init__.py").write_text("")
-for name in ("valuation.py", "website_data.py", "web_common.py", "cloud_web.py", "cloud_media.py"):
+for name in ("valuation.py", "website_data.py", "web_common.py", "cloud_web.py", "cloud_media.py",
+             "seo.py", "growth.py", "alerts.py"):
     shutil.copyfile(root.parent / "src" / "qayem" / name, package / name)
 films = {name: {"size": path.stat().st_size, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
          for name in ("explainer-v4-720.mp4", "explainer-v4-1080.mp4")
@@ -26,4 +27,7 @@ films = {name: {"size": path.stat().st_size, "sha256": hashlib.sha256(path.read_
     "        if path.startswith('/media/') and path.endswith('.mp4'):\n"
     "            return await serve_film(request, self.env, FILMS)\n"
     "        return await asgi.fetch(app, request, self.env, self.ctx)\n"
+    "    async def scheduled(self, controller, *args):\n"
+    "        from qayem.alerts import run_scheduled\n"
+    "        print('Alerts:', await run_scheduled(self.env))\n"
 )

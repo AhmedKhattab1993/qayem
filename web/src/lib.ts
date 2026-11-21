@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getLanguage, t } from "./locale";
+import { keepsServerHead, serverTitle } from "./head";
 import type { Catalog, Payment } from "./types";
 
 const locale = () => (getLanguage() === "ar" ? "ar-EG" : "en-GB");
@@ -36,7 +37,8 @@ export const scrollBehavior = (): ScrollBehavior =>
 /** The browser tab's title for a page about one unit, compound or developer. */
 export function useTitle(text: string | null | undefined) {
   useEffect(() => {
-    if (text) document.title = `${text} — ${t("Qayem")}`;
+    if (keepsServerHead(getLanguage())) document.title = serverTitle;
+    else if (text) document.title = `${text} — ${t("Qayem")}`;
   }, [text]);
 }
 

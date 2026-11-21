@@ -1,5 +1,6 @@
 import { createElement, Fragment, type ReactNode } from "react";
 import { ar } from "./ar";
+import { keepsServerHead } from "./head";
 
 export type Language = "ar" | "en";
 type Vars = Record<string, string | number | null | undefined>;
@@ -32,6 +33,7 @@ const enOne: Record<string, string> = {
   "{n} districts": "{n} district",
   "{n} sources": "{n} source",
   "{n} years": "{n} year",
+  "{n} days": "{n} day",
   "Left, over {n} years": "Left, over {n} year",
   "Left: ≈ {amount} a quarter for {n} years": "Left: ≈ {amount} a quarter for {n} year",
   "{n} further compounds have too few listings for a premium.": "{n} further compound has too few listings for a premium.",
@@ -66,8 +68,9 @@ export function setLanguage(next: Language) {
   language = next;
   document.documentElement.lang = next;
   document.documentElement.dir = next === "ar" ? "rtl" : "ltr";
-  document
-    .querySelector('meta[name="description"]')
+  if (!keepsServerHead(next))
+    document
+      .querySelector('meta[name="description"]')
     ?.setAttribute(
       "content",
       t("Qayem weighs Egypt's resale property market: every listing scored, sourced, and priced against its peers."),

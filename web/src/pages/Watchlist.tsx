@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { BellRing, Bookmark, Building2, Check, Home, Landmark, Plus, Rows3, X } from "lucide-react";
+import { useState } from "react";
+import { BellRing, Bookmark, Building2, Check, Home, Landmark, MessageCircle, Plus, Rows3, X } from "lucide-react";
 import { classLabel, money, nameOf, number, place, signed, tone, useApi, useCatalog } from "../lib";
 import { t } from "../locale";
 import { isPinned, useStore, type SavedSearch } from "../store";
@@ -11,12 +12,15 @@ import { termsLabel } from "../components/UnitTable";
 import { Thumb } from "../components/Gallery";
 import type { Overview, Page, Unit } from "../types";
 import { EmptyState } from "../components/States";
-import { HistoryPending } from "../components/Entity";
+import { AlertSignup } from "../components/Capture";
+import { useGrowthConfig } from "../growth";
 
 /** A saved search: how many units match now, and how many were indexed since it was last opened. */
 function SearchRow({ search }: { search: SavedSearch }) {
   const { toggleSearch, markSeen } = useStore();
   const catalog = useCatalog();
+  const growth = useGrowthConfig();
+  const [alerting, setAlerting] = useState(false);
   const and = search.query ? "&" : "";
   const now = useApi<Page<Unit>>(`/units?${search.query}${and}sort=newest&page_size=1`);
   const fresh = useApi<Page<Unit>>(`/units?${search.query}${and}newer_than=${search.seen}&page_size=1`);
@@ -47,6 +51,12 @@ function SearchRow({ search }: { search: SavedSearch }) {
           )}
         </span>
       </div>
+      {growth?.leads && (
+        <button className={`btn btn-sm${alerting ? " btn-ink" : ""}`} aria-expanded={alerting} onClick={() => setAlerting((v) => !v)}>
+          <MessageCircle size={15} />
+          <span className="watch-compare-label">{t("Get alerts")}</span>
+        </button>
+      )}
       <button
         className="btn btn-sm btn-icon btn-ghost"
         aria-label={t("Remove the saved search: {name}", { name: label })}
@@ -54,11 +64,16 @@ function SearchRow({ search }: { search: SavedSearch }) {
       >
         <X size={16} />
       </button>
+      {alerting && (
+        <div className="watch-alert">
+          <AlertSignup query={search.query} label={label} />
+        </div>
+      )}
     </li>
   );
 }
 
-export default function Watchlist({ overview }: { overview: Overview | null }) {
+export default function Watchlist(_props: { overview: Overview | null }) {
   const { watch, toggleWatch, searches, compare, toggleCompare } = useStore();
   const { get, retry } = usePinned(watch);
   return (
@@ -70,16 +85,15 @@ export default function Watchlist({ overview }: { overview: Overview | null }) {
             {t("The units and compounds")} <em>{t("you care about.")}</em>
           </h1>
           <p className="lede">
-            {t("Kept in this browser only. No account, no enquiries sent to anyone.")}
+            {t("Kept in this browser only. No account, no enquiries sent to anyone. Ask for an alert and we message you instead.")}
           </p>
         </div>
       </header>
       <div className="page">
-        <HistoryPending overview={overview} />
         {searches.length > 0 && (
           <section className="watch-section" aria-labelledby="searches-heading">
             <h2 id="searches-heading">{t("Saved searches")}</h2>
-            <p className="muted">{t("New listings that match appear here the next time you visit. Nothing is sent to you.")}</p>
+            <p className="muted">{t("New listings that match appear here the next time you visit. Choose Get alerts to have them sent to your WhatsApp or e-mail.")}</p>
             <ul className="watch-list">
               {searches.map((search) => (
                 <SearchRow key={search.query} search={search} />

@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
-import { BellPlus, BellRing, ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
+import { BellPlus, BellRing, ChevronDown, MessageCircle, Search, SlidersHorizontal, X } from "lucide-react";
 import { api, money, number, titleCase, useApi, useCatalog, sep, nameOf, place, year } from "../lib";
 import { useStore } from "../store";
-import { searchQuery } from "../searches";
+import { describeSearch, searchQuery } from "../searches";
+import { AlertSignup } from "../components/Capture";
+import { useGrowthConfig } from "../growth";
+import { track } from "../track";
 import { t } from "../locale";
 import type { Page, Unit } from "../types";
 import { EmptyState, ErrorState, Loading } from "../components/States";
@@ -12,7 +15,7 @@ import { levelText } from "../components/Opportunity";
 
 /** A buyer's budget and needs first, then where and what. */
 const BUDGET = ["price_max", "cash_max", "signing_max", "bedrooms_min", "area_min", "area_max", "delivery"];
-const FILTERS = [...BUDGET, "district", "developer", "property_type", "level", "terms", "launch"];
+const FILTERS = [...BUDGET, "district", "developer", "property_type", "level", "terms", "launch", "price_dropped"];
 const KEYS = ["q", "compound", ...FILTERS, "sort", "page"];
 const thisYear = new Date().getFullYear();
 const AREAS: [number | null, number | null][] = [[null, 100], [100, 150], [150, 200], [200, 300], [300, null]];
@@ -23,6 +26,8 @@ export default function Units() {
   const catalog = useCatalog();
   const [search, setSearch] = useState(params.get("q") ?? "");
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [alerting, setAlerting] = useState(false);
+  const growth = useGrowthConfig();
   const { searches, toggleSearch, toast } = useStore();
   const saved = searchQuery(params);
   const isSaved = searches.some((item) => item.query === saved);
@@ -237,6 +242,7 @@ export default function Units() {
             {select("launch", "Developer price", "All units", [
               { value: "true", label: t("Developer selling similar units") },
             ])}
+            {select("price_dropped", "Price changes", "All units", [{ value: "true", label: t("Price cut recently") }])}
           </div>
           <div className="results-bar" id="results">
             <p className="muted num">
@@ -252,9 +258,24 @@ export default function Units() {
               )}
             </p>
             {saved && (
-              <button type="button" className={`btn btn-sm${isSaved ? " btn-ink" : ""}`} aria-pressed={isSaved} onClick={save}>
-                {isSaved ? <BellRing size={15} /> : <BellPlus size={15} />} {t(isSaved ? "Search saved" : "Save this search")}
-              </button>
+              <span className="results-actions">
+                <button type="button" className={`btn btn-sm${isSaved ? " btn-ink" : ""}`} aria-pressed={isSaved} onClick={save}>
+                  {isSaved ? <BellRing size={15} /> : <BellPlus size={15} />} {t(isSaved ? "Search saved" : "Save this search")}
+                </button>
+                {growth?.leads && (
+                  <button
+                    type="button"
+                    className={`btn btn-sm btn-nile${alerting ? " is-open" : ""}`}
+                    aria-expanded={alerting}
+                    onClick={() => {
+                      setAlerting((open) => !open);
+                      if (!alerting) track("alert_open", { meta: { cta: "search_alert" } });
+                    }}
+                  >
+                    <MessageCircle size={15} /> {t("Get alerts")}
+                  </button>
+                )}
+              </span>
             )}
             {filtered && (
               <button
@@ -266,6 +287,9 @@ export default function Units() {
             )}
           </div>
         </div>
+        {alerting && saved && (
+          <AlertSignup key={saved} query={saved} label={describeSearch(saved, catalog)} onDone={() => !isSaved && save()} />
+        )}
         {error ? (
           <ErrorState message={error} retry={retry} />
         ) : !list ? (

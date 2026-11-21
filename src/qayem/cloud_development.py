@@ -22,12 +22,18 @@ def deployment_binding(root: Path, environment: str) -> dict:
     databases = stage.get("d1_databases", [])
     if stage.get("routes") != [] or stage.get("triggers", {}).get("crons") != []:
         raise ValueError("Staging must have no production routes or scheduled updates")
-    if len(databases) != 1 or databases[0].get("binding") != "DB":
-        raise ValueError("Staging requires exactly one explicit D1 binding")
-    database = databases[0]
+    bindings = {db.get("binding"): db for db in databases}
+    if len(bindings) != len(databases) or "DB" not in bindings or set(bindings) - {"DB", "LEADS_DB"}:
+        raise ValueError("Staging requires its own explicit DB binding (and optionally LEADS_DB)")
+    database = bindings["DB"]
     if database.get("database_name") != "qayem-staging" or not database.get("database_id") \
             or database["database_id"] == production["database_id"]:
         raise ValueError("Staging must use its own database")
+    # Staging's visitors and test leads never reach the production leads database.
+    production_leads = next((db for db in config["d1_databases"] if db["binding"] == "LEADS_DB"), None)
+    leads = bindings.get("LEADS_DB")
+    if leads and (not leads.get("database_id") or (production_leads and leads["database_id"] == production_leads["database_id"])):
+        raise ValueError("Staging must use its own leads database")
     return database
 
 

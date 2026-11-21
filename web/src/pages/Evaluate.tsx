@@ -1,14 +1,17 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowRight, ChevronDown, Link2, Scale } from "lucide-react";
+import { ArrowRight, ChevronDown, Link2, Scale, Tag } from "lucide-react";
 import { year as formatYear, api, ApiError, money, number, percent, quarterly, titleCase, useApi, useCatalog, scrollBehavior, sep, nameOf, place } from "../lib";
 import { t } from "../locale";
 import type { Evaluation, Payment } from "../types";
 import { ErrorState, Loading } from "../components/States";
-import { OpportunitySummary, PaymentFacts, PeerPanel, Unknowns } from "../components/Opportunity";
+import { OpportunitySummary, PaymentFacts, PeerPanel, Unknowns, levelText } from "../components/Opportunity";
 import { DeveloperPrice } from "../components/DeveloperPrice";
 import { Comparables } from "../components/UnitTable";
 import { NameList } from "../components/Names";
+import { LeadCard, SellerForm } from "../components/Capture";
+import { ShareBar } from "../components/Share";
+import { track } from "../track";
 
 const FIELDS = [
   "compound",
@@ -34,7 +37,22 @@ function fromParams(params: URLSearchParams): Form {
 export default function Evaluate() {
   const [params, setParams] = useSearchParams();
   const catalog = useCatalog();
-  const [mode, setMode] = useState(params.get("mode") === "link" ? "link" : "describe");
+  const initial = params.get("mode");
+  const [mode, setMode] = useState<"describe" | "link" | "sell">(initial === "link" || initial === "sell" ? initial : "describe");
+  const selling = mode === "sell";
+  /** The mode lives in the address too, so a shared seller link opens in seller mode. */
+  const switchMode = (next: "describe" | "link" | "sell") => {
+    setMode(next);
+    setParams(
+      (current) => {
+        const updated = new URLSearchParams(current);
+        if (next === "describe") updated.delete("mode");
+        else updated.set("mode", next);
+        return updated;
+      },
+      { replace: true },
+    );
+  };
   const [form, setForm] = useState<Form>(() => fromParams(params));
   const [problem, setProblem] = useState("");
   const result = useRef<HTMLElement>(null);
@@ -51,6 +69,12 @@ export default function Evaluate() {
       : null;
   }, [params]);
   const { data, error, retry } = useApi<Evaluation>(query);
+  useEffect(() => {
+    if (data && query)
+      track("evaluate_run", { entity: data.inputs.compound?.key, meta: { level: data.opportunity.level, mode, status: data.status } });
+    // one event per comparison shown
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -63,7 +87,7 @@ export default function Evaluate() {
     if (form.plan && !(down >= 0 && down <= price)) return setProblem("The amount paid at signing must be between 0 and the headline price.");
     if (form.plan && !(Number(form.installment_years) > 0)) return setProblem("Enter how many years of installments remain.");
     setProblem("");
-    const next = new URLSearchParams();
+    const next = new URLSearchParams(selling ? { mode: "sell" } : {});
     for (const field of FIELDS) {
       if ((field === "down_payment" || field === "installment_years") && !form.plan) continue;
       const value = String(form[field]).trim();
@@ -81,21 +105,35 @@ export default function Evaluate() {
     <div className="evaluate page-enter">
       <header className="page-head">
         <div className="page">
-          <span className="eyebrow">{t("Compare a unit")}</span>
-          <h1 className="display">
-            {t("Is this")} <em>{t("a real opportunity?")}</em>
-          </h1>
+          <span className="eyebrow">{t(selling ? "Selling a unit" : "Compare a unit")}</span>
+          {selling ? (
+            <h1 className="display">
+              {t("How will buyers")} <em>{t("see your price?")}</em>
+            </h1>
+          ) : (
+            <h1 className="display">
+              {t("Is this")} <em>{t("a real opportunity?")}</em>
+            </h1>
+          )}
           <p className="lede">
             {t(
-              "Describe the unit you were offered. Qayem puts its payment plan in today’s money and compares it with the developer’s price today and the similar units listed in the same compound.",
+              selling
+                ? "Describe the unit you want to sell. Buyers compare it with the developer’s price today and the similar units listed in your compound: see that comparison before you set a price."
+                : "Describe the unit you were offered. Qayem puts its payment plan in today’s money and compares it with the developer’s price today and the similar units listed in the same compound.",
             )}
           </p>
           <div className="segmented" role="group" aria-label={t("How to evaluate")}>
-            <button aria-pressed={mode === "describe"} onClick={() => setMode("describe")}>
+            <button aria-pressed={mode === "describe"} onClick={() => switchMode("describe")}>
               {t("Describe the unit")}
             </button>
-            <button aria-pressed={mode === "link"} onClick={() => setMode("link")}>
+            <button aria-pressed={mode === "link"} onClick={() => switchMode("link")}>
               <Link2 size={14} /> {t("Paste a listing link")}
+            </button>
+            <button
+              aria-pressed={selling}
+              onClick={() => switchMode("sell")}
+            >
+              <Tag size={14} /> {t("Selling?")}
             </button>
           </div>
         </div>
@@ -103,7 +141,7 @@ export default function Evaluate() {
 
       <div className="page evaluate-body">
         {mode === "link" ? (
-          <LinkLookup onFallback={() => setMode("describe")} />
+          <LinkLookup onFallback={() => switchMode("describe")} />
         ) : (
           <form className="evaluate-form" onSubmit={submit} noValidate>
             <fieldset>
@@ -275,7 +313,7 @@ export default function Evaluate() {
           ) : !data ? (
             <Loading label="Comparing the unit…" />
           ) : (
-            <Result data={data} />
+            <Result data={data} selling={selling} />
           )}
         </section>
       </div>
@@ -293,6 +331,7 @@ function LinkLookup({ onFallback }: { onFallback: () => void }) {
     setState("busy");
     try {
       const { id } = await api<{ id: number }>(`/lookup?url=${encodeURIComponent(url.trim())}`);
+      track("lookup", { unit_id: id, meta: { found: true } });
       navigate(`/units/${id}`);
     } catch (error) {
       setState(error instanceof ApiError && error.status === 404 ? "missing" : "idle");
@@ -303,7 +342,7 @@ function LinkLookup({ onFallback }: { onFallback: () => void }) {
       <fieldset>
         <legend>{t("Listing link")}</legend>
         <label className="field">
-          <span className="field-label">{t("Paste an AqarExit unit link")}</span>
+          <span className="field-label">{t("Paste an AqarExit or Nawy unit link")}</span>
           <span className="input">
             <Link2 size={17} />
             <input
@@ -335,8 +374,17 @@ function LinkLookup({ onFallback }: { onFallback: () => void }) {
   );
 }
 
-function Result({ data }: { data: Evaluation }) {
+function Result({ data, selling }: { data: Evaluation; selling: boolean }) {
   const { inputs } = data;
+  const subject = {
+    opportunity: data.opportunity,
+    launch: data.launch,
+    compound: inputs.compound,
+    developer: inputs.developer,
+    price: inputs.price,
+    property_type: inputs.property_type,
+    area_m2: inputs.area_m2,
+  };
   return (
     <div className="result">
       <div className="result-head">
@@ -367,7 +415,11 @@ function Result({ data }: { data: Evaluation }) {
       ) : (
         <>
           <OpportunitySummary unit={data} />
-          <CostCalculator price={inputs.price} payment={data.payment} ready={inputs.delivery?.bucket === "ready"} />
+          {selling ? <SellerForm compound={inputs.compound} price={inputs.price} /> : <LeadCard unit={subject} />}
+          <div className="result-share">
+            <ShareBar text={evaluationText(data)} path={`${window.location.pathname}${window.location.search}`} sheet={false} />
+          </div>
+          {!selling && <CostCalculator price={inputs.price} payment={data.payment} ready={inputs.delivery?.bucket === "ready"} />}
           {data.launch && (
             <section className="result-section">
               <h3>{t("Against the developer’s price today")}</h3>
@@ -408,6 +460,22 @@ function Result({ data }: { data: Evaluation }) {
       )}
     </div>
   );
+}
+
+/** A comparison in one line, for sharing: the verdict and the gaps. */
+function evaluationText(data: Evaluation) {
+  const { inputs } = data;
+  const gaps = [
+    data.launch?.same_finishing &&
+      t(data.launch.gap < 0 ? "{gap} below the developer today" : "{gap} above the developer today", { gap: percent(Math.abs(data.launch.gap)) }),
+    data.peers && t(data.peers.gap < 0 ? "{gap} below similar units" : "{gap} above similar units", { gap: percent(Math.abs(data.peers.gap)) }),
+  ].filter(Boolean);
+  return t("{unit} in {place} for {price}: {verdict}. Checked on Qayem.", {
+    unit: `${titleCase(inputs.property_type)} ${number(inputs.area_m2)} ${t("m²")}`,
+    place: nameOf(inputs.compound) ?? "",
+    price: money(inputs.price, true),
+    verdict: gaps.length ? gaps.join(t(", ")) : t(levelText[data.opportunity.level]),
+  });
 }
 
 const DEFAULTS = { transfer: 5, brokerage: 2.5, maintenance: 8, registration: 0 };

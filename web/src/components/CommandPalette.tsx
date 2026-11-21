@@ -71,7 +71,7 @@ export function CommandPalette({ onClose, onToggleLanguage }: { onClose: () => v
         label: place(district.name)!,
         meta: t("{n} listings", { n: number(district.units), count: district.units }),
         icon: <MapPin size={17} />,
-        run: go(`/compounds?district=${encodeURIComponent(district.key)}`),
+        run: go(`/districts/${encodeURIComponent(district.key)}`),
       });
     const pages: [string, string, ReactNode][] = [
       ["/evaluate", "Compare a unit", <Calculator size={17} />],

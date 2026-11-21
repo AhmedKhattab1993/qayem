@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, ArrowUpRight, Calculator } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, BellRing, Calculator } from "lucide-react";
 import { number, signed, titleCase, useApi, useTitle, nameOf, place } from "../lib";
 import { t } from "../locale";
 import type { CompoundDetail, Overview, Page, Unit } from "../types";
 import { ErrorState, Loading } from "../components/States";
 import { EntityActions, ScopeNote } from "../components/Opportunity";
-import { ClassCards, HistoryPending, LaunchPanel, ProfileFacts } from "../components/Entity";
+import { ClassCards, HistoryPanel, LaunchPanel, ProfileFacts } from "../components/Entity";
+import { AlertSignup } from "../components/Capture";
+import { Faq, compoundFaq } from "../components/Faq";
+import { track } from "../track";
 import { UnitTable } from "../components/UnitTable";
 import { NameList } from "../components/Names";
 
@@ -13,6 +17,7 @@ export default function CompoundPage({ overview }: { overview: Overview | null }
   const { key = "" } = useParams();
   const { data, error, missing, retry } = useApi<CompoundDetail>(`/compounds/${encodeURIComponent(key)}`);
   const units = useApi<Page<Unit>>(`/units?compound=${encodeURIComponent(key)}&page_size=10&sort=opportunity`);
+  const [alerting, setAlerting] = useState(false);
   useTitle(nameOf(data?.compound));
   if (error)
     return (
@@ -41,20 +46,35 @@ export default function CompoundPage({ overview }: { overview: Overview | null }
                 compound.developer && (
                   <Link to={`/developers/${encodeURIComponent(compound.developer.key)}`}>{nameOf(compound.developer)}</Link>
                 ),
-                <Link to={`/compounds?district=${encodeURIComponent(compound.district_key)}`}>{place(compound.district)}</Link>,
+                <Link to={`/districts/${encodeURIComponent(compound.district_key)}`}>{place(compound.district)}</Link>,
               ]}
             />
           </p>
           <div className="entity-bar">
             <EntityActions kind="compound" entityKey={compound.key} name={compound.name} />
+            <button
+              type="button"
+              className={`btn btn-sm${alerting ? " btn-ink" : ""}`}
+              aria-expanded={alerting}
+              onClick={() => {
+                setAlerting((open) => !open);
+                if (!alerting) track("alert_open", { entity: compound.key, meta: { cta: "compound_alert" } });
+              }}
+            >
+              <BellRing size={15} /> {t("Alert me about deals here")}
+            </button>
             <Link className="btn btn-sm btn-brass" to={`/evaluate?compound=${encodeURIComponent(compound.name)}`}>
               <Calculator size={15} /> {t("Compare a unit here")}
+            </Link>
+            <Link className="btn btn-sm" to={`/evaluate?mode=sell&compound=${encodeURIComponent(compound.name)}`}>
+              {t("Selling here?")}
             </Link>
           </div>
         </div>
       </header>
 
       <div className="page">
+        {alerting && <AlertSignup query={`compound=${encodeURIComponent(compound.key)}`} label={nameOf(compound)!} />}
         <section className="section-tight">
           <div className="section-row">
             <div>
@@ -116,7 +136,7 @@ export default function CompoundPage({ overview }: { overview: Overview | null }
           </div>
         </section>
 
-        <HistoryPending overview={overview} />
+        <HistoryPanel history={compound.history} overview={overview} />
 
         <section className="section-tight">
           <div className="section-row">
@@ -136,6 +156,7 @@ export default function CompoundPage({ overview }: { overview: Overview | null }
             <Loading />
           )}
         </section>
+        <Faq items={compoundFaq(compound)} />
       </div>
     </div>
   );

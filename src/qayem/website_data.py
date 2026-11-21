@@ -62,8 +62,15 @@ _FIELDS = (
     "area_m2", "bedrooms", "bathrooms", "city", "district", "compound",
     "developer", "finishing", "delivery_status", "delivery_date", "is_installment", "down_payment",
     "installment_months", "is_resale", "resale_evidence", "status", "purpose",
-    "first_seen_at", "last_seen_at", "images",
+    "first_seen_at", "last_seen_at", "removed_at", "images",
 )
+# History: how fast stock leaves the market and how prices move, from the crawl's own record.
+LIQUIDITY_DAYS = 30
+PRICE_DAYS = 60
+# The first crawls saw stock of every age; a listing first observed then has an unknown start.
+COHORT_SKIP_DAYS = 6
+# A price edit outside these bounds is a data correction, not a price change.
+PRICE_MOVE_BOUNDS = (0.5, 2.0)
 
 
 class CatalogUnavailable(Exception):
@@ -161,14 +168,15 @@ def contract_year(row: sqlite3.Row) -> int | None:
     return year if year and year >= 2000 else None
 
 
-def property_projection(row: sqlite3.Row) -> dict | None:
-    """Return eligible sale inventory, with invalid optional fields omitted."""
+def property_projection(row: sqlite3.Row, any_status: bool = False) -> dict | None:
+    """Return eligible sale inventory, with invalid optional fields omitted. `any_status` also
+    projects delisted listings (for liquidity history); they are never published as units."""
     price = number(row["price"], MIN_PRICE, MAX_PRICE)
     area = number(row["area_m2"], MIN_AREA, MAX_AREA)
     kind = clean_text(row["property_type"])
     kind = TYPE_ALIASES.get(kind.casefold(), kind.casefold()) if kind else None
     district, compound = clean_text(row["district"]), clean_text(row["compound"])
-    if (row["status"] != "active" or row["purpose"] != "sale"
+    if ((row["status"] != "active" and not any_status) or row["purpose"] != "sale"
             or (row["currency"] or "").upper() != "EGP"
             or price is None or area is None or not kind or not (district or compound)):
         return None
@@ -197,6 +205,68 @@ def property_projection(row: sqlite3.Row) -> dict | None:
         "last_seen_at": iso_date(row["last_seen_at"]), "first_seen_at": iso_date(row["first_seen_at"]),
         "images": photo_urls(row["images"]),
     }
+
+
+def _day(value: str | None) -> date | None:
+    return date.fromisoformat(value[:10]) if value else None
+
+
+def price_changes(versions: list, today: date) -> dict[int, dict]:
+    """Each listing's list-price change over the last PRICE_DAYS days, from real price edits.
+
+    A version that also changed the listing's link is a parser upgrade re-reading the page, not
+    an edit by the seller or developer, so it is ignored; so are edits outside PRICE_MOVE_BOUNDS.
+    """
+    edits: dict[int, list[tuple[str, float, float]]] = defaultdict(list)
+    low, high = PRICE_MOVE_BOUNDS
+    for row in versions:
+        fields = decode_json(row["changed_fields"], dict)
+        price = fields.get("price")
+        when = iso_date(row["captured_at"])
+        if not isinstance(price, dict) or "url" in fields or not when or (today - _day(when)).days > PRICE_DAYS:
+            continue
+        old, new = number(price.get("old"), 1, 10_000_000_000), number(price.get("new"), 1, 10_000_000_000)
+        if old and new and old != new and low <= new / old <= high:
+            edits[row["property_id"]].append((when, old, new))
+    changes = {}
+    for property_id, items in edits.items():
+        items.sort()
+        first, last = items[0][1], items[-1][2]
+        if abs(last / first - 1) >= 0.01:
+            changes[property_id] = {"from": first, "to": last, "change": round(last / first - 1, 4),
+                                    "at": items[-1][0][:10], "edits": len(items)}
+    return changes
+
+
+def liquidity(active: list[dict], delisted: list[dict], today: date, cohort_start: date | None) -> dict:
+    """How fast listings leave: delisted in the last 30 days against the stock, and how long the
+    listings first seen after the opening crawls stayed before leaving. Leaving means sold or withdrawn."""
+    recent = [r for r in delisted if (today - _day(r["removed_at"])).days <= LIQUIDITY_DAYS]
+    durations = [(_day(r["removed_at"]) - _day(r["first_seen_at"])).days for r in delisted
+                 if cohort_start and r["first_seen_at"] and _day(r["first_seen_at"]) >= cohort_start]
+    fresh = [r for r in [*active, *delisted] if cohort_start and r["first_seen_at"]
+             and _day(r["first_seen_at"]) >= cohort_start and (today - _day(r["first_seen_at"])).days <= LIQUIDITY_DAYS]
+    return {"delisted_30d": len(recent), "turnover_30d": _share(len(recent), len(active) + len(recent)),
+            "new_30d": len(fresh), "median_days_listed": round(median(durations)) if len(durations) >= 3 else None,
+            "tracked_delisted": len(durations)}
+
+
+def price_history(items: list[dict], launches: list[dict], today: date) -> dict:
+    """Listed price cuts among resale units, and how the developer's list prices for the same
+    units moved (units observed for at least half the window; an unchanged unit counts as 0%)."""
+    cuts = [r["price_change"]["change"] for r in items if r.get("price_change") and r["price_change"]["change"] < 0]
+    rises = sum(1 for r in items if r.get("price_change") and r["price_change"]["change"] > 0)
+    tracked = [u for u in launches if u["first_seen_at"] and (today - _day(u["first_seen_at"])).days >= PRICE_DAYS // 2]
+    moves = [u["price_change"]["change"] if u.get("price_change") else 0.0 for u in tracked]
+    return {"price_cuts_60d": len(cuts), "price_rises_60d": rises, "median_cut": _median(cuts, 4),
+            "developer_change_60d": round(sum(moves) / len(moves), 4) if len(moves) >= LAUNCH_MIN_UNITS else None,
+            "developer_tracked": len(moves), "developer_rising": sum(m > 0 for m in moves),
+            "developer_falling": sum(m < 0 for m in moves)}
+
+
+def history_of(items: list[dict], delisted: list[dict], launches: list[dict], today: date,
+               cohort_start: date | None) -> dict:
+    return {**liquidity(items, delisted, today, cohort_start), **price_history(items, launches, today)}
 
 
 # Arabic spellings of large compounds, as they appear on AqarExit and classifieds.
@@ -407,9 +477,9 @@ def unknowns(record: dict) -> list[str]:
 def public_unit(record: dict, full: bool = False) -> dict:
     keys = ("id", "source", "source_name", "source_url", "title", "property_type", "class", "price", "area_m2",
             "price_per_m2", "bedrooms", "district", "compound", "developer", "finishing_class", "delivery",
-            "payment", "launch", "peers", "opportunity", "contract_year", "is_resale")
+            "payment", "launch", "peers", "opportunity", "contract_year", "is_resale", "price_change")
     extra = ("bathrooms", "finishing", "installments", "down_payment", "installment_months",
-             "resale_evidence", "last_seen_at", "unknowns")
+             "resale_evidence", "last_seen_at", "first_seen_at", "unknowns")
     unit = {key: record.get(key) for key in keys + (extra if full else ())}
     images = record.get("images") or []
     unit["photo"] = images[0] if images else None  # lists show the first photo; a unit page shows them all
@@ -509,9 +579,14 @@ class Catalog:
                         "SELECT property_id, changed_fields FROM property_versions "
                         "WHERE change_type IN ('updated', 'relisted') AND changed_fields LIKE '%delivery_date%'"
                     ).fetchall()
+                    prices = connection.execute(
+                        "SELECT property_id, captured_at, changed_fields FROM property_versions "
+                        "WHERE change_type = 'updated' AND changed_fields LIKE '%\"price\"%' AND captured_at >= "
+                        "(SELECT datetime(max(captured_at), '-90 days') FROM property_versions)"
+                    ).fetchall()
                     hidden = unreliable_price_ids(connection)
                     aliases = entity_aliases(connection)
-                snapshot = build_snapshot(rows, runs, moves, hidden, aliases)
+                snapshot = build_snapshot(rows, runs, moves, hidden, aliases, prices)
             except sqlite3.Error as exc:
                 raise CatalogUnavailable("Qayem dataset is not ready. Point QAYEM_DB to a database containing the Qayem tables.") from exc
             with self._lock:
@@ -587,7 +662,7 @@ def apply_aliases(records: list[dict], aliases: dict[str, dict]) -> dict[str, st
 
 
 def build_snapshot(rows: list, runs: list, moves: list, hidden: set[int] = frozenset(),
-                   aliases: dict[str, dict] | None = None) -> Snapshot:
+                   aliases: dict[str, dict] | None = None, prices: list = ()) -> Snapshot:
     latest_by_source: dict[str, str] = {}
     for row in rows:
         if seen := iso_date(row["last_seen_at"]):
@@ -601,8 +676,25 @@ def build_snapshot(rows: list, runs: list, moves: list, hidden: set[int] = froze
     firsts = [d for row in rows if (d := iso_date(row["first_seen_at"]))]
     last_updated = max(dates) if dates else None
     today = date.fromisoformat(last_updated[:10]) if last_updated else date.today()
+    first_observed = min(firsts) if firsts else None
+    cohort_start = (date.fromordinal(_day(first_observed).toordinal() + COHORT_SKIP_DAYS)
+                    if first_observed else None)
+    # Resale listings that left in the history window: liquidity only, never published.
+    delisted: list[dict] = []
+    for row in rows:
+        if (row["status"] != "removed" or row["id"] in hidden or boolean(row["is_resale"]) is not True
+                or row["source"] in PRIMARY_SOURCES or not (removed_at := iso_date(row["removed_at"]))
+                or (today - _day(removed_at)).days > PRICE_DAYS):
+            continue
+        if (item := property_projection(row, any_status=True)) is not None:
+            item["removed_at"] = removed_at
+            delisted.append(item)
+    moved = price_changes(prices, today)
+    for item in projected:
+        item["price_change"] = moved.get(item["id"])
 
     # --- entity resolution: one compound → one district and developer ------
+    raw_names = {r["id"]: (r["compound_name"], r["developer_name"]) for r in records.values()}
     references = apply_aliases(list(records.values()), aliases or {})
     compound_names: dict[str, Counter] = defaultdict(Counter)
     arabic_names: dict[str, Counter] = defaultdict(Counter)
@@ -648,6 +740,17 @@ def build_snapshot(rows: list, runs: list, moves: list, hidden: set[int] = froze
         bucket, years = delivery_bucket(record["delivery_date"], record["delivery_status"], today)
         record["delivery"] = {"bucket": bucket, "date": record["delivery_date"], "years": years}
         record["unknowns"] = unknowns(record)
+    # A delisted listing joins the compound its spelling resolves to among the current listings.
+    by_spelling: dict[tuple, Counter] = defaultdict(Counter)
+    by_text: dict[str | None, Counter] = defaultdict(Counter)
+    for record in records.values():
+        if record["compound_key"]:
+            by_spelling[raw_names[record["id"]]][record["compound_key"]] += 1
+            by_text[raw_names[record["id"]][0]][record["compound_key"]] += 1
+    for item in delisted:
+        item["compound_key"] = (majority_or_none(by_spelling.get((item["compound_name"], item["developer_name"])))
+                                or majority_or_none(by_text.get(item["compound_name"])) or "")
+        item["developer_key"] = developer_key(item["developer_name"])
 
     # --- the two comparisons ----------------------------------------------------
     default = [record for record in records.values() if record["is_resale"] is True]
@@ -664,6 +767,7 @@ def build_snapshot(rows: list, runs: list, moves: list, hidden: set[int] = froze
     compounds = build_compounds(default, matched)
     developers = build_developers(default, compounds, matched, moves)
     districts = build_districts(default, compounds, matched)
+    attach_history(default, delisted, matched, compounds, developers, districts, today, cohort_start)
 
     run_status = {run["source"]: run["status"] or "unknown" for run in runs}
     source_counts = Counter(row["source"] for row in rows)
@@ -681,7 +785,6 @@ def build_snapshot(rows: list, runs: list, moves: list, hidden: set[int] = froze
     benchmarks = [{"id": source, "name": SOURCE_NAMES.get(source, source.title()), "count": count,
                    "last_seen_at": source_dates.get(source), "status": run_status.get(source, "unknown")}
                   for source, count in source_counts.most_common() if source in PRIMARY_SOURCES]
-    first_observed = min(firsts) if firsts else None
     # calendar days with observations, inclusive: one day of crawling is day 1
     window = ((datetime.fromisoformat(last_updated[:10]) - datetime.fromisoformat(first_observed[:10])).days + 1
               if last_updated and first_observed else 0)
@@ -701,6 +804,9 @@ def build_snapshot(rows: list, runs: list, moves: list, hidden: set[int] = froze
         "district_count": sum(1 for d in districts.values() if d["units"] >= 5),
         "last_updated": last_updated, "first_observed": first_observed, "observation_days": window,
         "history_ready": window >= HISTORY_READY_DAYS, "sources": sources, "benchmarks": benchmarks,
+        "history": {**history_of(default, delisted, [u for pool in matched.values() for u in pool], today, cohort_start),
+                    "cohort_start": cohort_start.isoformat() if cohort_start else None,
+                    "liquidity_days": LIQUIDITY_DAYS, "price_days": PRICE_DAYS},
         "scope": scope(default), "payment_terms": dict(terms), "plan_median_discount": _median(plan_discounts, 4),
         "discount_rate": DISCOUNT_RATE,
         "launch": {"units": len(launches), "matched": sum(len(units) for units in matched.values()),
@@ -971,12 +1077,50 @@ def build_districts(default: list[dict], compounds: dict[str, dict], matched: di
     for key, items in groups.items():
         name = majority(r["district"] for r in items)
         inside = [c["key"] for c in compounds.values() if c["district_key"] == key]
+        profile = _profile(items)
         districts[key] = {
             "key": key, "name": name, "units": len(items),
             "classes": price_classes(items, [u for c in inside for u in matched.get(c, [])]),
-            "compound_count": len(inside), "scope": scope(items), **_profile(items),
+            "compound_count": len(inside), "scope": scope(items), **profile, "good_count": _good(profile),
+            # its compounds, largest first: the district page lists them and its FAQ names the cheapest
+            "compounds": [{"key": c["key"], "name": c["name"], "name_ar": c["name_ar"], "units": c["units"],
+                           "good_count": c["good_count"], "developer": c["developer"],
+                           "median_gap": c["launch"]["median_gap"] if c["launch"] else None,
+                           "compared": c["launch"]["compared"] if c["launch"] else 0}
+                          for c in compounds.values() if c["district_key"] == key][:60],
         }
     return dict(sorted(districts.items(), key=lambda pair: (-pair[1]["units"], pair[0])))
+
+
+def attach_history(default: list[dict], delisted: list[dict], matched: dict[str, list[dict]], compounds: dict,
+                   developers: dict, districts: dict, today: date, cohort_start: date | None) -> None:
+    """Liquidity and price movement per compound, developer and district."""
+    def grouped(items, key):
+        groups = defaultdict(list)
+        for item in items:
+            if value := key(item):
+                groups[value].append(item)
+        return groups
+
+    developer_of = {key: c["developer"]["key"] for key, c in compounds.items() if c["developer"]}
+    district_of = {key: c["district_key"] for key, c in compounds.items()}
+    for kind, entries, key, gone in [
+        ("compound", compounds, lambda r: r["compound_key"], lambda r: r["compound_key"]),
+        ("developer", developers, lambda r: r["developer_key"],
+         lambda r: developer_of.get(r["compound_key"]) or r["developer_key"]),
+        ("district", districts, lambda r: slug(r["district"]),
+         lambda r: district_of.get(r["compound_key"]) or slug(r["district"])),
+    ]:
+        active, left = grouped(default, key), grouped(delisted, gone)
+        for name, entry in entries.items():
+            if kind == "compound":
+                pool = matched.get(name, [])
+            elif kind == "developer":
+                pool = [u for c in compounds.values() if c["developer"] and c["developer"]["key"] == name
+                        for u in matched.get(c["key"], [])]
+            else:
+                pool = [u for c, d in district_of.items() if d == name for u in matched.get(c, [])]
+            entry["history"] = history_of(active.get(name, []), left.get(name, []), pool, today, cohort_start)
 
 
 def comparables(snapshot: Snapshot, record: dict) -> list[dict]:

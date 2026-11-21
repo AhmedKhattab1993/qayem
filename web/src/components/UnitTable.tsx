@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight } from "lucide-react";
-import { money, number, quarterly, scrollBehavior, signed, titleCase, tone, sep, nameOf, place, year } from "../lib";
+import { money, number, percent, quarterly, scrollBehavior, signed, titleCase, tone, sep, nameOf, place, year } from "../lib";
 import { t } from "../locale";
 import type { Unit } from "../types";
 import { BothTag, LevelBadge } from "./Opportunity";
@@ -127,6 +127,9 @@ export function UnitTable({
                 <td data-label={t("Opportunity")} className="cell-level">
                   <LevelBadge level={unit.opportunity.level} />
                   <BothTag opportunity={unit.opportunity} />
+                  {unit.price_change && unit.price_change.change < 0 && (
+                    <span className="cut-tag num">{t("Price cut {cut}", { cut: percent(Math.abs(unit.price_change.change)) })}</span>
+                  )}
                 </td>
                 {sources && (
                   <td data-label={t("Source")} className="ledger-muted cell-source">
