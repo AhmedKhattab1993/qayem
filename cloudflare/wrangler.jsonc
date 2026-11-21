@@ -22,6 +22,7 @@
     {"binding": "LEADS_DB", "database_name": "qayem-leads", "database_id": "cf37f558-e536-4407-a190-3be940d0856f"}
   ],
   "triggers": {"crons": ["17 * * * *"]},
+  "vars": {"TURNSTILE_SITE_KEY": "0x4AAAAAAGMCjcYNvvUR8a8A"},
   "observability": {"enabled": true},
   "env": {
     "staging": {
