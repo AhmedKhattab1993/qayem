@@ -62,6 +62,9 @@ Set with `cd cloudflare && npx wrangler@4.147.0 secret put NAME` (add `--env sta
 | `ADMIN_TOKEN` | The funnel report. Any long random string, e.g. `openssl rand -hex 32`. |
 | `HASH_SALT` | Optional: the salt for the daily visitor hash. |
 
+Staging already has `ADMIN_TOKEN` (stored in the ignored `.artifacts/cloudflare/staging/admin-token`) and its own
+`qayem-leads-staging`, which holds the end-to-end test's sample lead and alerts.
+
 Read the funnel:
 
 ```sh
