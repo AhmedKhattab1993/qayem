@@ -39,27 +39,25 @@ def make_checkpoint(database: Path, directory: Path, *, previous: dict | None = 
     """Backup API includes committed WAL rows without interrupting the crawler."""
     directory.mkdir(parents=True, exist_ok=True)
     backup = directory / "checkpoint.db"
-    pending = directory / "checkpoint.pending.db"
     packed = directory / "checkpoint.db.gz"
     # A fresh destination keeps SQLite's backup header stable. Reusing an existing
     # destination changes its transaction counter even when the source is identical.
-    pending.unlink(missing_ok=True)
+    backup.unlink(missing_ok=True)
     try:
         with closing(sqlite3.connect(f"file:{database.resolve()}?mode=ro", uri=True, timeout=30)) as source:
-            with closing(sqlite3.connect(pending)) as target:
+            with closing(sqlite3.connect(backup)) as target:
                 source.backup(target, pages=256, sleep=0.1)
                 if target.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                     raise RuntimeError("Database checkpoint failed its integrity check")
-        pending.replace(backup)
+        checksum = digest(backup)
+        size = backup.stat().st_size
+        if previous and checksum == previous["sha256"] and size == previous["bytes"] and packed.exists() \
+                and packed.stat().st_size == previous["compressed_bytes"]:
+            return packed, previous
+        with backup.open("rb") as source, gzip.open(packed, "wb", compresslevel=1) as target:
+            shutil.copyfileobj(source, target, length=1024 * 1024)
     finally:
-        pending.unlink(missing_ok=True)
-    checksum = digest(backup)
-    size = backup.stat().st_size
-    if previous and checksum == previous["sha256"] and size == previous["bytes"] and packed.exists() \
-            and packed.stat().st_size == previous["compressed_bytes"]:
-        return packed, previous
-    with backup.open("rb") as source, gzip.open(packed, "wb", compresslevel=1) as target:
-        shutil.copyfileobj(source, target, length=1024 * 1024)
+        backup.unlink(missing_ok=True)
     return packed, {"sha256": checksum, "compressed_sha256": digest(packed),
                     "bytes": size, "compressed_bytes": packed.stat().st_size,
                     "saved_at": datetime.now(timezone.utc).isoformat()}
@@ -206,6 +204,9 @@ class Pipeline:
                     os.killpg(process.pid, signal.SIGKILL)
                     process.wait()
                 raise RuntimeError(f"{stage} exceeded its time budget") from None
+            if code:
+                output.write(f"\n!! {stage} exited with code {code}\n")
+                output.flush()
         self.checkpoint()
         return code
 
@@ -239,7 +240,7 @@ class Pipeline:
                     raise RuntimeError("Checkpoint did not finish before publication")
             self.checkpoint()
             sql = self.directory / "catalog.sql"
-            manifest = export_sql(self.directory / "checkpoint.db", sql,
+            manifest = export_sql(self.database, sql,
                                   sources=crawled_sources(), version=self.run_id)
             if not manifest["units"]:
                 raise RuntimeError("Empty catalogue cannot be published")

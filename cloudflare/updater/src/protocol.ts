@@ -10,6 +10,17 @@ export interface Checkpoint {
   bytes: number; compressed_bytes: number; saved_at: string;
 }
 
+export interface Job {
+  run_id: string; status: string; stage?: string; started_at?: string;
+  finished_at?: string; error?: string; publication?: Record<string, string | number>;
+}
+
+export function containerStopped(saved: Job | null | undefined, containerRunning: boolean, now = Date.now()): boolean {
+  if (!saved || saved.status !== "running" || containerRunning) return false;
+  if (saved.stage === "starting" && now - Date.parse(saved.started_at || "") < 10 * 60_000) return false;
+  return true;
+}
+
 export function assertRunId(value: unknown): asserts value is string {
   if (typeof value !== "string" || !RUN_ID.test(value)) throw new Error("Invalid run ID");
 }

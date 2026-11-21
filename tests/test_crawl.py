@@ -122,7 +122,27 @@ def test_confirmed_presence_protects_listings_from_removal(engine, monkeypatch):
     assert run(engine, monkeypatch, Incremental) == "completed"
     with Session(engine) as session:
         status = {p.source_listing_id: p.status for p in session.query(Property)}
+        last = session.execute(select(ParseRun).order_by(ParseRun.id.desc())).scalars().first()
     assert status == {"0": "active", "1": "active", "2": "removed"}
+    assert last.seen == 2 and last.updated == 1 and last.unchanged == 1
+
+    class QuietIncremental(BaseSource):
+        name = "fake"
+        wants_known = True
+
+        def fetch(self):
+            self.present_ids = {"0", "1"}  # 0 new/changed detail pages, 2 confirmed in sitemap
+            self.complete = True
+            self.scopes_completed.add("all")
+            return
+            yield
+
+    assert run(engine, monkeypatch, QuietIncremental) == "completed"
+    with Session(engine) as session:
+        last = session.execute(select(ParseRun).order_by(ParseRun.id.desc())).scalars().first()
+        health = source_health(session, datetime.now(timezone.utc), ["fake"])[0]
+    assert last.seen == 2 and last.unchanged == 2
+    assert health.state == "ok" and health.last_seen == 2
 
 
 def test_a_source_cannot_run_twice_at_once(engine, monkeypatch, tmp_path):

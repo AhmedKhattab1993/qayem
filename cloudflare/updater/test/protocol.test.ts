@@ -1,12 +1,21 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {authorized, scheduledRun, validateBatch, validateCheckpoint, validateManifest} from "../src/protocol.ts";
+import {authorized, containerStopped, scheduledRun, validateBatch, validateCheckpoint, validateManifest} from "../src/protocol.ts";
 
 test("nightly schedule is 02:30 Cairo in summer and winter without duplicate firing", () => {
   assert.equal(scheduledRun(Date.parse("2026-10-04T23:30:00Z")), "nightly-2026-10-05");
   assert.equal(scheduledRun(Date.parse("2026-10-05T00:30:00Z")), null);
   assert.equal(scheduledRun(Date.parse("2026-11-04T23:30:00Z")), null);
   assert.equal(scheduledRun(Date.parse("2026-11-05T00:30:00Z")), "nightly-2026-11-05");
+});
+
+test("a stopped container releases its stale running job unless still within its startup window", () => {
+  const now = Date.parse("2026-10-15T00:00:00Z");
+  assert.equal(containerStopped({run_id: "r1", status: "running", stage: "crawl", started_at: "2026-10-14T23:30:00Z"}, false, now), true);
+  assert.equal(containerStopped({run_id: "r1", status: "running", stage: "crawl", started_at: "2026-10-14T23:30:00Z"}, true, now), false);
+  assert.equal(containerStopped({run_id: "r1", status: "running", stage: "starting", started_at: "2026-10-14T23:55:00Z"}, false, now), false);
+  assert.equal(containerStopped({run_id: "r1", status: "running", stage: "starting", started_at: "2026-10-14T23:45:00Z"}, false, now), true);
+  assert.equal(containerStopped({run_id: "r1", status: "complete"}, false, now), false);
 });
 
 test("administration is private and fails closed without a configured secret", async () => {

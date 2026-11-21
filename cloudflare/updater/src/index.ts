@@ -1,8 +1,8 @@
 import {Container} from "@cloudflare/containers";
 export {ContainerProxy} from "@cloudflare/containers";
 import {WorkflowEntrypoint, type WorkflowEvent, type WorkflowStep} from "cloudflare:workers";
-import {assertRunId, authorized, scheduledRun, validateBatch, validateCheckpoint,
-  type Checkpoint, type Manifest} from "./protocol";
+import {assertRunId, authorized, containerStopped, scheduledRun, validateBatch, validateCheckpoint,
+  type Checkpoint, type Job, type Manifest} from "./protocol";
 import {activateDatabase} from "./publication";
 
 interface Bindings {
@@ -16,8 +16,6 @@ interface Bindings {
   QAYEM_BENCHMARK_SOURCES: string;
 }
 interface Params {run_id?: string}
-interface Job {run_id: string; status: string; stage?: string; started_at?: string;
-  finished_at?: string; error?: string; publication?: Record<string, string | number>}
 
 export class UpdateContainer extends Container<Bindings> {
   defaultPort = 8080;
@@ -36,6 +34,10 @@ export class UpdateContainer extends Container<Bindings> {
 
   async begin(runId: string): Promise<Job> {
     assertRunId(runId);
+    const current = await this.ctx.storage.get<Job>("job");
+    if (current && containerStopped(current, Boolean(this.ctx.container?.running))) {
+      await this.finish(current.run_id, {status: "failed", error: "Container stopped; next run restores its cloud checkpoint"});
+    }
     const existing = await this.ctx.storage.transaction(async tx => {
       const previous = await tx.get<Job>("job");
       if (!previous || (previous.run_id !== runId && previous.status !== "running")) {
@@ -69,11 +71,10 @@ export class UpdateContainer extends Container<Bindings> {
     const saved = await this.ctx.storage.get<Job>("job");
     if (!saved || (runId && saved.run_id !== runId)) return null;
     if (saved.status !== "running") return saved;
-    if (!this.ctx.container?.running && saved.stage === "starting" &&
-        Date.now() - Date.parse(saved.started_at || "") < 10 * 60_000) return saved;
-    if (!this.ctx.container?.running) {
+    if (containerStopped(saved, Boolean(this.ctx.container?.running))) {
       return this.finish(saved.run_id, {status: "failed", error: "Container stopped; next run restores its cloud checkpoint"});
     }
+    if (!this.ctx.container?.running) return saved;
     const response = await this.containerFetch("http://container/status");
     if (!response.ok) throw new Error("Could not read container status");
     const current = await response.json<Job>();

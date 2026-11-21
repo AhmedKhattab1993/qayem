@@ -238,6 +238,10 @@ def _run_source(engine, name: str, params: dict, dry_run: bool, min_interval: fl
             if session is not None and src.present_ids:
                 session.commit()
                 touch_present(session, name, src.present_ids, utcnow())
+            if src.present_ids:
+                confirmed_unchanged = len(src.present_ids - unique)
+                stats.seen += confirmed_unchanged
+                stats.unchanged += confirmed_unchanged
             # Guarded removals: only scopes whose crawl completed naturally
             # (pagination end reached, no errors) mark their unseen listings
             # as removed — never a scope this run didn't fully cover.

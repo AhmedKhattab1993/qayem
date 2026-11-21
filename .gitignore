@@ -11,6 +11,12 @@ web/dist-staging/
 web/*.tsbuildinfo
 web/test-results/
 .artifacts/
+# Symlinks to the offload volume, and editor/OS clutter
+.artifacts
+backups
+.DS_Store
+.zcode/
+.zcodeignore
 
 # Crawl logs and health reports
 logs/

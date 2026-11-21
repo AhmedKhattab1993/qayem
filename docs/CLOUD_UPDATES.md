@@ -80,7 +80,7 @@ The administration endpoints require the Qayem token. The local token is kept at
 Do not print or commit it. R2 has no public URL or custom domain configured.
 
 Containers require Workers Paid ($5/month plus usage beyond included allowances).
-AI/provider charges are separate. This service uses one `basic` instance and
+AI/provider charges are separate. This service uses one `standard-1` instance and
 stops between runs. Retain independent database backups; the canonical SQLite
 history is stored privately and is distinct from the sanitized D1 read model.
 
