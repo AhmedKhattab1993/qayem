@@ -13,6 +13,24 @@ the sanitized public read model, developer-price benchmarks and the internal
 records needed for comparison. Only the update service receives the selected
 GLM key as a Worker secret. The public API Worker and D1 receive no Pi credentials.
 
+## Page heads, leads and alerts
+
+Page routes (`/`, `/units/*`, `/compounds/*`, `/districts/*`, …, `/sitemap.xml`, `/robots.txt`)
+run the Worker first (`assets.run_worker_first`): it reads `index.html` from the asset binding
+once per isolate and writes each route's head (`src/qayem/seo.py`), and sends `www.qayem.ai` to
+the apex. Hashed build files, the favicon and posters are served directly.
+
+The Worker also binds `LEADS_DB` (`qayem-leads`; staging: `qayem-leads-staging`, schema
+`leads-schema.sql`) for first-party events, leads and alerts, and runs an hourly cron that sends
+alerts once per newly published catalogue (`src/qayem/alerts.py`). Secrets
+(`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `RESEND_API_KEY`, `TURNSTILE_SECRET`, `ADMIN_TOKEN`)
+and how to read the funnel are in [GROWTH.md](GROWTH.md). Without them the site works; forms still
+store leads, and pings, e-mail alerts and bot checks wait for their keys.
+
+To exercise the cron locally, run `uv run pywrangler dev --port 8788` and POST
+`{"cron": "17 * * * *"}` to `http://localhost:8788/cdn-cgi/local/explorer/api/local/scheduled?worker=qayem`
+(apply `leads-schema.sql` to the local `qayem-leads` first).
+
 ## Development and staging
 
 Production is `https://qayem.ai`. Staging is

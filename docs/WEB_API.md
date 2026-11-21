@@ -37,4 +37,20 @@ Unit = {id, source, source_name, source_url, title, property_type, class: 'apart
 - `GET /api/evaluate?property_type=&area=&price=&compound=&district=&developer=&down_payment=&installment_years=&delivery=ready|YYYY|YYYY-MM&finishing=` → `{inputs, payment, valuation, notes[], breakdown, comparables[], unknowns[]}`. Needs a compound or a district. An unknown compound falls back to district level (`notes: ['compound_not_found']`); a district without a compound uses the non-compound benchmark and may be `insufficient`.
 - `GET /api/lookup?url=` → `{id}` for an indexed listing link (host and path compared; links shared by several listings do not match).
 
-Unknown `/api/*` paths return JSON 404. Every other path serves the single-page app.
+- `price_dropped=true` on `/api/units` keeps units whose listed price was cut in the last 60 days. Units carry `price_change: {from, to, change, at, edits} | null` (real edits only; parser upgrades are ignored); unit details add `first_seen_at`.
+- Compounds, developers, districts and the overview carry `history`: `delisted_30d`, `turnover_30d`, `new_30d`, `median_days_listed`, `tracked_delisted`, `price_cuts_60d`, `price_rises_60d`, `median_cut`, `developer_change_60d` (average list-price change of the developer's same units), `developer_tracked`, `developer_rising`, `developer_falling`. The overview's adds `cohort_start`. A district lists its `compounds[]` (largest first, with `median_gap`) and `good_count`.
+
+### Growth routes (separate leads database)
+
+- `GET /api/config` → `{leads, turnstile_site_key, email_alerts}`: which forms can be offered.
+- `POST /api/events` `{type, path, visitor, unit_id?, entity?, referrer?, utm_*?, meta?}` → 204 always. Types: pageview, outbound_click, evaluate_run, share_click, cta_click, lead_open, alert_open, sheet_view, lookup.
+- `POST /api/leads` `{kind, role?, name?, whatsapp? | email?, unit_id?, compound?, intent?, path?, utm_*?, lang?, turnstile?, website (honeypot)}` → `{ok}`. Kinds: developer_price, resale_check, deal_sheet, seller, broker, general. Errors: 422 `invalid` / `invalid_contact`, 403 `verification_failed`, 429 `rate_limited`, 503 `unavailable`.
+- `POST /api/alerts` `{channel: email|whatsapp, destination, query, label, role?, lang?, turnstile?, website}` → `{ok, existing?}`. `query` uses the Units filter keys (`web/src/searches.ts`).
+- `GET|POST /api/alerts/unsubscribe?token=` → a small HTML confirmation.
+- `GET /api/admin/funnel?days=30` with `Authorization: Bearer <ADMIN_TOKEN>` → daily humans, actions, leads, alerts, top pages, sources, countries, capture rate.
+
+### Pages
+
+`/sitemap.xml`, `/robots.txt`, and every page route (`/`, `/units/:id`, `/compounds/:key`, `/developers/:key`, `/districts/:key`, …) return `index.html` with that route's head and summary (`src/qayem/seo.py`); unknown units, compounds, developers and districts return it with status 404 and `noindex`. `www.qayem.ai` redirects to `qayem.ai`.
+
+Unknown `/api/*` paths return JSON 404.

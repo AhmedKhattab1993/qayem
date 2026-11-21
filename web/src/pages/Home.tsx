@@ -298,7 +298,9 @@ export default function Home({ data, error, retry }: { data: Overview | null; er
                 <ScopeNote scope={data.scope} />
                 <p className="fineprint">
                   {t(
-                    "{days} days of observation. Comparisons use listed contract prices and developer list prices: there is no fair price, and trends wait for eight weeks of history.",
+                    data.history_ready
+                      ? "{days} days of observation. Comparisons use listed contract prices and developer list prices: there is no fair price. Compound pages show how fast listings leave and how prices move."
+                      : "{days} days of observation. Comparisons use listed contract prices and developer list prices: there is no fair price, and trends wait for eight weeks of history.",
                     { days: number(data.observation_days) },
                   )}{" "}
                   <Link to="/methodology#coverage">{t("See source coverage")}</Link>

@@ -494,10 +494,10 @@ def test_only_the_configured_sources_are_shown_and_fitted(database: Path, monkey
         assert client.get("/api/units/1").status_code == 404  # a Nawy listing
 
 
-def test_aqarexit_is_the_default_source(monkeypatch: pytest.MonkeyPatch):
+def test_aqarexit_and_nawy_resale_are_the_default_sources(monkeypatch: pytest.MonkeyPatch):
     from qayem.config import active_sources
     monkeypatch.delenv("QAYEM_SOURCES")
-    assert active_sources() == {"aqarexit"}
+    assert active_sources() == {"aqarexit", "nawy"}
     monkeypatch.setenv("QAYEM_SOURCES", "aqarexit, Nawy")
     assert active_sources() == {"aqarexit", "nawy"}
 

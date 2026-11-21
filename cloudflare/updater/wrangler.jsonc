@@ -20,5 +20,5 @@
     "database_id": "3249fecc-5050-4913-afaa-329fa561e0ad"
   }],
   "triggers": {"crons": ["30 23 * * *", "30 0 * * *"]},
-  "vars": {"QAYEM_SOURCES": "aqarexit", "QAYEM_BENCHMARK_SOURCES": "nawy_primary"}
+  "vars": {"QAYEM_SOURCES": "aqarexit,nawy", "QAYEM_BENCHMARK_SOURCES": "nawy_primary"}
 }

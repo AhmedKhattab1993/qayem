@@ -431,6 +431,27 @@ def _print_run_summary(name, status, stats, pages, errors, dry_run) -> None:
         console.print(f"  [red]· … {len(errors) - 5} more errors[/red]")
 
 
+@app.command("content-brief")
+def content_brief(
+    out: Path = typer.Option(Path("content-brief"), help="Folder for brief.md, brief.json, index.html and cards/."),
+    png: bool = typer.Option(False, help="Also render each card as PNG with a local Chrome (for posting)."),
+) -> None:
+    """Three Arabic data stories for this week's posts, with chart cards and tracked links, from the catalogue."""
+    from .config import crawled_sources, db_path
+    from .content import build, find_chrome, write
+    from .website_data import Catalog
+
+    snapshot = Catalog(db_path(), refresh_seconds=0, sources=crawled_sources()).snapshot()
+    chrome = find_chrome() if png else None
+    if png and not chrome:
+        console.print("[yellow]No Chrome found: writing SVG cards only.[/yellow]")
+    stories = build(snapshot)
+    result = write(stories, out / snapshot.today.isoformat(), snapshot.today, png=png, chrome=chrome)
+    console.print(f"Wrote {result['stories']} stories to {result['out']} (campaign {result['campaign']}).")
+    for story in stories:
+        console.print(f"  • {story.title}")
+
+
 @app.command()
 def status() -> None:
     """Per-source: last run outcome and database totals by status."""

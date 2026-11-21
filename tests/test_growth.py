@@ -278,3 +278,19 @@ def test_history_reports_delistings_price_cuts_and_developer_moves(tmp_path):
         dropped = client.get("/api/units", params={"price_dropped": "true"}).json()
         assert {u["id"] for u in dropped["items"]} == {3, 4}
         assert client.get("/api/units/3").json()["unit"]["price_change"]["from"] == 5_500_000
+
+
+def test_the_weekly_content_brief_writes_posts_cards_and_tracked_links(database, tmp_path):  # noqa: F811
+    from datetime import date
+    from qayem.content import build, write
+    from qayem.website_data import Catalog
+
+    snapshot = Catalog(database, 0, None).snapshot()
+    stories = build(snapshot, today=date(2026, 11, 23))
+    result = write(stories, tmp_path / "brief", date(2026, 11, 23))
+    assert result["stories"] == len(stories) >= 2 and result["campaign"] == "brief-2026-w48"
+    brief = (tmp_path / "brief" / "brief.md").read_text()
+    assert "utm_campaign=brief-2026-w48-1" in brief and "#قيّم" in brief
+    cards = sorted((tmp_path / "brief" / "cards").glob("*.svg"))
+    assert len(cards) == len(stories) and all(card.read_text().startswith("<svg") for card in cards)
+    assert json.loads((tmp_path / "brief" / "brief.json").read_text())[0]["link"].startswith("https://qayem.ai/units")

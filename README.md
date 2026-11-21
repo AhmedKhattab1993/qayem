@@ -10,10 +10,11 @@ estimate a "fair price": AqarExit lists units at their old contract prices, and
 Egypt publishes no resale sale prices.
 
 **Sources in use.** AqarExit is the only complete record of the secondary market
-(paid amount, balance and installments for every unit), so the website, the model,
-the nightly crawl and name resolution use AqarExit only. The other parsers
+(paid amount, balance and installments for every unit); since November 2026 Nawy's
+resale section (owners' asking prices with structured payment plans) is read too, so
+the website, the nightly crawl and name resolution use `aqarexit,nawy`. The other parsers
 below still work and their rows stay in the database, unused. `QAYEM_SOURCES`
-changes the selection: `QAYEM_SOURCES=aqarexit,nawy` or `QAYEM_SOURCES=all`.
+changes the selection: `QAYEM_SOURCES=aqarexit` or `QAYEM_SOURCES=all`.
 
 **Developer prices.** Nawy's developer-sale units (`nawy_primary`: each developer's
 current price and payment plan, per unit) are crawled nightly as a price benchmark
@@ -35,6 +36,9 @@ even for robots.txt); it is not crawled.
 - **Pipeline:** eight parsers into one SQLite database with a full lifecycle per
   listing and a nightly crawl. See [docs/OPERATIONS.md](docs/OPERATIONS.md).
 - Product direction: [docs/VISION.md](docs/VISION.md).
+- **Growth:** page heads and sitemap for search, first-party visit counts, lead capture,
+  WhatsApp/e-mail alerts, the funnel report and the weekly content brief. See
+  [docs/GROWTH.md](docs/GROWTH.md).
 
 ## Website
 
@@ -100,6 +104,7 @@ qayem removed --since 2026-09-01    # removal audit
 
 qayem resolve-entities --dry-run     # spelling pairs waiting for canonical names
 qayem resolve-entities               # resolve them (glm-5.3-flash, 120 pairs per Pi call)
+qayem content-brief --png            # this week's three Arabic data stories, cards and tracked links
 ```
 
 Every `parse` prints a summary: pages fetched, seen / created / updated /

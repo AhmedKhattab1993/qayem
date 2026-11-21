@@ -148,7 +148,7 @@ export function PeerPanel({ peers, price_per_m2 }: { peers: Peers; price_per_m2:
       <p className="fineprint">
         {t(
           peers.same_finishing
-            ? "Similar means the same compound and unit type, within 1.5× the size, with the same finishing. Medians of the other units; listed prices are the sellers’ contract prices."
+            ? "Similar means the same compound and unit type, within 1.5× the size, with the same finishing. Medians of the other units; AqarExit lists the sellers’ contract prices, Nawy their asking prices."
             : "Similar means the same compound and unit type, within 1.5× the size; too few share this unit’s finishing, so all finishings are included. Medians of the other units.",
         )}
       </p>

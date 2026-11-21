@@ -23,10 +23,11 @@ DEFAULT_RETRIES = 4  # transport errors and 5xx, with exponential backoff
 
 DEFAULT_DB_PATH = "qayem.db"
 
-# Sources the website, the fair-value model, the nightly crawl and enrichment use. AqarExit is
-# the only complete record of the secondary market; other sources' rows stay in the database
-# but are not shown, fitted, crawled or enriched.
-DEFAULT_SOURCES = ("aqarexit",)
+# Sources the website, the nightly crawl and name resolution use. AqarExit is the only complete
+# record of the secondary market (contract price, balance, installments); Nawy's resale section
+# adds owners' asking prices with structured payment plans (November 2026). Other sources' rows
+# stay in the database but are not shown, crawled or resolved.
+DEFAULT_SOURCES = ("aqarexit", "nawy")
 
 
 def active_sources() -> frozenset[str] | None:

@@ -627,7 +627,7 @@ export const ar: Record<string, string> = {
   "Priced about like what can be bought now.": "سعرها قريب مما يمكن شراؤه الآن.",
   "Pricier": "أغلى",
   "Rank in today’s money": "الترتيب بقيمة اليوم",
-  "Similar means the same compound and unit type, within 1.5× the size, with the same finishing. Medians of the other units; listed prices are the sellers’ contract prices.": "المماثل يعني الكمبوند ونوع الوحدة نفسيهما، بمساحة في حدود ١٫٥ ضعف، وبالتشطيب نفسه. وسيط الوحدات الأخرى؛ الأسعار المعلنة هي أسعار تعاقد البائعين.",
+  "Similar means the same compound and unit type, within 1.5× the size, with the same finishing. Medians of the other units; AqarExit lists the sellers’ contract prices, Nawy their asking prices.": "المماثل يعني الكمبوند ونوع الوحدة نفسيهما، بمساحة في حدود ١٫٥ ضعف، وبالتشطيب نفسه. وسيط الوحدات الأخرى؛ عقار إكزيت يعرض أسعار تعاقد البائعين، وناوي أسعارهم المطلوبة.",
   "Similar means the same compound and unit type, within 1.5× the size; too few share this unit’s finishing, so all finishings are included. Medians of the other units.": "المماثل يعني الكمبوند ونوع الوحدة نفسيهما، بمساحة في حدود ١٫٥ ضعف؛ الوحدات بتشطيب هذه الوحدة قليلة، فأُدرجت كل التشطيبات. وسيط الوحدات الأخرى.",
   "Similar units / m², as listed": "الوحدات المماثلة / م²، بالسعر المعلن",
   "Similar units / m², today’s money": "الوحدات المماثلة / م²، بقيمة اليوم",
@@ -1066,4 +1066,7 @@ export const ar: Record<string, string> = {
   "Something in the form is not valid. Please check it.": "في النموذج شيء غير صحيح. راجعه من فضلك.",
   "We could not send it. Check your connection and try again.": "تعذّر الإرسال. تأكد من اتصالك وحاول مرة أخرى.",
   "Price cut {cut}": "نزل {cut}",
+  "{days} days of observation. Comparisons use listed contract prices and developer list prices: there is no fair price. Compound pages show how fast listings leave and how prices move.": "{days} يومًا من الرصد. تعتمد المقارنات على أسعار العقود المعروضة وأسعار المطورين المعلنة: لا يوجد سعر عادل. وتعرض صفحات الكمبوندات سرعة خروج الإعلانات وتحرّك الأسعار.",
+  "Leaving is not a sale": "الخروج ليس بيعًا",
+  "History comes from Qayem’s own nightly crawls since September 2026. A listing that leaves may have sold or been withdrawn, and listed prices are not sale prices: days on the market and price cuts describe listings, not transactions.": "السجل من رصد قيّم الليلي منذ سبتمبر ٢٠٢٦. الإعلان الذي يخرج قد يكون بيع أو سُحب، والأسعار المعلنة ليست أسعار بيع: مدة العرض وتخفيضات السعر تصف الإعلانات، لا الصفقات.",
 };

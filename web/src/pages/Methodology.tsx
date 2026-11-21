@@ -44,8 +44,8 @@ const limits = [
   },
   {
     icon: History,
-    title: "History is still short",
-    text: "Price trends, time on market and delivery postponements need repeated observation. They appear once there are eight weeks of history.",
+    title: "Leaving is not a sale",
+    text: "History comes from Qayem’s own nightly crawls since September 2026. A listing that leaves may have sold or been withdrawn, and listed prices are not sale prices: days on the market and price cuts describe listings, not transactions.",
   },
   {
     icon: FileQuestion,

@@ -23,6 +23,11 @@ Verification evidence is saved privately under `.artifacts/cloud-updater/`.
 Description enrichment was removed from the nightly run in October 2026; its stored
 records remain in the canonical database and still apply (see the README).
 
+From November 2026 the updater crawls Nawy's resale section as well (`QAYEM_SOURCES=aqarexit,nawy`
+in `updater/wrangler.jsonc`). Its last full crawl took about an hour (1,062 pages, 12,739 units),
+inside its 100-minute scope budget and the crawl stage's four hours; new Nawy spellings go
+through the same bounded entity resolution.
+
 ## Schedule and operation
 
 The service starts at **02:30 Africa/Cairo every day**, including daylight-saving
