@@ -1,5 +1,6 @@
 """The price guide: market districts, cross-source dedupe, segments, the index, the ledger and CBE rates."""
 from datetime import date
+import json
 import sqlite3
 from types import SimpleNamespace
 
@@ -105,3 +106,31 @@ def test_cbe_rates_are_read_from_the_published_pages():
                                      "source": "CBE", "fetched_at": "x"})
     latest = ledger.rates(connection)
     assert latest["egp_per"]["usd"] == 54.4 and latest["previous_overnight_deposit"] == {"day": "2026-11-01", "value": 21.0}
+
+
+def test_heads_answer_first_with_structured_data():
+    import asyncio
+    from qayem import seo
+    segment = {"class": "apartment", "count": 3117, "median_ppm": 66_800, "p25_ppm": 52_400, "p75_ppm": 85_700,
+               "resale_vs_new": -0.12, "confidence": "high", "compound": "*", "size": "*", "delivery": "*"}
+    answer = seo.answer_ar(segment, "القاهرة الجديدة", "2026-11-22")
+    assert answer.startswith("متوسط سعر المتر المطلوب في الشقق في القاهرة الجديدة حوالي 66.8 ألف جنيه (نوفمبر 2026)")
+    assert "أرخص 12%" in answer and "لا تنشر أسعار البيع" in answer
+    edition = guide.index({"segments": [{**segment, "key": "new-cairo/*/apartment/*/*", "district": "new-cairo",
+                                         "district_name": "New Cairo", "district_name_ar": "القاهرة الجديدة",
+                                         "region": "greater_cairo", "compound_name": None, "compound_name_ar": None,
+                                         "single_source": False, "median_cash_ppm": None, "median_price": 9e6,
+                                         "list_price_gap": None, "developer": None,
+                                         "sources": [{"id": "nawy"}]}],
+                           "period": {"start": "2026-10-23", "end": "2026-11-22"}, "counts": {"kept": 3117}},
+                          date(2026, 11, 22))
+
+    async def load(kind, key):
+        return {"index": edition, "article": {"slug": "x-y-z", "lang": "en", "title": "T", "summary": "S",
+                "published_at": "2026-11-22T00:00:00", "blocks": [{"type": "p", "text": "<b>body</b>"}]}}.get(kind)
+    index = asyncio.run(seo.page_meta("/index/2026-11", {}, load))
+    assert index.path == "/index/2026-11" and any(j["@type"] == "Dataset" for j in index.jsonld)
+    assert "qayem-index-2026-11.csv" in json.dumps(index.jsonld)
+    article = asyncio.run(seo.page_meta("/articles/x-y-z", {}, load))
+    assert article.jsonld[0]["@type"] == "Article" and "&lt;b&gt;body" in article.body
+    assert seo.csv_month("qayem-index-2026-11.csv") == "2026-11" and seo.csv_month("../etc") is None
