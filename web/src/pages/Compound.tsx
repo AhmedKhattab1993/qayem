@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowUpRight, BellRing, Calculator } from "lucide-react";
-import { number, signed, titleCase, useApi, useTitle, nameOf, place } from "../lib";
+import { classLabel, money, number, signed, titleCase, useApi, useTitle, nameOf, place, sep } from "../lib";
 import { t } from "../locale";
 import type { CompoundDetail, Overview, Page, Unit } from "../types";
 import { ErrorState, Loading } from "../components/States";
@@ -27,8 +27,9 @@ export default function CompoundPage({ overview }: { overview: Overview | null }
       </div>
     );
   if (!data) return <Loading />;
-  const { compound, developer } = data;
+  const { compound, developer, observations } = data;
   const guide = compound.guide;
+  const comparable = compound.comparable_compounds ?? [];
   const headline = guide ? headlineOf(guide.segments, compound.key, guide.headline) : null;
   return (
     <div className="entity page-enter">
@@ -150,6 +151,73 @@ export default function CompoundPage({ overview }: { overview: Overview | null }
         </section>
 
         <HistoryPanel history={compound.history} overview={overview} />
+
+        {observations && observations.count > 0 && (
+          <section className="section-tight" aria-labelledby="observations-heading">
+            <span className="eyebrow">{t("Buyer reports")}</span>
+            <h2 id="observations-heading" className="display section-title">
+              {t("Quoted over and buyer observations")}
+            </h2>
+            <dl className="facts">
+              {observations.median_over != null && (
+                <div>
+                  <dt>{t("Typical quoted over")}</dt>
+                  <dd className="num">
+                    {money(observations.median_over, true)}
+                    {observations.p25_over != null && observations.p75_over != null && (
+                      <small className="muted">
+                        {" "}
+                        ({money(observations.p25_over, true)} – {money(observations.p75_over, true)})
+                      </small>
+                    )}
+                  </dd>
+                </div>
+              )}
+              {observations.median_developer_price != null && (
+                <div>
+                  <dt>{t("Reported developer offer")}</dt>
+                  <dd className="num">{money(observations.median_developer_price, true)}</dd>
+                </div>
+              )}
+              <div>
+                <dt>{t("Anonymous reports")}</dt>
+                <dd className="num">{number(observations.count)}</dd>
+              </div>
+            </dl>
+            <p className="fineprint">
+              {t("Anonymous buyer quotes collected on Qayem, filtered for outliers. Not verified sales.")}
+            </p>
+          </section>
+        )}
+
+        {comparable.length > 0 && (
+          <section className="section-tight" aria-labelledby="comparable-heading">
+            <span className="eyebrow">{t("In the same district")}</span>
+            <h2 id="comparable-heading" className="display section-title">
+              {t("Comparable compounds")}
+            </h2>
+            <ul className="guide-cards">
+              {comparable.map((peer) => (
+                <li key={peer.key}>
+                  <Link to={`/compounds/${encodeURIComponent(peer.key)}`}>
+                    <span className="guide-card-head">
+                      <b dir="auto">{nameOf(peer)}</b>
+                      {peer.developer && <small className="muted">{nameOf(peer.developer)}</small>}
+                    </span>
+                    <strong className="num">
+                      {money(peer.median_ppm, true)} <small>/ {t("m²")}</small>
+                    </strong>
+                    <span className="muted num">
+                      {classLabel(peer.class)}
+                      {sep()}
+                      {t("{n} listings", { n: number(peer.units), count: peer.units })}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         <section className="section-tight">
           <div className="section-row">

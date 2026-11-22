@@ -134,3 +134,66 @@ def test_heads_answer_first_with_structured_data():
     article = asyncio.run(seo.page_meta("/articles/x-y-z", {}, load))
     assert article.jsonld[0]["@type"] == "Article" and "&lt;b&gt;body" in article.body
     assert seo.csv_month("qayem-index-2026-11.csv") == "2026-11" and seo.csv_month("../etc") is None
+
+
+def test_finishing_segments_hex_grid_official_and_observations():
+    import asyncio
+    from pathlib import Path
+    import tempfile
+    from qayem import articles, editorial, guide_api, official, seo
+    from qayem.growth import LocalDatabase
+
+    today = date(2026, 11, 22)
+    resale = [item(i, "nawy" if i % 2 == 0 else "aqarexit", finishing_class="finished", area=100 + i * 8,
+                   price=6_000_000 + i * 450_000, bedrooms=3) for i in range(12)]
+    built = guide.build(resale, [], [], {"badya": {"key": "badya", "name": "Badya", "name_ar": "باديا"}}, {}, today)
+    assert any(s.get("finishing") == "finished" for s in built["segments"])
+    # No-JS guide table renders structured figures for crawlers
+    table_html = seo.guide_table(built["segments"])
+    assert "<table>" in table_html and "جنيه للمتر" in table_html
+    # Hex grid outputs cells only where >=5 listings exist
+    snapshot = SimpleNamespace(
+        today=today,
+        default=resale,
+        guide=built,
+        index=guide.index(built, today),
+        districts={"new-cairo": {"key": "new-cairo", "name": "New Cairo", "name_ar": "القاهرة الجديدة",
+                                 "units": 12, "listings": 12, "guide": {"segments": built["segments"],
+                                 "headline": built["segments"][0]}}},
+        compounds={"badya": {"key": "badya", "name": "Badya", "name_ar": "باديا", "district_key": "new-cairo",
+                             "units": 12, "ready_share": 0.5, "developer": {"name": "Palm Hills"},
+                             "guide": {"segments": [s for s in built["segments"] if s["compound"] == "badya"],
+                                       "headline": next(s for s in built["segments"] if s["compound"] == "badya")}}},
+    )
+    payload = guide_api.map_payload(snapshot, places={"badya": {"lat": 30.02, "lon": 31.49}})
+    assert len(payload["hexes"]) == 1 and payload["hexes"][0]["count"] == 12
+    assert len(payload["hexes"][0]["ring"]) == 7
+    assert payload["districts"][0]["bedrooms"]["3"] == 12
+    # Official fee schedules & public parsers
+    fees = official.fee_schedules()
+    assert fees["year"] >= 2026 and len(fees["items"]) >= 3
+    assert official.parse_capmas_inflation("<p>Annual Inflation 13.4%</p>")["value"] == 13.4
+    nuca = official.parse_nuca_announcements('<a href="/news/1">طرح أراضي إسكان متميز بالمدن الجديدة</a>')
+    assert len(nuca) == 1 and "newcities.gov.eg" in nuca[0]["url"]
+    # First-party observations with outlier rejection
+    from datetime import datetime, timezone
+    schema = Path(__file__).resolve().parents[1] / "cloudflare" / "leads-schema.sql"
+    with tempfile.TemporaryDirectory() as tmp:
+        db = LocalDatabase(Path(tmp) / "leads.db", schema)
+        for idx, (price, over) in enumerate(((6_000_000, 400_000), (6_200_000, 500_000), (6_400_000, 600_000), (60_000_000, 99_000_000))):
+            asyncio.run(db.run(
+                "INSERT INTO observations (created_at, day, kind, source, compound, area_m2, price, over, fingerprint, status) "
+                "VALUES ('2026-11-20T12:00:00Z', '2026-11-20', 'over', 'visitor', 'badya', 120, ?, ?, ?, 'accepted')",
+                (price, over, f"fp-{idx}")))
+        g = SimpleNamespace(leads=db, now=datetime(2026, 11, 22, tzinfo=timezone.utc))
+        obs = asyncio.run(editorial.compound_observations(g, "badya", median_ppm=50_000))
+        assert obs["over_count"] == 3 and obs["median_over"] == 500_000
+    # Articles search_gap trigger + share card generation
+    tlist = articles.triggers({"search_gaps": [{"level": "district", "key": "new-cairo",
+                                                "query": "اسعار الشقق في التجمع الخامس", "impressions": 200}]}, [], today)
+    assert any(t.kind == "search_gap" and t.key == "search:district:new-cairo:2026-11" for t in tlist)
+    pack = articles.Pack(tlist[0], "New Cairo apartments", "/districts/new-cairo",
+                         {"start": "2026-10-23", "end": "2026-11-22"},
+                         [articles.Figure("headline.median_ppm", "median", 66_800, "egp_per_m2")], [], {})
+    card = articles.share_card(pack, {"ar": {"title": "أسعار الشقق", "summary": "وسيط المتر 66.8 ألف"}}, "test-slug", today, None)
+    assert "utm_source=social" in card["social_url"] and card["svg_bytes"] > 500

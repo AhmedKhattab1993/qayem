@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowRight, ChevronDown, Link2, Scale, Tag } from "lucide-react";
-import { year as formatYear, api, ApiError, money, number, percent, quarterly, titleCase, useApi, useCatalog, scrollBehavior, sep, nameOf, place } from "../lib";
+import { year as formatYear, api, ApiError, money, number, percent, quarterly, signed, titleCase, tone, useApi, useCatalog, scrollBehavior, sep, nameOf, place } from "../lib";
 import { t } from "../locale";
 import type { Evaluation, Payment } from "../types";
 import { ErrorState, Loading } from "../components/States";
+import { ConfidenceBadge, NoSalePrices, resaleVsNewText } from "../components/Guide";
 import { OpportunitySummary, PaymentFacts, PeerPanel, Unknowns, levelText } from "../components/Opportunity";
 import { DeveloperPrice } from "../components/DeveloperPrice";
 import { Comparables } from "../components/UnitTable";
@@ -16,6 +17,7 @@ import { track } from "../track";
 
 const FIELDS = [
   "compound",
+  "district",
   "property_type",
   "area",
   "price",
@@ -65,7 +67,7 @@ export default function Evaluate() {
       const value = params.get(field);
       if (value) next.set(field, value);
     }
-    return next.get("property_type") && next.get("area") && next.get("price") && next.get("compound")
+    return next.get("property_type") && next.get("area") && next.get("price") && (next.get("compound") || next.get("district"))
       ? `/evaluate?${next}`
       : null;
   }, [params]);
@@ -82,7 +84,8 @@ export default function Evaluate() {
     const area = Number(form.area);
     const price = Number(form.price);
     const down = Number(form.down_payment);
-    if (!form.compound.trim()) return setProblem("Choose the unit’s compound: every comparison is within its compound.");
+    if (!form.compound.trim() && !form.district.trim())
+      return setProblem("Choose a compound, or pick a district for a unit outside a compound.");
     if (!(area >= 20 && area <= 5000)) return setProblem("Enter an area between 20 and 5,000 m².");
     if (!(price >= 100_000)) return setProblem("Enter the full headline price in EGP.");
     if (form.plan && !(down >= 0 && down <= price)) return setProblem("The amount paid at signing must be between 0 and the headline price.");
@@ -167,6 +170,20 @@ export default function Evaluate() {
                   </option>
                 ))}
               </datalist>
+              <label className="field">
+                <span className="field-label">{t("Or district (outside a compound)")}</span>
+                <span className="select">
+                  <select value={form.district} onChange={(event) => set("district", event.target.value)}>
+                    <option value="">{t("Choose a district")}</option>
+                    {catalog?.districts.map((d) => (
+                      <option key={d.key} value={d.key}>
+                        {place(d.name)}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown size={15} />
+                </span>
+              </label>
             </fieldset>
             <fieldset>
               <legend>{t("The unit")}</legend>
@@ -411,8 +428,58 @@ function Result({ data, selling }: { data: Evaluation; selling: boolean }) {
       </div>
       {data.status === "compound_not_found" ? (
         <p className="notice">
-          {t("We have no resale listings in that compound, so there is nothing to compare it with. Check the spelling, or choose a compound from the list.")}
+          {t("We have no resale listings in that compound, so there is nothing to compare it with. Check the spelling, or choose a district below.")}
         </p>
+      ) : data.status === "district_guide" && data.district_guide ? (
+        <>
+          <section className="result-section">
+            <div className="guide-answer">
+              <p className="guide-sentence">
+                {t("This unit asks {ppm} per m² — {gap} vs the {place} median of {median} per m².", {
+                  ppm: money(inputs.price_per_m2),
+                  gap: signed(data.district_guide.gap),
+                  place: nameOf(data.district_guide.district) ?? place(inputs.district),
+                  median: money(data.district_guide.segment.median_ppm),
+                })}
+              </p>
+              <dl className="facts">
+                <div>
+                  <dt>{t("Your asking / m²")}</dt>
+                  <dd className={`num ${tone(data.district_guide.gap)}`}>{money(inputs.price_per_m2)}</dd>
+                </div>
+                <div>
+                  <dt>{t("District median / m²")}</dt>
+                  <dd className="num">{money(data.district_guide.segment.median_ppm)}</dd>
+                </div>
+                <div>
+                  <dt>{t("Middle half / m²")}</dt>
+                  <dd className="num">
+                    {money(data.district_guide.segment.p25_ppm, true)} – {money(data.district_guide.segment.p75_ppm, true)}
+                  </dd>
+                </div>
+                <div>
+                  <dt>{t("Listings")}</dt>
+                  <dd className="num">
+                    {number(data.district_guide.segment.count)}{" "}
+                    <ConfidenceBadge confidence={data.district_guide.segment.confidence} />
+                  </dd>
+                </div>
+              </dl>
+              {resaleVsNewText(data.district_guide.segment.resale_vs_new) && (
+                <p className={`guide-gap ${tone(data.district_guide.segment.resale_vs_new)}`}>
+                  {resaleVsNewText(data.district_guide.segment.resale_vs_new)}
+                </p>
+              )}
+              <NoSalePrices />
+              <p>
+                <Link className="link-arrow" to={`/districts/${encodeURIComponent(data.district_guide.district.key)}`}>
+                  {t("Open the price guide for {name}", { name: nameOf(data.district_guide.district) })}
+                </Link>
+              </p>
+            </div>
+          </section>
+          {!selling && <CostCalculator price={inputs.price} payment={data.payment} ready={inputs.delivery?.bucket === "ready"} />}
+        </>
       ) : (
         <>
           <OpportunitySummary unit={data} />

@@ -6,13 +6,43 @@ import { getLanguage, t } from "../locale";
 import { useCurrency } from "../currency";
 import { ErrorState, Loading } from "../components/States";
 import { ConfidenceBadge, NoSalePrices, RateNote, confidenceRules, resaleVsNewText } from "../components/Guide";
-import type { MapFeature } from "../components/MapCanvas";
+import type { MapFeature, MapHexFeature } from "../components/MapCanvas";
 import { GAP_BREAKS, GAP_COLOURS, NO_DATA, PRICE_COLOURS, colourFor, priceBreaks, rowFor, valueOf, type Measure } from "../mapScale";
-import type { GuideRow, MapData, Overview, PropertyClass } from "../types";
+import type { GuideRow, MapData, MapDistrict, Overview, PropertyClass } from "../types";
 
 const MapCanvas = lazy(() => import("../components/MapCanvas"));
 type Outlines = GeoJSON.FeatureCollection<GeoJSON.Geometry, Record<string, unknown>>;
 const CLASSES: PropertyClass[] = ["apartment", "house", "chalet"];
+const DELIVERIES = ["", "ready", "under_2y", "later"] as const;
+const BEDROOMS = ["", "1", "2", "3", "4+"] as const;
+const BUDGETS = [
+  { value: "", label: "Any budget" },
+  { value: "5000000", label: "Up to 5M EGP" },
+  { value: "10000000", label: "Up to 10M EGP" },
+  { value: "15000000", label: "Up to 15M EGP" },
+  { value: "25000000", label: "Up to 25M EGP" },
+] as const;
+
+function districtRow(district: MapDistrict, cls: PropertyClass, delivery: string): GuideRow | null {
+  const base = rowFor(district.classes, null, cls);
+  if (!delivery) return base;
+  const sub = district.deliveries?.[cls]?.[delivery];
+  if (!sub) return null;
+  return {
+    class: cls,
+    count: sub.count,
+    confidence: sub.confidence,
+    single_source: sub.confidence === "indicative",
+    median_ppm: sub.median_ppm,
+    p25_ppm: sub.p25_ppm,
+    p75_ppm: sub.p75_ppm,
+    median_cash_ppm: null,
+    median_price: sub.median_price,
+    resale_vs_new: sub.resale_vs_new,
+    sources: base?.sources ?? [],
+    developer_ppm: base?.developer_ppm ?? null,
+  };
+}
 
 /** The district outlines are a static file; without it the map shows a dot per district. */
 function useOutlines() {
@@ -140,6 +170,10 @@ export default function MapPage({ overview }: { overview: Overview | null }) {
   const { currency, currencies, change } = useCurrency();
   const cls = (CLASSES as string[]).includes(params.get("type") ?? "") ? (params.get("type") as PropertyClass) : "apartment";
   const measure: Measure = params.get("show") === "gap" ? "gap" : "price";
+  const delivery = (DELIVERIES as readonly string[]).includes(params.get("delivery") ?? "") ? (params.get("delivery") ?? "") : "";
+  const beds = (BEDROOMS as readonly string[]).includes(params.get("beds") ?? "") ? (params.get("beds") ?? "") : "";
+  const budget = Number(params.get("budget") ?? "") || 0;
+  const showGrid = params.get("grid") !== "0";
   const focus = params.get("focus");
   const [selected, setSelected] = useState<Selection | null>(focus ? { kind: "district", key: focus } : null);
   const [view, setView] = useState<"map" | "list">("map");
@@ -152,25 +186,46 @@ export default function MapPage({ overview }: { overview: Overview | null }) {
     setParams(next, { replace: true });
   };
 
-  const districts = useMemo(
-    () => [...(data?.districts ?? [])].sort((a, b) => (rowFor(b.classes, null, cls)?.count ?? 0) - (rowFor(a.classes, null, cls)?.count ?? 0) || b.listings - a.listings),
-    [data, cls],
-  );
+  const districts = useMemo(() => {
+    const all = data?.districts ?? [];
+    const filtered = all.filter((d) => {
+      const row = districtRow(d, cls, delivery);
+      if (beds && !(d.bedrooms?.[beds] ?? 0)) return false;
+      if (budget && (!row || row.median_price > budget)) return false;
+      return true;
+    });
+    return [...filtered].sort(
+      (a, b) => (districtRow(b, cls, delivery)?.count ?? 0) - (districtRow(a, cls, delivery)?.count ?? 0) || b.listings - a.listings,
+    );
+  }, [data, cls, delivery, beds, budget]);
+
+  const compounds = useMemo(() => {
+    const all = data?.compounds ?? [];
+    return all.filter((c) => {
+      if (c.lat == null || c.lon == null) return false;
+      const row = rowFor(c.classes ?? (c.headline ? [c.headline] : []), c.headline, cls);
+      if (beds && !(c.bedrooms?.[beds] ?? 0)) return false;
+      if (delivery === "ready" && (c.ready_share ?? 0) < 0.25) return false;
+      if (budget && (!row || row.median_price > budget)) return false;
+      return true;
+    });
+  }, [data, cls, delivery, beds, budget]);
+
   const breaks = useMemo(
     () =>
       priceBreaks([
-        ...districts.map((d) => rowFor(d.classes, null, cls)?.median_ppm ?? NaN),
-        ...(data?.compounds ?? []).filter((c) => c.headline?.class === cls).map((c) => c.headline!.median_ppm),
+        ...districts.map((d) => districtRow(d, cls, delivery)?.median_ppm ?? NaN),
+        ...compounds.map((c) => rowFor(c.classes ?? (c.headline ? [c.headline] : []), c.headline, cls)?.median_ppm ?? NaN),
       ]),
-    [districts, data, cls],
+    [districts, compounds, cls, delivery],
   );
   const features = useMemo<MapFeature[]>(() => {
     if (!data) return [];
     const short = (value: number | null) =>
       value == null ? "" : measure === "price" ? money(value, true) : signed(value);
     return [
-      ...data.districts.map((d) => {
-        const value = valueOf(rowFor(d.classes, null, cls), measure);
+      ...districts.map((d) => {
+        const value = valueOf(districtRow(d, cls, delivery), measure);
         const name = nameOf(d)!;
         return {
           key: d.key,
@@ -181,23 +236,34 @@ export default function MapPage({ overview }: { overview: Overview | null }) {
           lon: d.lon,
         };
       }),
-      ...data.compounds
-        .filter((c) => c.lat != null && c.lon != null)
-        .map((c) => {
-          const row = c.headline && c.headline.class === cls ? c.headline : null;
-          return {
-            key: c.key,
-            kind: "compound" as const,
-            label: nameOf(c)!,
-            colour: colourFor(valueOf(row, measure), measure, breaks),
-            lat: c.lat,
-            lon: c.lon,
-            size: c.listings,
-          };
-        }),
+      ...compounds.map((c) => {
+        const row = rowFor(c.classes ?? (c.headline ? [c.headline] : []), c.headline, cls);
+        return {
+          key: c.key,
+          kind: "compound" as const,
+          label: nameOf(c)!,
+          colour: colourFor(valueOf(row, measure), measure, breaks),
+          lat: c.lat,
+          lon: c.lon,
+          size: c.listings,
+        };
+      }),
     ];
     // The currency changes the labels' figures.
-  }, [data, cls, measure, breaks, currency, language]);
+  }, [data, districts, compounds, cls, delivery, measure, breaks, currency, language]);
+
+  const hexFeatures = useMemo<MapHexFeature[]>(() => {
+    if (!data?.hexes || measure !== "price" || !showGrid) return [];
+    return data.hexes
+      .filter((h) => h.class === cls)
+      .map((h) => ({
+        id: h.id,
+        colour: colourFor(h.median_ppm, "price", breaks),
+        count: h.count,
+        median_ppm: h.median_ppm,
+        ring: h.ring,
+      }));
+  }, [data, cls, measure, showGrid, breaks]);
 
   const card = useMemo(() => {
     if (!selected || !data) return null;
@@ -206,7 +272,7 @@ export default function MapPage({ overview }: { overview: Overview | null }) {
       if (!district) return null;
       return {
         name: nameOf(district)!,
-        row: rowFor(district.classes, null, cls),
+        row: districtRow(district, cls, delivery),
         to: `/districts/${encodeURIComponent(district.key)}`,
         meta: t("{n} listings", { n: number(district.listings), count: district.listings }),
       };
@@ -216,11 +282,11 @@ export default function MapPage({ overview }: { overview: Overview | null }) {
     const district = data.districts.find((d) => d.key === compound.district);
     return {
       name: nameOf(compound)!,
-      row: compound.headline && compound.headline.class === cls ? compound.headline : null,
+      row: rowFor(compound.classes ?? (compound.headline ? [compound.headline] : []), compound.headline, cls),
       to: `/compounds/${encodeURIComponent(compound.key)}`,
       meta: district ? nameOf(district) : undefined,
     };
-  }, [selected, data, cls, currency, language]);
+  }, [selected, data, cls, delivery, currency, language]);
 
   if (error)
     return (
@@ -267,6 +333,45 @@ export default function MapPage({ overview }: { overview: Overview | null }) {
                 {t("Resale vs new")}
               </button>
             </div>
+            <label className="map-select">
+              <span className="sr-only">{t("Delivery")}</span>
+              <select aria-label={t("Delivery")} value={delivery} onChange={(event) => update({ delivery: event.target.value })}>
+                <option value="">{t("Any delivery")}</option>
+                <option value="ready">{t("Ready now")}</option>
+                <option value="under_2y">{t("Within 2 years")}</option>
+                <option value="later">{t("In 2 years or more")}</option>
+              </select>
+            </label>
+            <label className="map-select">
+              <span className="sr-only">{t("Bedrooms")}</span>
+              <select aria-label={t("Bedrooms")} value={beds} onChange={(event) => update({ beds: event.target.value })}>
+                <option value="">{t("Any bedrooms")}</option>
+                <option value="1">{t("1 bedroom")}</option>
+                <option value="2">{t("2 bedrooms")}</option>
+                <option value="3">{t("3 bedrooms")}</option>
+                <option value="4+">{t("4+ bedrooms")}</option>
+              </select>
+            </label>
+            <label className="map-select">
+              <span className="sr-only">{t("Budget")}</span>
+              <select aria-label={t("Budget")} value={budget ? String(budget) : ""} onChange={(event) => update({ budget: event.target.value })}>
+                {BUDGETS.map((item) => (
+                  <option key={item.value} value={item.value}>
+                    {t(item.label)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {measure === "price" && (data.hexes?.length ?? 0) > 0 && (
+              <button
+                type="button"
+                className="btn btn-sm"
+                aria-pressed={showGrid}
+                onClick={() => update({ grid: showGrid ? "0" : "" })}
+              >
+                {t(showGrid ? "Price grid: on" : "Price grid: off")}
+              </button>
+            )}
             {currencies.length > 1 && (
               <div className="segmented map-currency" role="group" aria-label={t("Show prices in")}>
                 {currencies.map((code) => (
@@ -296,6 +401,7 @@ export default function MapPage({ overview }: { overview: Overview | null }) {
             <MapCanvas
               features={features}
               outlines={outlines}
+              hexes={hexFeatures}
               language={language}
               selected={selected?.kind === "district" ? selected.key : null}
               focus={focus}
@@ -354,7 +460,7 @@ export default function MapPage({ overview }: { overview: Overview | null }) {
                 </thead>
                 <tbody>
                   {districts.map((district) => {
-                    const row = rowFor(district.classes, null, cls);
+                    const row = districtRow(district, cls, delivery);
                     return (
                       <tr key={district.key}>
                         <th scope="row">

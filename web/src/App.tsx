@@ -1,6 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { Link, NavLink, Route, Routes, useLocation } from "react-router-dom";
-import { ArrowRight, BarChart3, Bookmark, Building2, Calculator, Check, Compass, Landmark, Map as MapIcon, MapPin, Rows3, Scale, Search, X } from "lucide-react";
+import { ArrowRight, BarChart3, Bookmark, BookOpen, Building2, Calculator, Check, Compass, Landmark, Map as MapIcon, MapPin, Scale, Search, X } from "lucide-react";
 import Home from "./pages/Home";
 import Evaluate from "./pages/Evaluate";
 import Units from "./pages/Units";
@@ -38,17 +38,17 @@ const DealCheck = lazy(() => import("./pages/DealCheck"));
 
 const nav = [
   { to: "/map", label: "Map", short: "Map", icon: MapIcon },
-  { to: "/evaluate", label: "Compare a unit", short: "Evaluate", icon: Calculator },
+  { to: "/districts", label: "Districts", short: "Districts", icon: MapPin },
   { to: "/compounds", label: "Compounds", short: "Compounds", icon: Building2 },
   { to: "/developers", label: "Developers", short: "Developers", icon: Landmark },
-  { to: "/districts", label: "Districts", short: "Districts", icon: MapPin },
   { to: "/index", label: "Qayem Index", short: "Index", icon: BarChart3 },
-  { to: "/units", label: "Units", short: "Units", icon: Rows3 },
+  { to: "/articles", label: "Articles", short: "Articles", icon: BookOpen },
+  { to: "/evaluate", label: "Compare a unit", short: "Evaluate", icon: Calculator },
 ];
-const tabs = ["/map", "/evaluate", "/compounds", "/units"];
+const tabs = ["/map", "/districts", "/compounds", "/evaluate"];
 const footerLinks = [
   ...nav,
-  { to: "/articles", label: "Articles" },
+  { to: "/units", label: "Resale units" },
   { to: "/deal-check", label: "Free deal check" },
   { to: "/methodology", label: "Methodology" },
   { to: "/watchlist", label: "Watchlist" },
@@ -58,7 +58,7 @@ const footerLinks = [
   { to: "/privacy", label: "Privacy" },
 ];
 const titles: [RegExp, string][] = [
-  [/^\/$/, "Resale opportunities"],
+  [/^\/$/, "Egypt property price guide"],
   [/^\/evaluate/, "Compare a unit"],
   [/^\/units\/\d+/, "Unit"],
   [/^\/units/, "Units"],
@@ -280,9 +280,9 @@ export default function App() {
           <div className="footer-brand">
             <Mark size={46} />
             <p className="display">
-              {t("Is it really")} <em>{t("a good deal?")}</em>
+              {t("What does property")} <em>{t("really cost in Egypt?")}</em>
             </p>
-            <span>{t("Resale units against what you could buy instead, in Egypt’s property market.")}</span>
+            <span>{t("Egypt’s property price guide: asking prices per m² by district and compound, and resale against the developer.")}</span>
           </div>
           <nav className="footer-links" aria-label={t("Footer")}>
             {footerLinks.map((item) => (

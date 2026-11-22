@@ -230,7 +230,8 @@ def test_detail_is_sanitized_and_explains_itself(client: TestClient):
     assert detail["unit"]["images"] == [] and detail["unit"]["photo"] is None
     assert "example.test/b.jpg" not in text
     assert detail["unit"]["source_url"] is None and detail["unit"]["bedrooms"] is None
-    assert "+201012345678" not in detail["unit"]["description"] and "<script>" not in detail["unit"]["description"]
+    assert "description" not in detail["unit"]
+    assert "+201012345678" not in text and "<script>" not in text
     # the similar units it is ranked against, nearest in size first
     assert [c["area_m2"] for c in detail["comparables"]][:3] == [120, 120, 120]
     # every similar unit is listed (the page shows the nearest six until asked), each with its seller's contract year

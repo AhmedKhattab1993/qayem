@@ -9,7 +9,6 @@ import type { ClassSummary, Launch, Profile, UnitFull } from "../types";
 import { EmptyState } from "../components/States";
 import { LevelBadge } from "../components/Opportunity";
 import { termsLabel } from "../components/UnitTable";
-import { Thumb } from "../components/Gallery";
 
 /** Compounds with compounds, developers with developers, units with units. */
 type Ready = Extract<Loaded, { status: "ready" }>;
@@ -228,10 +227,6 @@ export default function Compare() {
                   {compare.map((item) => (
                     <th scope="col" key={item.key}>
                       <span className="compare-head">
-                        {item.kind === "unit" && (() => {
-                          const entry = get(item);
-                          return <Thumb url={entry.status === "ready" && entry.kind === "unit" ? entry.data.unit.photo : null} />;
-                        })()}
                         <Link to={pinnedPath(item)} dir="auto">
                           {pinnedName(item, get(item))}
                         </Link>

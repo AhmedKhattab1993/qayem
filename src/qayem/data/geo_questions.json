@@ -1,0 +1,22 @@
+[
+  {"id": 1, "lang": "ar", "buyer": "first_time", "question": "سعر المتر في التجمع الخامس كام للشقق؟"},
+  {"id": 2, "lang": "ar", "buyer": "first_time", "question": "سعر المتر في الشيخ زايد أغلى ولا 6 أكتوبر؟"},
+  {"id": 3, "lang": "ar", "buyer": "first_time", "question": "متوسط سعر شقة 3 غرف في القاهرة الجديدة كام في 2026؟"},
+  {"id": 4, "lang": "ar", "buyer": "first_time", "question": "سعر المتر في مدينة نصر كام دلوقتي؟"},
+  {"id": 5, "lang": "ar", "buyer": "first_time", "question": "سعر المتر في المعادي كام للشقق؟"},
+  {"id": 6, "lang": "ar", "buyer": "first_time", "question": "أسعار الشقق في الإسكندرية سعر المتر كام؟"},
+  {"id": 7, "lang": "ar", "buyer": "expat", "question": "5 مليون جنيه تجيب شقة فين في مصر؟"},
+  {"id": 8, "lang": "ar", "buyer": "expat", "question": "سعر الشقة في مدينتي كام بالدولار؟"},
+  {"id": 9, "lang": "ar", "buyer": "expat", "question": "أشتري ريسيل ولا من المطور في القاهرة الجديدة؟"},
+  {"id": 10, "lang": "ar", "buyer": "resale", "question": "سعر المتر ريسيل في باديا بالم هيلز كام مقارنة بسعر المطور؟"},
+  {"id": 11, "lang": "ar", "buyer": "resale", "question": "أسعار الريسيل في ميفيدا التجمع الخامس كام؟"},
+  {"id": 12, "lang": "ar", "buyer": "resale", "question": "أسعار الريسيل في ماونتن فيو أي سيتي مقارنة بالمطور؟"},
+  {"id": 13, "lang": "ar", "buyer": "seller", "question": "أبيع شقتي في مدينتي بكام؟"},
+  {"id": 14, "lang": "ar", "buyer": "investor", "question": "إيه أكتر مناطق العقارات اللي سعرها زاد في مصر السنة دي؟"},
+  {"id": 15, "lang": "ar", "buyer": "investor", "question": "فين الكمبوندات اللي الريسيل فيها أرخص من سعر المطور؟"},
+  {"id": 16, "lang": "en", "buyer": "first_time", "question": "How much is a 3-bedroom apartment in New Cairo in 2026?"},
+  {"id": 17, "lang": "en", "buyer": "expat", "question": "What does 5 million EGP buy in Cairo real estate?"},
+  {"id": 18, "lang": "en", "buyer": "expat", "question": "Is Sheikh Zayed cheaper than 6th of October per square meter?"},
+  {"id": 19, "lang": "en", "buyer": "resale", "question": "Is resale cheaper than buying from the developer in New Cairo?"},
+  {"id": 20, "lang": "en", "buyer": "investor", "question": "What is the average price per sqm in North Coast Egypt compounds?"}
+]

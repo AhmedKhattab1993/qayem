@@ -1,7 +1,7 @@
 import { ArrowDown, Banknote, Building2, CalendarClock, FileQuestion, Files, Gavel, History, Landmark, Layers3, ScanLine, Truck } from "lucide-react";
 import { date, number, percent, signed, sep } from "../lib";
 import type { ReactNode } from "react";
-import { t } from "../locale";
+import { getLanguage, t } from "../locale";
 import type { Level, Overview } from "../types";
 import { ErrorState, Loading } from "../components/States";
 import { LevelBadge, ScopeNote } from "../components/Opportunity";
@@ -119,6 +119,81 @@ export default function Methodology({ overview, error, retry }: { overview: Over
           </dl>
         </div>
       </header>
+
+      <section className="page section" id="guide" aria-labelledby="guide-method-heading">
+        <div className="section-head">
+          <div>
+            <span className="eyebrow">00{sep()}{t("The price guide and index")}</span>
+            <h2 id="guide-method-heading" className="display">
+              {t("Deduplicated,")} <em>{t("graded by confidence.")}</em>
+            </h2>
+          </div>
+          <p className="lede">
+            {t(
+              "The price guide and the monthly Qayem Index read public listings across Egypt’s portals, drop cross-site duplicates and implausible prices, and publish medians only where enough listings exist.",
+            )}
+          </p>
+        </div>
+        <div className="definitions">
+          <article>
+            <Files size={22} strokeWidth={1.6} />
+            <h3>{t("Deduplication and confidence")}</h3>
+            <p>
+              {t(
+                "Listings with matching place, type, area and price across sources count once. Every figure is graded High (20+ listings, no single source above 80%), Medium (5+ across sources, or 10+ from one), or Indicative.",
+              )}
+            </p>
+          </article>
+          <article>
+            <Banknote size={22} strokeWidth={1.6} />
+            <h3>{t("CBE rates and official fees")}</h3>
+            <p>
+              {t(
+                "Currency conversions and the installment discount rate follow the Central Bank of Egypt’s latest published exchange and overnight deposit rates.",
+              )}
+            </p>
+          </article>
+          <article>
+            <FileQuestion size={22} strokeWidth={1.6} />
+            <h3>{t("Articles and buyer reports")}</h3>
+            <p>
+              {t(
+                "Market articles are drafted by the Qayem data desk with AI from published figures only and automatically fact-checked against the data pack. Anonymous buyer observations are outlier-filtered before display.",
+              )}
+            </p>
+          </article>
+        </div>
+        {overview.fee_schedules && overview.fee_schedules.items.length > 0 && (
+          <div className="ledger-frame">
+            <div className="ledger stack">
+              <table>
+                <caption className="sr-only">{t("Statutory buying and registration fees in Egypt")}</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">{t("Fee")}</th>
+                    <th scope="col">{t("Typical schedule")}</th>
+                    <th scope="col">{t("Notes")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {overview.fee_schedules.items.map((item) => {
+                    const ar = getLanguage() === "ar";
+                    return (
+                      <tr key={item.key}>
+                        <th scope="row">{ar ? item.label_ar : item.label}</th>
+                        <td data-label={t("Typical schedule")} className="num">
+                          {ar ? item.value_ar : item.value}
+                        </td>
+                        <td data-label={t("Notes")}>{ar ? item.note_ar : item.note}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </section>
 
       <section className="page section" aria-labelledby="comparisons-heading">
         <div className="section-head">

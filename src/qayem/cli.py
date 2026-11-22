@@ -311,61 +311,6 @@ def source_lock(name: str):
     return handle
 
 
-@app.command("backfill-images")
-def backfill_images(
-    limit: int = typer.Option(None, help="Stop after this many unit pages."),
-    order: Path = typer.Option(None, help="JSON list of property ids to check first (e.g. the website's ranking)."),
-    min_interval: float = typer.Option(DEFAULT_MIN_INTERVAL, help="Min seconds between requests to a host."),
-) -> None:
-    """Fetch the photos of stored AqarExit units once. The incremental crawl only refetches changed pages, so units
-    stored before photos were parsed have none. Progress is kept in logs/, so a rerun continues where it stopped."""
-    from .sources.aqarexit import BASE, DETAIL_PATH, images_from_page
-    from .http_client import BlockedError, FetchError
-
-    lock = source_lock("aqarexit")
-    if lock is None:
-        console.print("[yellow]aqarexit: a crawl of this source is in progress; try later[/yellow]")
-        raise typer.Exit(1)
-    progress = Path("logs") / "backfill-images-aqarexit.json"
-    progress.parent.mkdir(exist_ok=True)
-    checked: set[str] = set(json.loads(progress.read_text())) if progress.exists() else set()
-    engine = get_engine()
-    with session_scope(engine) as session:
-        todo = [
-            (pid, uid) for pid, uid, images in session.execute(
-                select(Property.id, Property.source_listing_id, Property.images)
-                .where(Property.source == "aqarexit", Property.status == "active").order_by(Property.id.desc())
-            )
-            if not images and uid not in checked
-        ]
-    if order:
-        rank = {pid: index for index, pid in enumerate(json.loads(order.read_text()))}
-        todo.sort(key=lambda item: rank.get(item[0], len(rank)))
-    todo = todo[:limit]
-    console.print(f"{len(todo)} AqarExit units to check for photos")
-    found = 0
-    with Fetcher(min_interval=min_interval) as fetcher:
-        for number, (pid, uid) in enumerate(todo, 1):
-            try:
-                images = images_from_page(fetcher.get_text(f"{BASE}{DETAIL_PATH}{uid}"))
-            except BlockedError as exc:
-                console.print(f"[red]Blocked, stopping: {exc}[/red]")
-                break
-            except FetchError as exc:
-                console.print(f"[yellow]{uid}: {exc}[/yellow]")
-                continue
-            if images:
-                found += 1
-                with session_scope(engine) as session:
-                    session.get(Property, pid).images = images
-            checked.add(uid)
-            if number % 25 == 0 or number == len(todo):
-                progress.write_text(json.dumps(sorted(checked)))
-                console.print(f"{number}/{len(todo)} checked, {found} with photos")
-    progress.write_text(json.dumps(sorted(checked)))
-    lock.close()
-
-
 @app.command()
 def crawl(
     only: list[str] = typer.Option(None, "--only", help="Limit to these sources (repeatable)."),
@@ -518,6 +463,21 @@ def fetch_rates() -> None:
         count = record_rates(connection, figures)
     console.print(f"CBE {figures['day']}: {count} figures; USD {figures['fx'].get('usd')} EGP, "
                   f"overnight deposit {figures['key'].get('overnight_deposit')}%.")
+
+
+@app.command("fetch-official")
+def fetch_official_cmd(
+    out: Path = typer.Option(Path(".artifacts/official/latest.json"), help="Where to save the public CAPMAS/NUCA snapshot."),
+) -> None:
+    """Fetch public CAPMAS inflation and NUCA housing announcements (best-effort, polite)."""
+    from .official import fee_schedules, fetch_official
+
+    result = fetch_official()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    fees = fee_schedules()
+    console.print(f"Official {result['day']}: CAPMAS={'ok' if result['capmas'] else 'none'}, "
+                  f"NUCA notices={len(result['nuca'])}, statutory fee schedule {fees.get('year')} ({len(fees.get('items', []))} items).")
 
 
 @app.command("articles")

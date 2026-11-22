@@ -151,6 +151,14 @@
 "name": "AZAD",
 "district": "new-cairo"
 },
+"azad-views": {
+"lat": 30.01199,
+"lon": 31.50856,
+"source": "osm:way/685383538",
+"match": "contains",
+"name": "Azad Views",
+"district": "new-cairo"
+},
 "bamboo-iii": {
 "lat": 30.00919,
 "lon": 31.02392,
@@ -223,6 +231,22 @@
 "name": "Cairo Festival City",
 "district": "new-cairo"
 },
+"canyon8": {
+"lat": 30.06649,
+"lon": 31.64008,
+"source": "osm:way/687344735",
+"match": "contains",
+"name": "Canyon8",
+"district": "new-capital-city"
+},
+"capital-gardens": {
+"lat": 30.13665,
+"lon": 31.80685,
+"source": "osm:way/1049287440",
+"match": "search",
+"name": "Capital Gardens",
+"district": "new-cairo"
+},
 "casa": {
 "lat": 30.06576,
 "lon": 30.95901,
@@ -279,6 +303,14 @@
 "name": "Dara Gardens",
 "district": "6th-of-october-city"
 },
+"degla-landmark": {
+"lat": 30.04366,
+"lon": 31.51234,
+"source": "osm:way/352821081",
+"match": "contains",
+"name": "Degla Landmark",
+"district": "nasr-city"
+},
 "degla-palms": {
 "lat": 29.8854,
 "lon": 30.9171,
@@ -286,6 +318,22 @@
 "match": "name",
 "name": "Degla Palms",
 "district": "6th-of-october-city"
+},
+"dejoya-residence": {
+"lat": 30.00305,
+"lon": 30.99114,
+"source": "osm:way/642043225",
+"match": "contains",
+"name": "Dejoya Residence",
+"district": "new-zayed"
+},
+"dejoya-residence-taj-misr-developments": {
+"lat": 30.00305,
+"lon": 30.99114,
+"source": "osm:way/642043225",
+"match": "contains",
+"name": "Dejoya Residence (Taj Misr Developments)",
+"district": "new-zayed"
 },
 "dijar": {
 "lat": 29.94869,
@@ -359,6 +407,14 @@
 "name": "El Patio 5 East",
 "district": "el-shorouk"
 },
+"el-patio-6-october": {
+"lat": 29.98315,
+"lon": 31.07393,
+"source": "osm:way/690166249",
+"match": "contains",
+"name": "El Patio 6 October",
+"district": "6th-of-october-city"
+},
 "el-patio-oro": {
 "lat": 30.02588,
 "lon": 31.59336,
@@ -406,6 +462,14 @@
 "match": "search",
 "name": "Etapa",
 "district": "el-sheikh-zayed"
+},
+"ever": {
+"lat": 30.06032,
+"lon": 30.94879,
+"source": "osm:way/696946818",
+"match": "contains",
+"name": "Ever",
+"district": "6th-of-october-city"
 },
 "fcc": {
 "lat": 30.05903,
@@ -463,6 +527,14 @@
 "name": "Ghazala Bay",
 "district": "north-coast"
 },
+"golden-gate": {
+"lat": 30.00598,
+"lon": 31.34357,
+"source": "osm:way/310217954",
+"match": "contains",
+"name": "Golden Gate",
+"district": "new-cairo"
+},
 "grand-residence": {
 "lat": 30.01317,
 "lon": 31.48386,
@@ -478,6 +550,14 @@
 "match": "name",
 "name": "Green 3",
 "district": "el-sheikh-zayed"
+},
+"green-4-october": {
+"lat": 30.00512,
+"lon": 31.02001,
+"source": "osm:way/642030035",
+"match": "contains",
+"name": "Green 4 October",
+"district": "6th-of-october-city"
 },
 "green-5": {
 "lat": 29.9959,
@@ -519,6 +599,14 @@
 "name": "Hacienda Bay",
 "district": "sidi-abdel-rahman"
 },
+"hacienda-blue": {
+"lat": 31.00079,
+"lon": 28.65315,
+"source": "osm:way/301413600",
+"match": "contains",
+"name": "Hacienda Blue",
+"district": "north-coast"
+},
 "hacienda-red": {
 "lat": 31.00079,
 "lon": 28.65315,
@@ -526,6 +614,14 @@
 "match": "contains",
 "name": "Hacienda Red",
 "district": "sidi-abdel-rahman"
+},
+"hacienda-waters-palm-hills-developments": {
+"lat": 31.00079,
+"lon": 28.65315,
+"source": "osm:way/301413600",
+"match": "contains",
+"name": "Hacienda Waters (Palm Hills Developments)",
+"district": "north-coast"
 },
 "hacienda-white": {
 "lat": 30.99896,
@@ -567,12 +663,28 @@
 "name": "Hay El Ashgar",
 "district": "6th-of-october-city"
 },
+"hom": {
+"lat": 29.90453,
+"lon": 31.06736,
+"source": "osm:way/540088031",
+"match": "contains",
+"name": "HOM",
+"district": "october-gardens"
+},
 "hyde-park": {
 "lat": 29.98864,
 "lon": 31.54159,
 "source": "osm:way/1366735852",
 "match": "contains",
 "name": "Hyde Park",
+"district": "new-cairo"
+},
+"hyde-park-hyde-park": {
+"lat": 29.98864,
+"lon": 31.54159,
+"source": "osm:way/1366735852",
+"match": "contains",
+"name": "Hyde Park (Hyde Park)",
 "district": "new-cairo"
 },
 "hyde-park-new-cairo": {
@@ -582,6 +694,14 @@
 "match": "search",
 "name": "Hyde Park New Cairo",
 "district": "new-cairo"
+},
+"iden": {
+"lat": 30.13377,
+"lon": 31.749,
+"source": "osm:way/689914070",
+"match": "contains",
+"name": "iDEN",
+"district": "new-capital-city"
 },
 "il-bosco-city": {
 "lat": 30.0661,
@@ -598,6 +718,30 @@
 "match": "search",
 "name": "Il Latini",
 "district": "al-alamein"
+},
+"il-latini-saudi-egyptian-developers-sed": {
+"lat": 30.85865,
+"lon": 28.90009,
+"source": "osm:way/1429670450",
+"match": "search",
+"name": "Il Latini (Saudi Egyptian Developers (SED))",
+"district": "al-alamein"
+},
+"ion": {
+"lat": 30.16239,
+"lon": 31.65288,
+"source": "osm:way/773160699",
+"match": "contains",
+"name": "ION",
+"district": "new-capital-city"
+},
+"ira": {
+"lat": 30.07575,
+"lon": 30.97313,
+"source": "osm:way/545542488",
+"match": "contains",
+"name": "IRA",
+"district": "new-zayed"
 },
 "iris-swanlake-residences": {
 "lat": 30.07597,
@@ -631,6 +775,22 @@
 "name": "Jeera",
 "district": "el-sheikh-zayed"
 },
+"jewar-sheikh-zayed": {
+"lat": 30.05491,
+"lon": 30.9835,
+"source": "osm:way/697782330",
+"match": "contains",
+"name": "Jewar Sheikh Zayed",
+"district": "6th-of-october-city"
+},
+"jirian-palm-hills-developments": {
+"lat": 30.01392,
+"lon": 31.02646,
+"source": "osm:way/691672998",
+"match": "contains",
+"name": "Jirian (Palm Hills Developments)",
+"district": "new-zayed"
+},
 "kamaran": {
 "lat": 27.37846,
 "lon": 33.65592,
@@ -638,6 +798,14 @@
 "match": "name",
 "name": "Kamaran",
 "district": "el-gouna"
+},
+"karma-residence": {
+"lat": 30.05103,
+"lon": 30.95896,
+"source": "osm:way/545629315",
+"match": "contains",
+"name": "Karma Residence",
+"district": "6th-of-october-city"
 },
 "karmell": {
 "lat": 30.06197,
@@ -847,6 +1015,22 @@
 "name": "Les Rois New Cairo",
 "district": "new-cairo"
 },
+"life-wise": {
+"lat": 30.01058,
+"lon": 31.48952,
+"source": "osm:way/680903173",
+"match": "contains",
+"name": "Life Wise",
+"district": "new-cairo"
+},
+"life-wise-eons-developments": {
+"lat": 30.01058,
+"lon": 31.48952,
+"source": "osm:way/680903173",
+"match": "contains",
+"name": "Life Wise (EONS developments)",
+"district": "new-cairo"
+},
 "maadi-view": {
 "lat": 30.1226,
 "lon": 31.65192,
@@ -854,6 +1038,14 @@
 "match": "name",
 "name": "Maadi View",
 "district": "el-shorouk"
+},
+"madai": {
+"lat": 30.10054,
+"lon": 31.66361,
+"source": "osm:way/685399399",
+"match": "contains",
+"name": "Madai",
+"district": "new-capital-city"
 },
 "madinaty": {
 "lat": 30.08884,
@@ -942,6 +1134,14 @@
 "match": "contains",
 "name": "Marriott Residences Heliopolis",
 "district": "heliopolis"
+},
+"marseilia-beach-2": {
+"lat": 30.85224,
+"lon": 29.27747,
+"source": "osm:way/267185308",
+"match": "name",
+"name": "Marseilia Beach 2",
+"district": "north-coast"
 },
 "marseilia-beach-4": {
 "lat": 30.95004,
@@ -1103,6 +1303,14 @@
 "name": "New Giza",
 "district": "6th-of-october-city"
 },
+"noi": {
+"lat": 30.22817,
+"lon": 31.26778,
+"source": "osm:way/737612246",
+"match": "name",
+"name": "Noi",
+"district": "new-cairo"
+},
 "nyom-new-cairo": {
 "lat": 30.06648,
 "lon": 31.68078,
@@ -1110,6 +1318,14 @@
 "match": "search",
 "name": "Nyom New Cairo",
 "district": "new-cairo"
+},
+"nyoum-mostaqbal-city": {
+"lat": 30.06756,
+"lon": 31.68102,
+"source": "osm:way/1073860849",
+"match": "contains",
+"name": "Nyoum Mostaqbal City",
+"district": "mostakbal-city"
 },
 "october-hills-2": {
 "lat": 29.9963,
@@ -1135,12 +1351,28 @@
 "name": "One Ninety",
 "district": "new-cairo"
 },
+"ons": {
+"lat": 30.01286,
+"lon": 31.1081,
+"source": "osm:way/1067182333",
+"match": "contains",
+"name": "Ons",
+"district": "new-zayed"
+},
 "palm-hills-golf-extension": {
 "lat": 29.99511,
 "lon": 31.03556,
 "source": "osm:way/690479639",
 "match": "name",
 "name": "Palm Hills Golf Extension",
+"district": "6th-of-october-city"
+},
+"palm-hills-golf-views": {
+"lat": 30.01392,
+"lon": 31.02646,
+"source": "osm:way/691672998",
+"match": "contains",
+"name": "Palm Hills Golf Views",
 "district": "6th-of-october-city"
 },
 "palm-hills-katameya": {
@@ -1174,6 +1406,14 @@
 "match": "contains",
 "name": "Palm Hills New Cairo (Palm Hills Developments)",
 "district": "new-cairo"
+},
+"palm-hills-october": {
+"lat": 30.01392,
+"lon": 31.02646,
+"source": "osm:way/691672998",
+"match": "contains",
+"name": "Palm Hills October",
+"district": "6th-of-october-city"
 },
 "palm-parks": {
 "lat": 29.98959,
@@ -1239,6 +1479,14 @@
 "name": "Pyramids Walk",
 "district": "6th-of-october-city"
 },
+"rare": {
+"lat": 30.02073,
+"lon": 31.53515,
+"source": "osm:way/685461885",
+"match": "contains",
+"name": "Rare",
+"district": "mostakbal-city"
+},
 "ras-soma": {
 "lat": 26.86351,
 "lon": 33.9613,
@@ -1246,6 +1494,14 @@
 "match": "contains",
 "name": "Ras Soma",
 "district": "soma-bay"
+},
+"red": {
+"lat": 29.96444,
+"lon": 31.51391,
+"source": "osm:way/882690104",
+"match": "contains",
+"name": "Red",
+"district": "mostakbal-city"
 },
 "regents-park": {
 "lat": 30.0003,
@@ -1303,6 +1559,22 @@
 "name": "Saba Residence",
 "district": "6th-of-october-city"
 },
+"sarai": {
+"lat": 30.06499,
+"lon": 31.28277,
+"source": "osm:way/705410712",
+"match": "contains",
+"name": "Sarai",
+"district": "new-cairo"
+},
+"sarai-madinet-masr": {
+"lat": 30.06499,
+"lon": 31.28277,
+"source": "osm:way/705410712",
+"match": "contains",
+"name": "Sarai (Madinet Masr)",
+"district": "new-cairo"
+},
 "sawary": {
 "lat": 31.18498,
 "lon": 29.89464,
@@ -1342,6 +1614,14 @@
 "match": "contains",
 "name": "Sia Lagoon",
 "district": "north-coast"
+},
+"sodic-east": {
+"lat": 30.0123,
+"lon": 31.51504,
+"source": "osm:way/217300265",
+"match": "contains",
+"name": "SODIC East",
+"district": "new-heliopolis"
 },
 "solana-east": {
 "lat": 29.97844,
@@ -1447,6 +1727,14 @@
 "name": "Tala",
 "district": "6th-of-october-city"
 },
+"tawny": {
+"lat": 29.99613,
+"lon": 31.02804,
+"source": "osm:way/1466683021",
+"match": "contains",
+"name": "Tawny",
+"district": "6th-of-october-city"
+},
 "telal-al-guezira": {
 "lat": 30.07575,
 "lon": 30.97313,
@@ -1462,6 +1750,30 @@
 "match": "name",
 "name": "Telal East",
 "district": "new-cairo"
+},
+"telal-north-coast": {
+"lat": 31.01327,
+"lon": 28.60614,
+"source": "osm:way/267187302",
+"match": "contains",
+"name": "Telal North Coast",
+"district": "sidi-abdel-rahman"
+},
+"telal-sokhna": {
+"lat": 29.39632,
+"lon": 32.54316,
+"source": "osm:way/1346422003",
+"match": "contains",
+"name": "Telal Sokhna",
+"district": "ain-sokhna"
+},
+"telal-sokhna-pre-group": {
+"lat": 29.39632,
+"lon": 32.54316,
+"source": "osm:way/1346422003",
+"match": "contains",
+"name": "Telal Sokhna (PRE Group)",
+"district": "ain-sokhna"
 },
 "the-101": {
 "lat": 30.00936,
@@ -1551,12 +1863,28 @@
 "name": "Three Sixty",
 "district": "new-cairo"
 },
+"triangle": {
+"lat": 30.06086,
+"lon": 31.6141,
+"source": "osm:way/1367258697",
+"match": "contains",
+"name": "Triangle",
+"district": "new-cairo"
+},
 "trio": {
 "lat": 30.05639,
 "lon": 31.60447,
 "source": "osm:way/1367258696",
 "match": "search",
 "name": "Trio",
+"district": "new-cairo"
+},
+"tru": {
+"lat": 30.04145,
+"lon": 31.4771,
+"source": "osm:way/252868625",
+"match": "contains",
+"name": "Tru",
 "district": "new-cairo"
 },
 "uptown-cairo": {
@@ -1566,6 +1894,14 @@
 "match": "name",
 "name": "Uptown Cairo",
 "district": "mokattam"
+},
+"venia": {
+"lat": 30.1321,
+"lon": 31.62397,
+"source": "osm:way/772964020",
+"match": "contains",
+"name": "Venia",
+"district": "new-capital-city"
 },
 "veranda-sahl-hasheesh": {
 "lat": 27.04844,
@@ -1614,6 +1950,14 @@
 "match": "search",
 "name": "VYE",
 "district": "new-zayed"
+},
+"west-elgolf": {
+"lat": 30.07695,
+"lon": 31.32869,
+"source": "osm:way/1248800960",
+"match": "contains",
+"name": "West ElGolf",
+"district": "new-cairo"
 },
 "westown-residences": {
 "lat": 30.06768,
@@ -1670,5 +2014,21 @@
 "match": "name",
 "name": "Zizinia El Mostakbal",
 "district": "mostakbal-city"
+},
+"zoya-ghazala-bay": {
+"lat": 31.03042,
+"lon": 28.59163,
+"source": "osm:way/267187322",
+"match": "contains",
+"name": "Zoya Ghazala Bay",
+"district": "north-coast"
+},
+"جيران": {
+"lat": 30.05739,
+"lon": 30.98555,
+"source": "osm:way/697782329",
+"match": "contains",
+"name": "جيران",
+"district": "october-gardens"
 }
 }

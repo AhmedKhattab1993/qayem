@@ -278,7 +278,15 @@ function SegmentTable({ caption, rows }: { caption: string; rows: [Segment, stri
   );
 }
 
-/** The guide's segments for one place: by type and size, then by delivery. */
+const FINISHING_LABELS: Record<string, string> = {
+  finished: "Finished",
+  semi_finished: "Semi-finished",
+  core_shell: "Core and shell",
+  furnished: "Furnished",
+};
+export const finishingText = (value: string) => t(FINISHING_LABELS[value] ?? value);
+
+/** The guide's segments for one place: by type and size, by delivery, and by finishing. */
 export function SegmentTables({
   segments,
   scope,
@@ -294,15 +302,20 @@ export function SegmentTables({
   const own = segments.filter((s) => s.compound === scope);
   const byClass = (a: Segment, b: Segment) => CLASS_ORDER.indexOf(a.class) - CLASS_ORDER.indexOf(b.class);
   const sizes = own
-    .filter((s) => s.delivery === "*")
+    .filter((s) => s.delivery === "*" && (s.finishing ?? "*") === "*")
     .sort((a, b) => byClass(a, b) || SIZE_ORDER(a.size) - SIZE_ORDER(b.size))
     .map((s): [Segment, string] => [s, sizeLabel(s.size)]);
-  const outside = scope === "*" ? segments.filter((s) => s.compound === "outside" && s.size === "*" && s.delivery === "*") : [];
+  const outside =
+    scope === "*" ? segments.filter((s) => s.compound === "outside" && s.size === "*" && s.delivery === "*" && (s.finishing ?? "*") === "*") : [];
   const delivery = own
-    .filter((s) => s.size === "*" && s.delivery !== "*")
+    .filter((s) => s.size === "*" && s.delivery !== "*" && (s.finishing ?? "*") === "*")
     .sort((a, b) => byClass(a, b) || ["ready", "under_2y", "later"].indexOf(a.delivery) - ["ready", "under_2y", "later"].indexOf(b.delivery))
     .map((s): [Segment, string] => [s, deliveryText(s.delivery)]);
-  if (!sizes.length && !delivery.length) return null;
+  const finishing = own
+    .filter((s) => s.size === "*" && s.delivery === "*" && (s.finishing ?? "*") !== "*")
+    .sort((a, b) => byClass(a, b) || b.count - a.count)
+    .map((s): [Segment, string] => [s, finishingText(s.finishing!)]);
+  if (!sizes.length && !delivery.length && !finishing.length) return null;
   return (
     <div className="guide-tables">
       {sizes.length > 0 && (
@@ -318,6 +331,12 @@ export function SegmentTables({
         <div>
           <h3>{t("By delivery")}</h3>
           <SegmentTable caption={t("Asking prices by delivery")} rows={delivery} />
+        </div>
+      )}
+      {finishing.length > 0 && (
+        <div>
+          <h3>{t("By finishing")}</h3>
+          <SegmentTable caption={t("Asking prices by finishing")} rows={finishing} />
         </div>
       )}
       <p className="fineprint">

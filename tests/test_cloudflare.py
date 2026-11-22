@@ -76,7 +76,7 @@ def test_publication_contains_no_phone_or_raw_payload(clients):
     _, cloud, _, export = clients
     text = export.read_text()
     assert "PRIVATE" not in text and "+201012345678" not in text and "phone_reveal_key" not in text
-    assert "description" in cloud.get("/api/units/30").json()["unit"]
+    assert "description" not in cloud.get("/api/units/30").json()["unit"]
 
 
 def test_incomplete_import_cannot_replace_the_active_catalogue(clients):

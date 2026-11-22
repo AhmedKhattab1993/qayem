@@ -122,7 +122,7 @@ def number(value: Any, low: float, high: float) -> float | None:
 
 async def log_check(g: Growth, inputs: dict, status: str) -> None:
     """One asking-price observation per distinct unit checked a day (no visitor details kept)."""
-    if g.leads is None or g.is_bot or status != "compared":
+    if g.leads is None or g.is_bot or status not in ("compared", "district_guide"):
         return
     compound = (inputs.get("compound") or {}).get("key")
     try:
@@ -132,10 +132,64 @@ async def log_check(g: Growth, inputs: dict, status: str) -> None:
             "AND ip_hash=?)<?",
             (g.now.isoformat(), g.day, "price_check", "evaluate", compound, inputs.get("district"),
              inputs.get("property_type"), inputs.get("area_m2"), inputs.get("price"),
-             fingerprint("price_check", g.day, compound, inputs.get("property_type"), inputs.get("area_m2"), inputs.get("price")),
+             fingerprint("price_check", g.day, compound or inputs.get("district"), inputs.get("property_type"),
+                         inputs.get("area_m2"), inputs.get("price")),
              g.ip_hash, g.day, g.ip_hash, OBSERVATIONS_PER_DAY))
     except Exception:
         pass  # a record of the check must never break the check
+
+
+async def compound_observations(g: Growth, compound_key: str, median_ppm: float | None = None) -> dict | None:
+    """First-party observations (price checks, quoted over, developer offers, broker sheets) for one compound,
+    with outliers removed (docs/STRATEGY.md 4.3, 5.2 C)."""
+    if g.leads is None or not compound_key:
+        return None
+    since = (g.now.date() - timedelta(days=90)).isoformat()
+    try:
+        rows = await g.leads.all(
+            "SELECT kind, area_m2, price, over, developer_price, paid_price FROM observations "
+            "WHERE status='accepted' AND day>=? AND lower(compound)=? LIMIT 500",
+            (since, compound_key.casefold()),
+        )
+    except Exception:
+        return None
+    if not rows:
+        return None
+    overs: list[float] = []
+    dev_prices: list[float] = []
+    kept = 0
+    for row in rows:
+        area, price = row.get("area_m2"), row.get("price")
+        if median_ppm and area and price and area > 0:
+            ppm = price / area
+            if not (0.3 * median_ppm <= ppm <= 3.5 * median_ppm):
+                continue
+        kept += 1
+        over = row.get("over")
+        if isinstance(over, (int, float)) and 0 <= over <= (price or 50_000_000):
+            overs.append(float(over))
+        dev = row.get("developer_price")
+        if isinstance(dev, (int, float)) and dev >= 100_000:
+            dev_prices.append(float(dev))
+    if not kept:
+        return None
+
+    def _q(values: list[float], q: float) -> float:
+        ordered = sorted(values)
+        pos = (len(ordered) - 1) * q
+        lo = int(pos)
+        hi = min(lo + 1, len(ordered) - 1)
+        return round(ordered[lo] + (ordered[hi] - ordered[lo]) * (pos - lo), -3)
+
+    return {
+        "count": kept,
+        "over_count": len(overs),
+        "median_over": _q(overs, 0.5) if len(overs) >= 3 else None,
+        "p25_over": _q(overs, 0.25) if len(overs) >= 3 else None,
+        "p75_over": _q(overs, 0.75) if len(overs) >= 3 else None,
+        "developer_offer_count": len(dev_prices),
+        "median_developer_price": _q(dev_prices, 0.5) if len(dev_prices) >= 3 else None,
+    }
 
 
 def editorial_router(resolve: Callable[[Request], Awaitable[Growth]]) -> APIRouter:

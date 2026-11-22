@@ -16,17 +16,19 @@ from .website_data import Snapshot, evaluate, peer_groups, url_key
 
 Level = Literal["", "strong", "good", "in_line", "mixed", "pricier", "check", "unrated"]
 
-def _no_photos(item: dict) -> dict:
-    """Sources' photos are never served, even from a catalogue published before they were dropped."""
+def _strip_third_party(item: dict) -> dict:
+    """Sources' photos and listing descriptions are never served, even from older catalogues."""
     if "images" in item:
         item["images"] = []
     if "photo" in item:
         item["photo"] = None
+    if "description" in item and "source_url" in item:
+        item.pop("description", None)
     return item
 
 
 def public_json(text: str):
-    return json.loads(text, object_hook=_no_photos)
+    return json.loads(text, object_hook=_strip_third_party)
 
 
 
@@ -191,14 +193,16 @@ class Store:
         return {"items": [public_json("".join(text)) for text in parts.values()], "total": total,
                 "page": page, "page_size": page_size, "pages": (total + page_size - 1) // page_size}
 
-    async def evaluation_snapshot(self, compound):
-        entry = await self.document("compound", slug(compound))
-        if entry is None:
-            wanted = compound.strip().casefold()
-            rows = await self.database.all("SELECT key FROM entities WHERE version=? AND kind='compound' "
-                                          "AND (name=? OR name_ar=?) ORDER BY position LIMIT 1",
-                                          (self.version, wanted, wanted))
-            entry = await self.document("compound", rows[0]["key"]) if rows else None
+    async def evaluation_snapshot(self, compound: str = "", district: str = ""):
+        entry = None
+        if compound.strip():
+            entry = await self.document("compound", slug(compound))
+            if entry is None:
+                wanted = compound.strip().casefold()
+                rows = await self.database.all("SELECT key FROM entities WHERE version=? AND kind='compound' "
+                                              "AND (name=? OR name_ar=?) ORDER BY position LIMIT 1",
+                                              (self.version, wanted, wanted))
+                entry = await self.document("compound", rows[0]["key"]) if rows else None
         records, launches = [], []
         if entry:
             records = await self.database.all("SELECT record FROM units WHERE version=? AND compound=? "
@@ -208,10 +212,22 @@ class Store:
                                                "ORDER BY id LIMIT 10001", (self.version, entry["key"]))
             if len(records) > 10000 or len(launches) > 10000:
                 raise Unavailable()  # guard Worker memory without silently reducing comparison evidence
+        districts = {}
+        if not entry and district.strip():
+            from . import market
+            dkey = slug(district)
+            doc = await self.document("district", dkey)
+            if doc is None:
+                resolved = market.resolve(district)
+                if resolved:
+                    doc = await self.document("district", resolved.key)
+            if doc:
+                districts[doc["key"]] = doc
+        overview = await self.document("overview") or {}
         records = [public_json(row["record"]) for row in records]
         launches = [public_json(row["record"]) for row in launches]
         return Snapshot({r["id"]: r for r in records}, records, self.today,
-                        {entry["key"]: entry} if entry else {}, {}, {}, {}, {}, {},
+                        {entry["key"]: entry} if entry else {}, {}, districts, overview, {}, {},
                         {entry["key"]: launches} if entry else {}, peer_groups(records))
 
     async def load(self, kind, key):
@@ -224,11 +240,11 @@ class Store:
                 "SELECT key FROM entities WHERE version=? AND kind=? AND units>=? ORDER BY position",
                 (self.version, kind, seo.SITEMAP_MIN_UNITS))]
         compounds, developers = await keys("compound"), await keys("developer")
+        guide_doc = await self.document("guide")
         catalog = await self.document("catalog", required=True)
-        districts = [d["key"] for d in catalog["districts"] if d["units"] >= seo.SITEMAP_MIN_UNITS]
-        units = [row["id"] for row in await self.database.all(
-            "SELECT id FROM units WHERE version=? AND is_default=1 AND level!='unrated' ORDER BY id", (self.version,))]
-        return seo.sitemap_paths(compounds, developers, districts, units)
+        districts = sorted({*(d["key"] for d in catalog["districts"] if d["units"] >= seo.SITEMAP_MIN_UNITS),
+                            *(d["key"] for d in (guide_doc or {}).get("districts", []))})
+        return seo.sitemap_paths(compounds, developers, districts)
 
     async def newest_unit_id(self) -> int:
         rows = await self.database.all("SELECT max(id) AS n FROM units WHERE version=? AND is_default=1", (self.version,))
@@ -391,12 +407,15 @@ def create_cloud_app(database=None, *, leads=_FROM_ENV, http=None, settings=None
         return result
 
     @app.get("/api/compounds/{key}")
-    async def compound(key: str, data=Depends(store)):
+    async def compound(key: str, data=Depends(store), g=Depends(growth)):
         entry = await data.document("compound", key)
         if entry is None:
             raise HTTPException(404, "We have no identified resale listings for this compound.")
+        median_ppm = ((entry.get("guide") or {}).get("headline") or {}).get("median_ppm")
+        observations = await editorial.compound_observations(g, entry["key"], median_ppm)
         return {"compound": entry, "district": await data.document("district", entry["district_key"]),
-                "developer": await data.document("developer", entry["developer"]["key"]) if entry["developer"] else None}
+                "developer": await data.document("developer", entry["developer"]["key"]) if entry["developer"] else None,
+                "observations": observations}
 
     @app.get("/api/developers")
     async def developers(q: str = Query("", max_length=200),
@@ -448,7 +467,8 @@ def create_cloud_app(database=None, *, leads=_FROM_ENV, http=None, settings=None
     async def evaluate_unit(property_type: str = Query(..., min_length=2, max_length=64),
         area: float = Query(..., ge=20, le=5_000, allow_inf_nan=False),
         price: float = Query(..., ge=100_000, le=1_000_000_000, allow_inf_nan=False),
-        compound: str = Query(..., min_length=1, max_length=200),
+        compound: str = Query("", max_length=200),
+        district: str = Query("", max_length=200),
         down_payment: float | None = Query(None, ge=0, le=1_000_000_000, allow_inf_nan=False),
         installment_years: float | None = Query(None, gt=0, le=15, allow_inf_nan=False),
         delivery: str = Query("", pattern=r"^(|ready|\d{4}(-\d{2})?)$"),
@@ -456,11 +476,11 @@ def create_cloud_app(database=None, *, leads=_FROM_ENV, http=None, settings=None
         g=Depends(growth)):
         if down_payment is not None and down_payment > price:
             raise HTTPException(422, "The down payment cannot exceed the total price.")
-        if not compound.strip():
-            raise HTTPException(422, "Choose the unit's compound.")
-        result = evaluate(await data.evaluation_snapshot(compound), property_type=property_type, area=area, price=price,
-                          compound=compound, down_payment=down_payment, installment_years=installment_years,
-                          delivery=delivery, finishing=finishing)
+        if not compound.strip() and not district.strip():
+            raise HTTPException(422, "Choose the unit's compound or district.")
+        result = evaluate(await data.evaluation_snapshot(compound, district), property_type=property_type, area=area,
+                          price=price, compound=compound, district=district, down_payment=down_payment,
+                          installment_years=installment_years, delivery=delivery, finishing=finishing)
         await editorial.log_check(g, result["inputs"], result["status"])
         return result
 

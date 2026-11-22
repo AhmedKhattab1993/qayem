@@ -1,46 +1,13 @@
 import { useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, ArrowUpRight, Banknote, BarChart3, Building2, Landmark, Link2, Map as MapIcon, PlayCircle, Scale, Users, type LucideIcon } from "lucide-react";
-import type { Guide, Overview, Page, Unit } from "../types";
+import { ArrowRight, ArrowUpRight, Banknote, BarChart3, Building2, Landmark, Link2, Map as MapIcon, PlayCircle, Scale, Users } from "lucide-react";
+import type { Guide, Overview } from "../types";
 import { classLabel, date, money, monthLabel, number, percent, periodLabel, sep, signed, tone, useApi, useCatalog, nameOf } from "../lib";
 import { ConfidenceBadge, NoSalePrices, RateNote } from "../components/Guide";
 import { t } from "../locale";
 import { ErrorState, Loading } from "../components/States";
 import { DivergingBars, ScopeNote } from "../components/Opportunity";
-import { UnitTable } from "../components/UnitTable";
 import { Explainer, explainerLength, type ExplainerHandle } from "../components/Explainer";
-
-const GROUP_SIZE = 5;
-
-/** One ranking of the best opportunities, by a single comparison. */
-function BestGroup({ id, icon: Icon, title, note, items, caption, to, more }: {
-  id: string;
-  icon: LucideIcon;
-  title: string;
-  note: string;
-  items: Unit[];
-  caption: string;
-  to: string;
-  more: string;
-}) {
-  if (!items.length) return null;
-  return (
-    <div className="best-group" role="group" aria-labelledby={id}>
-      <div className="best-group-head">
-        <h3 id={id}>
-          <Icon size={20} /> {t(title)}
-        </h3>
-        <p>{t(note)}</p>
-      </div>
-      <UnitTable items={items} caption={caption} />
-      <div className="section-foot best-group-foot">
-        <Link className="link-arrow" to={to}>
-          {t(more)} <ArrowUpRight size={16} className="flip-rtl" />
-        </Link>
-      </div>
-    </div>
-  );
-}
 
 /** The price guide's headline figures: the busiest districts, each a link to its guide, and the way into the map. */
 function GuideHeadlines() {
@@ -111,23 +78,30 @@ export default function Home({ data, error, retry }: { data: Overview | null; er
   const navigate = useNavigate();
   const explainer = useRef<ExplainerHandle>(null);
   const catalog = useCatalog();
-  // Two rankings, never one: "below the developer" and "below similar resale units" answer different questions.
-  const belowDeveloper = useApi<Page<Unit>>(`/units?sort=launch_gap&page_size=${GROUP_SIZE}`);
-  const belowPeers = useApi<Page<Unit>>(`/units?sort=peer_gap&page_size=${GROUP_SIZE}`);
-  const [compound, setCompound] = useState("");
+  const [placeQuery, setPlaceQuery] = useState("");
   const submit = (event: FormEvent) => {
     event.preventDefault();
-    const value = compound.trim();
-    const match = catalog?.compounds.find((c) =>
-      [c.name, c.name_ar].some((name) => name?.toLocaleLowerCase() === value.toLocaleLowerCase()),
+    const value = placeQuery.trim();
+    if (!value) {
+      navigate("/map");
+      return;
+    }
+    const lower = value.toLocaleLowerCase();
+    const districtMatch = catalog?.districts.find((d) => d.name.toLocaleLowerCase() === lower || d.key === lower);
+    if (districtMatch) {
+      navigate(`/districts/${encodeURIComponent(districtMatch.key)}`);
+      return;
+    }
+    const compoundMatch = catalog?.compounds.find((c) =>
+      [c.name, c.name_ar].some((name) => name?.toLocaleLowerCase() === lower),
     );
-    navigate(match ? `/evaluate?compound=${encodeURIComponent(match.name)}` : value ? `/compounds?q=${encodeURIComponent(value)}` : "/evaluate");
+    navigate(compoundMatch ? `/compounds/${encodeURIComponent(compoundMatch.key)}` : `/compounds?q=${encodeURIComponent(value)}`);
   };
   const gaps = data?.developer_gaps ?? [];
   const spread = [...gaps.slice(0, 5), ...gaps.slice(-5)].filter(
     (item, index, all) => all.findIndex((other) => other.key === item.key) === index,
   );
-  const good = data ? (data.opportunities.strong ?? 0) + (data.opportunities.good ?? 0) : 0;
+  const guideKept = data?.guide?.kept ?? data?.total_records ?? 0;
 
   return (
     <div className="home">
@@ -137,40 +111,44 @@ export default function Home({ data, error, retry }: { data: Overview | null; er
           <div className="hero-copy page-enter">
             <span className="hero-live">
               <span className="live-dot" />
-              {t("Resale opportunity index")}
+              {t("Egypt property price guide")}
               {sep()}
               {data ? t("observed {date}", { date: date(data.last_updated) }) : t("loading…")}
             </span>
             <h1 className="display">
-              {t("Is it really")}
+              {t("What does property")}
               <br />
-              <em>{t("a good deal?")}</em>
+              <em>{t("really cost in Egypt?")}</em>
             </h1>
             <p className="hero-lede">
               {t(
-                "Qayem compares every resale unit with what you could buy instead today: the developer’s own current price and the similar units listed in the same compound, both in today’s money.",
+                "Asking prices per m² across Egypt’s districts and compounds, from public listings with duplicates removed — plus a free check against the developer’s price today.",
               )}
             </p>
             <form className="hero-search" onSubmit={submit} role="search">
               <Building2 size={20} />
               <input
-                value={compound}
-                onChange={(event) => setCompound(event.target.value)}
-                placeholder={t("Which compound is the unit in?")}
-                aria-label={t("Compound")}
-                list="home-compounds"
+                value={placeQuery}
+                onChange={(event) => setPlaceQuery(event.target.value)}
+                placeholder={t("Search a district or compound")}
+                aria-label={t("District or compound")}
+                list="home-places"
                 maxLength={200}
               />
-              <datalist id="home-compounds">
-                {catalog?.compounds.map((c) => <option key={c.key} value={nameOf(c)} />)}
+              <datalist id="home-places">
+                {catalog?.districts.map((d) => <option key={`d-${d.key}`} value={d.name} />)}
+                {catalog?.compounds.map((c) => <option key={`c-${c.key}`} value={nameOf(c)} />)}
               </datalist>
               <button type="submit" className="btn btn-brass">
-                {t("Compare a unit")} <ArrowRight size={16} className="flip-rtl" />
+                {t("See prices")} <ArrowRight size={16} className="flip-rtl" />
               </button>
             </form>
             <div className="hero-alts">
               <Link className="hero-alt hero-alt-map" to="/map">
                 <MapIcon size={15} /> {t("See prices on the map")}
+              </Link>
+              <Link className="hero-alt" to="/evaluate">
+                <Scale size={15} /> {t("Check a unit price")}
               </Link>
               <Link className="hero-alt" to="/evaluate?mode=link">
                 <Link2 size={15} /> {t("Or paste a listing link")}
@@ -192,18 +170,22 @@ export default function Home({ data, error, retry }: { data: Overview | null; er
           {data && (
             <dl className="hero-stats hero-stats-2 page-enter">
               <div>
-                <dt>{t("Resale units compared")}</dt>
-                <dd className="num">{number(data.rated_count)}</dd>
-                <dd className="hero-stat-note num">{t("of {n} listed", { n: number(data.total_resale) })}</dd>
+                <dt>{t("Listings in the price guide")}</dt>
+                <dd className="num">{number(guideKept)}</dd>
+                <dd className="hero-stat-note">
+                  <Link to="/index">
+                    {t("The Qayem Index")} <ArrowRight size={13} className="flip-rtl" />
+                  </Link>
+                </dd>
               </div>
               <div>
-                <dt>{t("Strong or good opportunities")}</dt>
+                <dt>{t("Districts and compounds")}</dt>
                 <dd className="num">
-                  <Link to="/units">{number(good)}</Link>
+                  <Link to="/map">{number(data.district_count)} · {number(data.compound_count)}</Link>
                 </dd>
                 <dd className="hero-stat-note">
-                  <Link to="/units">
-                    {t("See them, best first")} <ArrowRight size={13} className="flip-rtl" />
+                  <Link to="/map">
+                    {t("Open the price map")} <ArrowRight size={13} className="flip-rtl" />
                   </Link>
                 </dd>
               </div>
@@ -223,43 +205,6 @@ export default function Home({ data, error, retry }: { data: Overview | null; er
       ) : (
         <>
           <GuideHeadlines />
-          {((belowDeveloper.data?.items.length ?? 0) > 0 || (belowPeers.data?.items.length ?? 0) > 0) && (
-            <section className="page section" aria-labelledby="best-heading">
-              <div className="section-head">
-                <div>
-                  <span className="eyebrow">{t("Best opportunities now")}</span>
-                  <h2 id="best-heading" className="display">
-                    {t("Cheaper than")} <em>{t("what you could buy instead.")}</em>
-                  </h2>
-                </div>
-                <p className="lede">
-                  {t(
-                    "Two different comparisons, ranked separately. A unit cheaper than both the developer and similar resale units is marked “Cheaper on both”.",
-                  )}
-                </p>
-              </div>
-              <BestGroup
-                id="best-developer"
-                icon={Landmark}
-                title="Cheaper than the developer today"
-                note="Below what the developer asks today for a unit of the same type, finishing and similar size in the same compound. Mostly older contracts: developer prices have risen since the seller signed."
-                items={belowDeveloper.data?.items ?? []}
-                caption="Resale units furthest below the developer’s price today"
-                to="/units?sort=launch_gap"
-                more="All units, furthest below the developer"
-              />
-              <BestGroup
-                id="best-peers"
-                icon={Users}
-                title="Cheaper than other resale units"
-                note="Below the typical price of at least four similar resale units listed in the same compound, as listed and in today’s money."
-                items={belowPeers.data?.items ?? []}
-                caption="Resale units furthest below similar units in their compound"
-                to="/units?sort=peer_gap"
-                more="All units, furthest below similar units"
-              />
-            </section>
-          )}
 
           <section className="page section" aria-labelledby="developers-heading">
             <div className="section-head">
@@ -386,7 +331,6 @@ export default function Home({ data, error, retry }: { data: Overview | null; er
               </div>
             </div>
           </section>
-
         </>
       )}
     </div>

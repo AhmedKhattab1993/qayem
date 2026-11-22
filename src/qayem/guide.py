@@ -254,19 +254,24 @@ def build(resale: list[dict], market_items: list[dict], developer: list[dict], c
         district, cls = slug(item["district"]), item["class"]
         compound = item.get("compound_key") or ""
         size, delivery = size_band(cls, item["area_m2"]), delivery_group(item)
-        groups[(district, "*", cls, "*", "*")].append(item)
+        finish = item.get("finishing_class") or "unknown"
+        groups[(district, "*", cls, "*", "*", "*")].append(item)
         if size:
-            groups[(district, "*", cls, size, "*")].append(item)
+            groups[(district, "*", cls, size, "*", "*")].append(item)
         if delivery:
-            groups[(district, "*", cls, "*", delivery)].append(item)
+            groups[(district, "*", cls, "*", delivery, "*")].append(item)
+        if finish != "unknown":
+            groups[(district, "*", cls, "*", "*", finish)].append(item)
         if compound:
-            groups[(district, compound, cls, "*", "*")].append(item)
+            groups[(district, compound, cls, "*", "*", "*")].append(item)
             if size:
-                groups[(district, compound, cls, size, "*")].append(item)
+                groups[(district, compound, cls, size, "*", "*")].append(item)
+            if finish != "unknown":
+                groups[(district, compound, cls, "*", "*", finish)].append(item)
         else:
-            groups[(district, "outside", cls, "*", "*")].append(item)
+            groups[(district, "outside", cls, "*", "*", "*")].append(item)
     segments = []
-    for (district, compound, cls, size, delivery), items in groups.items():
+    for (district, compound, cls, size, delivery, finish), items in groups.items():
         if not district:
             continue
         if compound in ("*", "outside"):
@@ -275,20 +280,23 @@ def build(resale: list[dict], market_items: list[dict], developer: list[dict], c
             dev = developer_by_compound.get((compound, cls), [])
         if size != "*":
             dev = [u for u in dev if size_band(cls, u["area_m2"]) == size]
+        if finish != "*":
+            dev = [u for u in dev if (u.get("finishing_class") or "unknown") == finish]
         figures = stats(items, dev)
         if figures is None:
             continue
         place = market.BY_KEY.get(district)
         entry = compounds.get(compound) if compound not in ("*", "outside") else None
+        key_parts = (district, compound, cls, size, delivery) if finish == "*" else (district, compound, cls, size, delivery, finish)
         segments.append({
-            "key": "/".join((district, compound, cls, size, delivery)),
+            "key": "/".join(key_parts),
             "district": district, "district_name": place.name if place else items[0]["district"],
             "district_name_ar": place.name_ar if place else None, "region": place.region if place else None,
             "compound": compound, "compound_name": entry["name"] if entry else None,
             "compound_name_ar": entry.get("name_ar") if entry else None,
-            "class": cls, "size": size, "delivery": delivery, **figures,
+            "class": cls, "size": size, "delivery": delivery, "finishing": finish, **figures,
         })
-    segments.sort(key=lambda s: (s["district"], s["compound"] != "*", s["compound"], s["class"], s["size"], s["delivery"]))
+    segments.sort(key=lambda s: (s["district"], s["compound"] != "*", s["compound"], s["class"], s["size"], s["delivery"], s["finishing"]))
     levels = Counter(s["confidence"] for s in segments)
     multi = sum(1 for s in segments if not s["single_source"])
     return {
@@ -322,7 +330,7 @@ def month_label(month: str, lang: str = "en") -> str:
 def index(guide: dict, today: date) -> dict:
     """The Qayem Index for the month of `today`: one dated figure set per district and compound."""
     month = today.strftime("%Y-%m")
-    tops = [s for s in guide["segments"] if s["size"] == "*" and s["delivery"] == "*"]
+    tops = [s for s in guide["segments"] if s["size"] == "*" and s["delivery"] == "*" and s.get("finishing", "*") == "*"]
     districts: dict[str, dict] = {}
     compounds: dict[str, dict] = {}
     for segment in tops:

@@ -269,6 +269,22 @@
   align-items: center;
   gap: 10px 14px;
 }
+.map-select {
+  display: inline-flex;
+  align-items: center;
+}
+.map-select select {
+  height: 36px;
+  padding-inline: 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line-soft);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+}
 .map-view-toggle {
   display: none;
 }

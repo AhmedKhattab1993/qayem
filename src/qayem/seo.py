@@ -357,23 +357,48 @@ def article_meta(article: dict | None, slug: str) -> Meta:
 
 # --- per-route meta --------------------------------------------------------------------
 
+def guide_table(segments: list[dict], limit: int = 24) -> str:
+    """Full structured HTML table of segment figures so crawlers and AI assistants read them without JS."""
+    if not segments:
+        return ""
+    rows = []
+    for s in segments[:limit]:
+        label = CLASS_AR.get(s["class"], s["class"])
+        if s["size"] != "*":
+            label += f" ({s['size']} م²)"
+        if s["delivery"] != "*":
+            label += f" ({DELIVERY_AR.get(s['delivery'], s['delivery'])})"
+        if s.get("finishing", "*") != "*":
+            label += f" ({s['finishing']})"
+        if s["compound"] == "outside":
+            label += " — خارج الكمبوندات"
+        gap = gap_ar(s.get("resale_vs_new"), "المطور") if s.get("resale_vs_new") is not None else "—"
+        rows.append([label, ppm_ar(s["median_ppm"]), f"{ppm_ar(s['p25_ppm'])} – {ppm_ar(s['p75_ppm'])}",
+                     gap, f"{s['count']:,}", CONFIDENCE_AR.get(s["confidence"], "")])
+    return _table(["الفئة", "متوسط سعر المتر", "النطاق (النصف الأوسط)", "الريسيل مقابل المطور", "الإعلانات", "الثقة"], rows)
+
+
 def home_meta(overview: dict | None) -> Meta:
-    title = f"{BRAND} — هل سعر الوحدة الريسيل لقطة فعلًا؟ مقارنة بسعر المطور اليوم"
-    if overview:
-        good = (overview.get("opportunities") or {}).get("strong", 0) + (overview.get("opportunities") or {}).get("good", 0)
-        description = (f"قيّم يقارن {overview['total_resale']:,} وحدة ريسيل في {overview['compound_count']} كمبوند "
-                       f"بسعر المطور اليوم وبالوحدات المماثلة المعروضة، كاش وبقيمة الأقساط اليوم. "
-                       f"{good:,} فرصة قوية أو جيدة الآن.")
+    title = f"{BRAND} — دليل أسعار العقارات في مصر: سعر المتر بالمنطقة والكمبوند والخريطة"
+    if overview and overview.get("guide"):
+        g = overview["guide"]
+        month = month_ar((g.get("period") or {}).get("end"))
+        description = (f"دليل أسعار العقارات في مصر ({month}): متوسط سعر المتر المطلوب في {overview.get('district_count', 0)} منطقة "
+                       f"و{overview.get('compound_count', 0)} كمبوند، من {g.get('kept', 0):,} إعلان بعد حذف التكرار عبر "
+                       f"{len(g.get('sources') or [])} مواقع، مع خريطة تفاعلية ومقارنة الريسيل بسعر المطور اليوم.")
+    elif overview:
+        description = (f"قيّم يقارن {overview['total_resale']:,} وحدة في {overview['compound_count']} كمبوند "
+                       f"بسعر المطور اليوم وبالوحدات المماثلة المعروضة، كاش وبقيمة الأقساط اليوم.")
     else:
-        description = "قيّم يقارن كل وحدة ريسيل في مصر بسعر المطور اليوم وبالوحدات المماثلة المعروضة، كاش وبقيمة الأقساط اليوم."
+        description = "دليل أسعار العقارات في مصر: متوسط سعر المتر المطلوب في كل منطقة وكمبوند، وخريطة الأسعار، ومقارنة الريسيل بالمطور."
     site = {"@context": "https://schema.org", "@type": "WebSite", "name": BRAND, "alternateName": "Qayem", "url": SITE + "/",
             "inLanguage": ["ar", "en"], "potentialAction": {"@type": "SearchAction",
-            "target": SITE + "/units?q={search_term_string}", "query-input": "required name=search_term_string"}}
+            "target": SITE + "/compounds?q={search_term_string}", "query-input": "required name=search_term_string"}}
     organization = {"@context": "https://schema.org", "@type": "Organization", "name": "Qayem", "url": SITE + "/",
                     "logo": SITE + "/favicon.svg", "publishingPrinciples": SITE + "/methodology",
                     "description": "دليل أسعار العقارات في مصر: أسعار المتر المطلوبة حسب المنطقة والكمبوند، من بيانات عامة مجمّعة."}
     return Meta(title, description, "/", jsonld=[site, organization],
-                body=_summary("هل هي فرصة حقيقية؟", description, links=NAV))
+                body=_summary("دليل أسعار العقارات في مصر", description, links=NAV))
 
 
 STATIC = {
@@ -454,7 +479,7 @@ def unit_meta(detail: dict | None, unit_id: str) -> Meta:
     if unit.get("developer"):
         links.append((name_ar(unit["developer"]), f"/developers/{quote(unit['developer']['key'])}"))
     links.append(("قارن وحدة أخرى", "/evaluate"))
-    return Meta(title, description, f"/units/{unit['id']}", image=image, kind="article",
+    return Meta(title, description, f"/units/{unit['id']}", image=image, kind="article", index=False,
                 jsonld=[listing, breadcrumbs(*crumbs)], body=_summary(f"{name} في {where}", description, links=links))
 
 
@@ -462,7 +487,7 @@ def compound_meta(compound: dict | None, key: str) -> Meta:
     if not compound:
         return not_found(f"/compounds/{quote(key)}")
     name, developer = name_ar(compound), name_ar(compound.get("developer"))
-    title = f"أسعار ريسيل {both_names(compound)} اليوم — مقارنة بسعر {developer or 'المطور'} | قيّم"
+    title = f"أسعار {both_names(compound)} اليوم — سعر المتر والريسيل مقابل {developer or 'المطور'} | قيّم"
     main = _primary_class(compound.get("classes") or [])
     parts = [f"{compound['units']} وحدة ريسيل في {name} ب{place_ar(compound.get('district'))}"]
     if main and main.get("median_asking_ppm"):
@@ -480,17 +505,19 @@ def compound_meta(compound: dict | None, key: str) -> Meta:
     if compound.get("district_key"):
         crumbs.append((place_ar(compound.get("district")), f"/districts/{quote(compound['district_key'])}"))
     crumbs.append((name, path))
-    links = [(f"وحدات {name}", f"/units?compound={quote(compound['key'])}"),
-             (f"قيّم وحدة في {name}", f"/evaluate?compound={quote(compound['name'])}")]
+    links = [(f"قيّم وحدة في {name}", f"/evaluate?compound={quote(compound['name'])}"),
+             ("خريطة الأسعار", "/map")]
     if compound.get("developer"):
         links.append((developer, f"/developers/{quote(compound['developer']['key'])}"))
     if compound.get("district_key"):
         links.append((place_ar(compound.get("district")), f"/districts/{quote(compound['district_key'])}"))
     jsonld = ([breadcrumbs(*crumbs), place_jsonld(name, compound["name"], path, None, description)]
               + ([faq_jsonld(faq)] if faq else []))
-    return Meta(title, description, path, jsonld=jsonld,
-                body=_summary(f"أسعار ريسيل {both_names(compound)}", description,
-                              facts=guide_rows(guide.get("segments", [])[:16]), faq=faq, links=links))
+    indexable = bool(guide.get("headline")) or (compound.get("units", 0) >= SITEMAP_MIN_UNITS)
+    body = _summary(f"أسعار {both_names(compound)}", description, faq=faq, links=links)
+    if segs := guide.get("segments"):
+        body = body.replace("</div>", guide_table(segs, 16) + "</div>", 1)
+    return Meta(title, description, path, index=indexable, jsonld=jsonld, body=body)
 
 
 def developer_meta(developer: dict | None, key: str) -> Meta:
@@ -522,17 +549,20 @@ def district_meta(district: dict | None, key: str) -> Meta:
     head = guide.get("headline")
     period_end = (guide.get("period") or {}).get("end")
     answer = answer_ar(head, name, period_end)
+    indexable = bool(head) or (district.get("units", 0) >= SITEMAP_MIN_UNITS)
+    district_segs = [s for s in guide.get("segments", []) if s["compound"] in ("*", "outside")]
     if not district.get("units"):  # figures from classifieds only: a price guide, no units to rank
         title = f"أسعار الشقق والعقارات في {name} اليوم — سعر المتر {month_ar(period_end)} | قيّم"
         description = answer or f"أسعار العقارات في {name} من الإعلانات العامة."
         path = f"/districts/{quote(district['key'])}"
-        facts = guide_rows([s for s in guide.get("segments", []) if s["compound"] in ("*", "outside")][:30])
         jsonld = [breadcrumbs(("قيّم", "/"), ("المناطق", "/districts"), (name, path)),
                   place_jsonld(name, district["name"], path, district.get("location"), description)]
-        return Meta(title, description, path, jsonld=jsonld,
-                    body=_summary(f"أسعار العقارات في {name}", description, facts=facts, links=NAV))
-    title = (f"سعر المتر في {name} اليوم ({month_ar(period_end)}) — الريسيل مقابل المطور وأفضل الفرص | قيّم" if head
-             else f"أفضل فرص الريسيل في {name} اليوم — أسعار المتر كاش وتقسيط | قيّم")
+        body = _summary(f"أسعار العقارات في {name}", description, links=NAV)
+        if district_segs:
+            body = body.replace("</div>", guide_table(district_segs, 30) + "</div>", 1)
+        return Meta(title, description, path, index=indexable, jsonld=jsonld, body=body)
+    title = (f"سعر المتر في {name} اليوم ({month_ar(period_end)}) — دليل الأسعار والريسيل مقابل المطور | قيّم" if head
+             else f"أسعار العقارات في {name} اليوم — سعر المتر كاش وتقسيط | قيّم")
     main = _primary_class(district.get("classes") or [])
     opportunities = district.get("opportunities") or {}
     good = opportunities.get("strong", 0) + opportunities.get("good", 0)
@@ -547,13 +577,14 @@ def district_meta(district: dict | None, key: str) -> Meta:
     facts = [f"{name_ar(c)}: {c['units']} وحدة" + (f"، {gap_ar(c['median_gap'], 'المطور')}" if c.get("median_gap") is not None else "")
              for c in compounds[:12]]
     links = [(name_ar(c), f"/compounds/{quote(c['key'])}") for c in compounds[:12]]
-    links.append((f"كل وحدات {name}", f"/units?district={quote(district['key'])}"))
-    facts = guide_rows([s for s in guide.get("segments", []) if s["compound"] in ("*", "outside")][:24]) + facts
+    links.append(("خريطة الأسعار", f"/map?focus={quote(district['key'])}"))
     jsonld = ([breadcrumbs(("قيّم", "/"), ("المناطق", "/districts"), (name, path)),
                place_jsonld(name, district["name"], path, district.get("location"), description)]
               + ([faq_jsonld(faq)] if faq else []))
-    return Meta(title, description, path, jsonld=jsonld,
-                body=_summary(f"فرص الريسيل في {name}", description, facts=facts, faq=faq, links=links))
+    body = _summary(f"أسعار العقارات في {name}", description, facts=facts, faq=faq, links=links)
+    if district_segs:
+        body = body.replace("</div>", guide_table(district_segs, 24) + "</div>", 1)
+    return Meta(title, description, path, index=indexable, jsonld=jsonld, body=body)
 
 
 def not_found(path: str) -> Meta:
@@ -664,7 +695,8 @@ def query_dict(query: str) -> dict[str, str]:
 
 # --- sitemap and robots ----------------------------------------------------------------
 
-SECTIONS = ("/", "/evaluate", "/units", "/compounds", "/developers", "/districts", "/methodology")
+SECTIONS = ("/", "/map", "/index", "/districts", "/compounds", "/developers", "/articles",
+            "/evaluate", "/deal-check", "/methodology", "/terms", "/corrections", "/privacy")
 
 
 def sitemap_xml(paths: list[str], lastmod: date | str | None) -> str:
@@ -674,16 +706,19 @@ def sitemap_xml(paths: list[str], lastmod: date | str | None) -> str:
             f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{rows}</urlset>\n')
 
 
-def sitemap_paths(compounds: list[str], developers: list[str], districts: list[str], units: list[int]) -> list[str]:
+def sitemap_paths(compounds: list[str], developers: list[str], districts: list[str], units: list[int] = ()) -> list[str]:
+    """Guide, index, district, compound and developer pages (individual unit pages fade out of search)."""
     return [*SECTIONS, *(f"/districts/{quote(k)}" for k in districts), *(f"/compounds/{quote(k)}" for k in compounds),
-            *(f"/developers/{quote(k)}" for k in developers), *(f"/units/{i}" for i in units)]
+            *(f"/developers/{quote(k)}" for k in developers)]
 
 
 def robots_txt(staging: bool = False) -> str:
     if staging:
         return "User-agent: *\nDisallow: /\n"
     # /api stays crawlable: search engines render the app, which reads it.
-    return ("User-agent: *\nAllow: /\nDisallow: /compare\nDisallow: /watchlist\nDisallow: /sheet/\n\n"
+    ai = "\n".join(f"User-agent: {bot}\nAllow: /\n"
+                   for bot in ("OAI-SearchBot", "GPTBot", "ClaudeBot", "PerplexityBot", "Google-Extended"))
+    return (f"{ai}\nUser-agent: *\nAllow: /\nDisallow: /compare\nDisallow: /watchlist\nDisallow: /sheet/\n\n"
             f"Sitemap: {SITE}/sitemap.xml\n")
 
 

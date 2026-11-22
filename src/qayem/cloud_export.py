@@ -4,7 +4,6 @@ from __future__ import annotations
 from datetime import datetime, timezone
 import json
 from pathlib import Path
-import sqlite3
 from uuid import uuid4
 
 from .valuation import slug
@@ -96,11 +95,6 @@ def export_sql(database: Path, output: Path, *, sources=None, version: str | Non
             entity_count += 1
         rank = {r["id"]: i for i, r in enumerate(sorted(snapshot.records.values(), key=opportunity_key))}
         default = {r["id"] for r in snapshot.default}
-        # One connection for every sanitized description; no N+1 connections during export.
-        with sqlite3.connect(f"file:{database.resolve()}?mode=ro", uri=True) as connection:
-            from .website_data import clean_text
-            descriptions = {i: clean_text(text, 10_000) for i, text in connection.execute(
-                "SELECT id,description FROM properties") if i in snapshot.records}
         for record in snapshot.records.values():
             compound, developer = record["compound"], record["developer"]
             search = " ".join(str(v or "") for v in [record["title"], record["district"], record["compound_name"],
@@ -115,7 +109,7 @@ def export_sql(database: Path, output: Path, *, sources=None, version: str | Non
                 int(bool(launch and launch["same_finishing"])), peers["gap"] if peers else None,
                 cash / record["area_m2"] if cash else None, url_key(record["source_url"]),
                 encoded(public_unit(record)), encoded(record)])
-            unit_detail = detail(snapshot, record, descriptions.get(record["id"]))
+            unit_detail = detail(snapshot, record)
             # Store comparable IDs, rather than duplicating their photos and public fields
             # across thousands of detail rows. The API joins the same immutable version.
             unit_detail["comparables"] = [{"id": item["id"], "cash_ppm": item["cash_ppm"]}

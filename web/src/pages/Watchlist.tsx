@@ -9,7 +9,6 @@ import { pinnedName, pinnedPath, usePinned } from "../entities";
 import { LevelBadge } from "../components/Opportunity";
 import { NameList } from "../components/Names";
 import { termsLabel } from "../components/UnitTable";
-import { Thumb } from "../components/Gallery";
 import type { Overview, Page, Unit } from "../types";
 import { EmptyState } from "../components/States";
 import { AlertSignup } from "../components/Capture";
@@ -126,13 +125,9 @@ export default function Watchlist(_props: { overview: Overview | null }) {
               const path = pinnedPath(item);
               return (
                 <li key={`${item.kind}-${item.key}`}>
-                  {item.kind === "unit" && entry.status === "ready" && entry.kind === "unit" ? (
-                    <Thumb url={entry.data.unit.photo} />
-                  ) : (
-                    <span className="watch-icon">
-                      {item.kind === "compound" ? <Building2 size={18} /> : item.kind === "unit" ? <Home size={18} /> : <Landmark size={18} />}
-                    </span>
-                  )}
+                  <span className="watch-icon">
+                    {item.kind === "compound" ? <Building2 size={18} /> : item.kind === "unit" ? <Home size={18} /> : <Landmark size={18} />}
+                  </span>
                   <div className="watch-body">
                     <Link to={path} dir="auto">
                       <strong>{pinnedName(item, entry)}</strong>

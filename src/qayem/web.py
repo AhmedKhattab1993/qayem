@@ -193,7 +193,7 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
         record = snapshot.records.get(unit_id)
         if record is None:
             raise HTTPException(404, "This unit is unavailable or does not meet the published inclusion rules.")
-        return detail(snapshot, record, catalog.description(unit_id))
+        return detail(snapshot, record)
 
     @app.get("/api/compounds")
     def compounds(
@@ -220,13 +220,16 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
         return result
 
     @app.get("/api/compounds/{key}")
-    def compound_detail(key: str) -> dict:
+    async def compound_detail(key: str, request: Request) -> dict:
         snapshot = catalog.snapshot()
         compound = snapshot.compounds.get(key)
         if compound is None:
             raise HTTPException(404, "We have no identified resale listings for this compound.")
+        median_ppm = ((compound.get("guide") or {}).get("headline") or {}).get("median_ppm")
+        observations = await editorial.compound_observations(await growth(request), compound["key"], median_ppm)
         return {"compound": compound, "district": snapshot.districts.get(compound["district_key"]),
-                "developer": snapshot.developers.get(compound["developer"]["key"]) if compound["developer"] else None}
+                "developer": snapshot.developers.get(compound["developer"]["key"]) if compound["developer"] else None,
+                "observations": observations}
 
     @app.get("/api/developers")
     def developers(
@@ -296,7 +299,8 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
         property_type: str = Query(..., min_length=2, max_length=64),
         area: float = Query(..., ge=20, le=5_000, allow_inf_nan=False),
         price: float = Query(..., ge=100_000, le=1_000_000_000, allow_inf_nan=False),
-        compound: str = Query(..., min_length=1, max_length=200),
+        compound: str = Query("", max_length=200),
+        district: str = Query("", max_length=200),
         down_payment: float | None = Query(None, ge=0, le=1_000_000_000, allow_inf_nan=False),
         installment_years: float | None = Query(None, gt=0, le=15, allow_inf_nan=False),
         delivery: str = Query("", pattern=r"^(|ready|\d{4}(-\d{2})?)$"),
@@ -304,11 +308,11 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
     ) -> dict:
         if down_payment is not None and down_payment > price:
             raise HTTPException(422, "The down payment cannot exceed the total price.")
-        if not compound.strip():
-            raise HTTPException(422, "Choose the unit's compound.")
+        if not compound.strip() and not district.strip():
+            raise HTTPException(422, "Choose the unit's compound or district.")
         result = evaluate(catalog.snapshot(), property_type=property_type, area=area, price=price,
-                          compound=compound, down_payment=down_payment, installment_years=installment_years,
-                          delivery=delivery, finishing=finishing)
+                          compound=compound, district=district, down_payment=down_payment,
+                          installment_years=installment_years, delivery=delivery, finishing=finishing)
         await editorial.log_check(await growth(request), result["inputs"], result["status"])
         return result
 
@@ -348,11 +352,12 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
     async def sitemap() -> Response:
         snapshot = catalog.snapshot()
         minimum = seo.SITEMAP_MIN_UNITS
+        districts = sorted({*(d["key"] for d in snapshot.catalog["districts"] if d["units"] >= minimum),
+                            *(k for k, d in snapshot.districts.items() if (d.get("guide") or {}).get("headline"))})
         paths = seo.sitemap_paths(
             [k for k, c in snapshot.compounds.items() if c["units"] >= minimum],
             [k for k, d in snapshot.developers.items() if d["units"] >= minimum],
-            [d["key"] for d in snapshot.catalog["districts"] if d["units"] >= minimum],
-            sorted(r["id"] for r in snapshot.default if r["opportunity"]["level"] != "unrated"))
+            districts)
         paths += seo.guide_paths(snapshot.overview.get("index_months") or [])
         paths += [p for p, _ in await editorial.article_paths(Growth(leads, public, config, None))]
         return Response(seo.sitemap_xml(paths, snapshot.today), media_type="application/xml")

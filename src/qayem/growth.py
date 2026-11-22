@@ -502,6 +502,11 @@ async def funnel_report(db: Database, since: str) -> dict:
         "sources": await top("SELECT coalesce(utm_source, referrer, 'direct') AS source, "
                              "count(DISTINCT coalesce(visitor, ip_hash)) AS visitors FROM events WHERE day>=? AND is_bot=0 "
                              "AND event_type='pageview' GROUP BY source ORDER BY visitors DESC LIMIT 20"),
+        "ai_referrals": await top(
+            "SELECT referrer AS source, count(DISTINCT coalesce(visitor, ip_hash)) AS visitors, count(*) AS pageviews "
+            "FROM events WHERE day>=? AND is_bot=0 AND event_type='pageview' AND referrer IN "
+            "('chatgpt.com','chat.openai.com','perplexity.ai','gemini.google.com','copilot.microsoft.com','claude.ai') "
+            "GROUP BY referrer ORDER BY visitors DESC"),
         "countries": await top("SELECT coalesce(country,'??') AS country, count(DISTINCT coalesce(visitor, ip_hash)) AS visitors "
                                "FROM events WHERE day>=? AND is_bot=0 AND event_type='pageview' GROUP BY country "
                                "ORDER BY visitors DESC LIMIT 20"),

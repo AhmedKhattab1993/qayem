@@ -15,7 +15,7 @@ interface Bindings {
   QAYEM_SOURCES: string;
   QAYEM_BENCHMARK_SOURCES: string;
 }
-interface Params {run_id?: string}
+interface Params {run_id?: string; skip_crawl?: boolean}
 
 export class UpdateContainer extends Container<Bindings> {
   defaultPort = 8080;
@@ -32,7 +32,7 @@ export class UpdateContainer extends Container<Bindings> {
     return job;
   }
 
-  async begin(runId: string): Promise<Job> {
+  async begin(runId: string, skipCrawl = false): Promise<Job> {
     assertRunId(runId);
     const current = await this.ctx.storage.get<Job>("job");
     if (current && containerStopped(current, Boolean(this.ctx.container?.running))) {
@@ -54,7 +54,8 @@ export class UpdateContainer extends Container<Bindings> {
       if (this.ctx.container?.running) await this.destroy();
     }
     const response = await this.containerFetch("http://container/run", {
-      method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({run_id: runId}),
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({run_id: runId, skip_crawl: skipCrawl}),
     });
     if (!response.ok) {
       let detail = await response.text();
@@ -193,7 +194,8 @@ export class NightlyUpdate extends WorkflowEntrypoint<Bindings, Params> {
     const startRetry = {retries: {limit: 12, delay: "30 seconds", backoff: "constant"}, timeout: "5 minutes"} as const;
     try {
       // A newly deployed image can take several minutes to become available.
-      const initial = await step.do<Job>("restore and start pipeline", startRetry, () => updater.begin(runId));
+      const initial = await step.do<Job>("restore and start pipeline", startRetry,
+        () => updater.begin(runId, Boolean(event.payload?.skip_crawl)));
       if (initial.status === "skipped") return initial;
       for (let minute = 0; minute < 450; minute++) {
         const status = await step.do<Job | null>(`check pipeline ${minute}`, retry, () => updater.status(runId));
@@ -223,9 +225,10 @@ export default {
       return Response.json(await env.UPDATER.getByName("nightly").status());
     }
     if (path === "/run" && request.method === "POST") {
+      const payload = await request.json<{skip_crawl?: boolean}>().catch(() => ({}));
       const runId = `manual-${crypto.randomUUID()}`;
-      const instance = await env.UPDATES.create({id: runId, params: {run_id: runId}});
-      return Response.json({run_id: instance.id}, {status: 202});
+      const instance = await env.UPDATES.create({id: runId, params: {run_id: runId, skip_crawl: Boolean(payload?.skip_crawl)}});
+      return Response.json({run_id: instance.id, skip_crawl: Boolean(payload?.skip_crawl)}, {status: 202});
     }
     if (path === "/stop" && request.method === "POST") {
       const updater = env.UPDATER.getByName("nightly");

@@ -13,8 +13,12 @@ package.mkdir(parents=True, exist_ok=True)
 (package / "__init__.py").write_text("")
 for name in ("valuation.py", "website_data.py", "web_common.py", "cloud_web.py", "cloud_media.py",
              "seo.py", "growth.py", "alerts.py", "market.py", "guide.py", "ledger.py", "guide_api.py",
-             "editorial.py"):
+             "editorial.py", "official.py"):
     shutil.copyfile(root.parent / "src" / "qayem" / name, package / name)
+data_dir = package / "data"
+data_dir.mkdir(exist_ok=True)
+for name in ("fee_schedules.json",):
+    shutil.copyfile(root.parent / "src" / "qayem" / "data" / name, data_dir / name)
 films = {name: {"size": path.stat().st_size, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
          for name in ("explainer-v4-720.mp4", "explainer-v4-1080.mp4")
          for path in [args.assets_dir / "media" / name]}

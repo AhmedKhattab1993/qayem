@@ -140,10 +140,11 @@ class Bridge:
 
 
 class Pipeline:
-    def __init__(self, run_id: str, *, bridge=None, database=None):
+    def __init__(self, run_id: str, *, bridge=None, database=None, skip_crawl: bool = False):
         if not RUN_ID.fullmatch(run_id):
             raise ValueError("Invalid run ID")
         self.run_id = run_id
+        self.skip_crawl = skip_crawl
         self.bridge = bridge or Bridge()
         self.database = database or db_path()
         self.directory = self.database.parent / "runs" / run_id
@@ -237,17 +238,18 @@ class Pipeline:
             configure_pi()
             thread = threading.Thread(target=self.checkpoint_loop, daemon=True)
             thread.start()
-            if self.command("crawl", ["crawl"], 4 * 3600):
-                raise RuntimeError("Crawler failed")
-            # AqarExit refetches only changed pages; parser fixes reach stored units here (no fetching).
-            self.command("renormalize", ["renormalize", "aqarexit"], 10 * 60)
-            # Personal data never stays in the canonical database (idempotent; cleans older checkpoints' rows).
-            self.command("scrub", ["scrub-personal"], 15 * 60)
-            self.command("entities", ["resolve-entities", "--workers", "4", "--max-minutes", "30"], 45 * 60)
-            required = sorted(required_sources() or [])
-            if self.command("health", ["health", "--write", str(self.directory / "health.json"),
-                                       *[arg for name in required for arg in ("--require", name)]], 120):
-                raise RuntimeError("Source health needs attention; previous catalogue retained")
+            if not self.skip_crawl:
+                if self.command("crawl", ["crawl"], 4 * 3600):
+                    raise RuntimeError("Crawler failed")
+                # AqarExit refetches only changed pages; parser fixes reach stored units here (no fetching).
+                self.command("renormalize", ["renormalize", "aqarexit"], 10 * 60)
+                # Personal data never stays in the canonical database (idempotent; cleans older checkpoints' rows).
+                self.command("scrub", ["scrub-personal"], 15 * 60)
+                self.command("entities", ["resolve-entities", "--workers", "4", "--max-minutes", "30"], 45 * 60)
+                required = sorted(required_sources() or [])
+                if self.command("health", ["health", "--write", str(self.directory / "health.json"),
+                                           *[arg for name in required for arg in ("--require", name)]], 120):
+                    raise RuntimeError("Source health needs attention; previous catalogue retained")
             # The CBE's rates of the day (a failure keeps yesterday's; the site shows their date), then this
             # month's Qayem Index and today's segment figures from the sources fit to publish.
             fit = self.publish_sources()
@@ -344,7 +346,9 @@ def serve():
             if not 0 < length < 4096:
                 return self.respond(400, {"error": "invalid request"})
             try:
-                run_id = json.loads(self.rfile.read(length))["run_id"]
+                body = json.loads(self.rfile.read(length))
+                run_id = body["run_id"]
+                skip_crawl = bool(body.get("skip_crawl"))
                 if not isinstance(run_id, str) or not RUN_ID.fullmatch(run_id):
                     raise ValueError()
             except (ValueError, KeyError, TypeError):
@@ -352,7 +356,7 @@ def serve():
             with lock:
                 if pipeline:
                     return self.respond(200 if pipeline.run_id == run_id else 409, pipeline.status)
-                pipeline = Pipeline(run_id)
+                pipeline = Pipeline(run_id, skip_crawl=skip_crawl)
                 threading.Thread(target=pipeline.run, daemon=True).start()
                 self.respond(202, pipeline.status)
 

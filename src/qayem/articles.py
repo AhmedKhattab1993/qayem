@@ -117,6 +117,13 @@ def triggers(data: dict, recent: list[dict], today: date) -> list[Trigger]:
             out.append(Trigger("developer_prices", f"developer:{developer['key']}:{today:%Y-%m}", 3,
                                {"key": developer["key"]}))
     month = today.strftime("%Y-%m")
+    for gap in data.get("search_gaps") or []:
+        level, key = gap.get("level"), gap.get("key")
+        query = (gap.get("query") or "").strip()
+        if level in ("district", "compound") and key and query:
+            out.append(Trigger("search_gap", f"search:{level}:{key}:{month}", 3,
+                               {"level": level, "key": key, "query": query,
+                                "count": int(gap.get("impressions") or 0)}))
     for compound in data.get("compounds", []):
         head = (compound.get("guide") or {}).get("headline")
         if head and head["count"] >= MIN_HEADLINE_COUNT and head["confidence"] != "indicative":
@@ -443,8 +450,20 @@ def report_pack(trigger: Trigger, data: dict, site: Site) -> Pack | None:
                 {"source": "the developer's own published results", "urls_not_to_cite": True})
 
 
+def search_gap_pack(trigger: Trigger, data: dict, site: Site) -> Pack | None:
+    """Data pack for a Search Console query with impressions and no matching page (docs/STRATEGY.md 8.2)."""
+    pack = guide_pack(trigger, data, site)
+    if pack is None:
+        return None
+    query = trigger.subject.get("query") or ""
+    if query:
+        pack.title_hint = f"{query} — {pack.title_hint}"
+        pack.context = {**pack.context, "search_query": query}
+    return pack
+
+
 PACKS: dict[str, Callable[[Trigger, dict, Site], Pack | None]] = {
-    "developer_report": report_pack,
+    "developer_report": report_pack, "search_gap": search_gap_pack,
     "guide": guide_pack, "index": index_pack, "move": move_pack, "developer_prices": developer_pack, "rates": rates_pack}
 
 
@@ -714,6 +733,49 @@ def publish(site: Site, pack: Pack, drafts: dict, today: date) -> dict:
 Drafter = Callable[[str], dict]
 
 
+def share_card(pack: Pack, drafts: dict, slug: str, today: date, folder: Path | None) -> dict | None:
+    """Write one 1080×1350 Arabic chart card + tracked social link after publishing (docs/STRATEGY.md 8.4)."""
+    from .content import COLORS, Story, card_svg, find_chrome, tracked
+
+    ar = drafts.get("ar") or {}
+    bars: list[tuple[str, float, str, str]] = []
+    for table in pack.tables:
+        for row in table.get("rows", [])[:5]:
+            if len(row) >= 3 and isinstance(row[2], (int, float)) and row[2] > 0:
+                label = str(row[1] or row[0])
+                bars.append((label, float(row[2]), f"{round(row[2]):,} ج/م²", COLORS["nile"]))
+    if not bars:
+        for fig in pack.figures:
+            if isinstance(fig.value, (int, float)) and fig.value > 0 and fig.unit in ("egp_per_m2", "egp"):
+                shown = f"{round(fig.value):,} ج/م²" if fig.unit == "egp_per_m2" else f"{round(fig.value / 1_000_000, 1)} م"
+                bars.append((fig.label[:24], float(fig.value), shown, COLORS["brass"] if fig.new else COLORS["nile"]))
+            if len(bars) >= 4:
+                break
+    article_path = f"/articles/{slug}"
+    social_url = tracked(article_path, f"article-{slug[:40]}")
+    story = Story(slug=slug, title=ar.get("title") or pack.title_hint, hook=ar.get("summary") or ar.get("title") or "",
+                  body=[], path=article_path, bars=bars, chart_title="قيّم — مؤشر أسعار العقارات في مصر")
+    svg_text = card_svg(story, f"{today.isoformat()} · qayem.ai")
+    if folder is None:
+        return {"social_url": social_url, "svg_bytes": len(svg_text.encode("utf-8"))}
+    cards = folder / today.isoformat() / "cards"
+    cards.mkdir(parents=True, exist_ok=True)
+    svg = cards / f"{slug}.svg"
+    svg.write_text(svg_text, encoding="utf-8")
+    image = svg.name
+    if chrome := find_chrome():
+        png = svg.with_suffix(".png")
+        try:
+            subprocess.run([chrome, "--headless=new", "--disable-gpu", "--hide-scrollbars", "--window-size=1080,1350",
+                            f"--screenshot={png}", svg.resolve().as_uri()], check=False,
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=45)
+            if png.exists():
+                image = png.name
+        except (OSError, subprocess.SubprocessError):
+            pass
+    return {"social_url": social_url, "card": str(cards / image)}
+
+
 def run(site: Site, *, drafter: Drafter = agy_draft, today: date | None = None, log_dir: Path | None = None,
         dry_run: bool = False, limit: int = 1) -> list[dict]:
     """One pass: publish up to `limit` article pairs, within the weekly cap. Returns what happened."""
@@ -727,6 +789,12 @@ def run(site: Site, *, drafter: Drafter = agy_draft, today: date | None = None, 
             "compounds": site.get("/api/compounds?sort=units&page_size=40")["items"],
             "developers": site.get("/api/developers?sort=units&page_size=30")["items"]}
     data["districts"] = data["guide"].get("districts", [])
+    gaps_file = (log_dir / "search-gaps.json") if log_dir else None
+    if gaps_file and gaps_file.is_file():
+        try:
+            data["search_gaps"] = json.loads(gaps_file.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            data["search_gaps"] = []
     outcomes = []
     budget = min(limit, WEEKLY_CAP - len(this_week))
     attempts = 0
@@ -758,7 +826,9 @@ def run(site: Site, *, drafter: Drafter = agy_draft, today: date | None = None, 
         elif dry_run:
             outcome.update(status="passed", title=drafts["ar"]["title"])
         else:
-            outcome.update(status="published", result=publish(site, pack, drafts, today), title=drafts["ar"]["title"])
+            published = publish(site, pack, drafts, today)
+            card = share_card(pack, drafts, slug_for(pack, today), today, log_dir)
+            outcome.update(status="published", result=published, title=drafts["ar"]["title"], share_card=card)
         outcomes.append(outcome)
         _log(log_dir, today, trigger, pack, drafts, outcome)
         if outcome["status"] in ("published", "passed"):

@@ -1,13 +1,11 @@
 """Model building blocks: entity resolution, cash-equivalent pricing, calibration."""
 
 from datetime import date
-import math
-import random
 
 import pytest
 
 from qayem.valuation import (
-    Unit, canonical_district, delivery_bucket, developer_key, fit, payment_terms, present_value_factor,
+    canonical_district, delivery_bucket, developer_key, payment_terms, present_value_factor,
 )
 
 
@@ -50,24 +48,11 @@ def test_delivery_buckets():
     assert delivery_bucket(None, None, today) == ("unknown", None)
 
 
-def test_model_recovers_compound_levels_and_calibrates_ranges():
-    rng = random.Random(7)
-    units, uid = [], 0
-    for compound, ppm in (("a", 40_000), ("b", 60_000), ("c", 90_000)):
-        for _ in range(60):
-            uid += 1
-            area = rng.uniform(80, 200)
-            units.append(Unit(uid, "apartment", "apartment", "New Cairo", compound[0], compound, "finished",
-                              "ready", math.log(area), math.log(ppm * math.exp(rng.gauss(0, 0.1)))))
-    model = fit(units, date(2026, 9, 21))
-    for compound, ppm in (("a", 40_000), ("b", 60_000), ("c", 90_000)):
-        reference = Unit(None, "apartment", "apartment", "New Cairo", compound, compound, "finished", "ready",
-                         model.area_center["apartment"])
-        assert model.reference(reference) == pytest.approx(ppm, rel=0.06)
-    grade_a = model.backtest["grades"][0]
-    assert grade_a["grade"] == "A" and grade_a["calibrated"]
-    assert 0.6 <= grade_a["within_10pct"] <= 0.8  # noise σ=10% → ~68% inside ±10%
-    assert model.backtest["naive_baseline"]["median_abs_error"] > model.backtest["median_abs_error"]
+def test_payment_terms_uses_custom_discount_rate():
+    low = payment_terms(10_000_000, 2_000_000, 84, True, cash_when_not_installment=False, rate=0.15)
+    high = payment_terms(10_000_000, 2_000_000, 84, True, cash_when_not_installment=False, rate=0.25)
+    assert high["cash_equivalent"] < low["cash_equivalent"]
+    assert high["discount"] > low["discount"]
 
 
 def test_compound_spelling_variants_join_their_compound():

@@ -1,4 +1,13 @@
 [
-  {"developer": "palmhills", "url": "https://www.palmhillsdevelopments.com/en/projects", "wait": 20},
-  {"developer": "madinetmasr", "url": "https://www.madinetmasr.com/en/", "wait": 20}
+  {"developer": "palmhills", "url": "https://www.palmhillsdevelopments.com/en/projects", "wait": 20, "kind": "projects"},
+  {"developer": "madinetmasr", "url": "https://www.madinetmasr.com/en/", "wait": 20, "kind": "projects"},
+  {"developer": "tmg", "url": "https://talaatmoustafa.com/projects/", "wait": 20, "kind": "projects"},
+  {"developer": "sodic", "url": "https://www.sodic.com/developments", "wait": 20, "kind": "projects"},
+  {"developer": "ora", "url": "https://oradevelopers.com/egypt/", "wait": 20, "kind": "projects"},
+  {"developer": "hassanallam", "url": "https://www.hap.com.eg/projects", "wait": 20, "kind": "projects"},
+  {"developer": "tatweer", "url": "https://tatweermisr.com/projects/", "wait": 20, "kind": "projects"},
+  {"developer": "mountainview", "url": "https://mountainviewegypt.com/projects", "wait": 20, "kind": "projects"},
+  {"developer": "hydepark", "url": "https://hydeparkdevelopments.com/projects", "wait": 20, "kind": "projects"},
+  {"developer": "alahlysabbour", "url": "https://www.alahlysabbour.com/projects", "wait": 20, "kind": "projects"},
+  {"developer": "realestate_gov_eg", "url": "https://realestate.gov.eg/", "wait": 20, "kind": "terms_check"}
 ]

@@ -105,9 +105,29 @@ const points = (features: MapFeature[], kind: MapFeature["kind"], outlines: Coll
   };
 };
 
+export interface MapHexFeature {
+  id: string;
+  colour: string;
+  count: number;
+  median_ppm: number;
+  ring: [number, number][];
+}
+
+function hexShapes(hexes: MapHexFeature[]): Collection {
+  return {
+    type: "FeatureCollection",
+    features: hexes.map((h) => ({
+      type: "Feature",
+      geometry: { type: "Polygon", coordinates: [h.ring] },
+      properties: { id: h.id, colour: h.colour, count: h.count, median_ppm: h.median_ppm },
+    })),
+  };
+}
+
 export default function MapCanvas({
   features,
   outlines,
+  hexes = [],
   language,
   selected,
   focus,
@@ -117,6 +137,7 @@ export default function MapCanvas({
 }: {
   features: MapFeature[];
   outlines: Collection | null;
+  hexes?: MapHexFeature[];
   language: "ar" | "en";
   selected: string | null;
   focus: string | null;
@@ -127,8 +148,8 @@ export default function MapCanvas({
   const box = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const ready = useRef(false);
-  const latest = useRef({ features, outlines, onSelect, onError });
-  latest.current = { features, outlines, onSelect, onError };
+  const latest = useRef({ features, outlines, hexes, onSelect, onError });
+  latest.current = { features, outlines, hexes, onSelect, onError };
 
   useEffect(() => {
     if (!box.current) return;
@@ -168,8 +189,9 @@ export default function MapCanvas({
       }
     });
     instance.on("load", () => {
-      const { features: current, outlines: shapes } = latest.current;
+      const { features: current, outlines: shapes, hexes: cells } = latest.current;
       instance.addSource("districts", { type: "geojson", data: districtShapes(shapes, current) });
+      instance.addSource("hexes", { type: "geojson", data: hexShapes(cells) });
       instance.addSource("district-points", { type: "geojson", data: points(current, "district", shapes) });
       instance.addSource("compounds", { type: "geojson", data: points(current, "compound") });
       instance.addLayer({
@@ -177,6 +199,20 @@ export default function MapCanvas({
         type: "fill",
         source: "districts",
         paint: { "fill-color": ["get", "colour"], "fill-opacity": 0.62 },
+      });
+      instance.addLayer({
+        id: "hex-fill",
+        type: "fill",
+        source: "hexes",
+        minzoom: 9,
+        paint: { "fill-color": ["get", "colour"], "fill-opacity": 0.58 },
+      });
+      instance.addLayer({
+        id: "hex-line",
+        type: "line",
+        source: "hexes",
+        minzoom: 9,
+        paint: { "line-color": "#fbf8f1", "line-opacity": 0.65, "line-width": 1 },
       });
       instance.addLayer({
         id: "district-line",
@@ -268,12 +304,13 @@ export default function MapCanvas({
     if (!instance) return;
     const apply = () => {
       (instance.getSource("districts") as GeoJSONSource | undefined)?.setData(districtShapes(outlines, features));
+      (instance.getSource("hexes") as GeoJSONSource | undefined)?.setData(hexShapes(hexes));
       (instance.getSource("district-points") as GeoJSONSource | undefined)?.setData(points(features, "district", outlines));
       (instance.getSource("compounds") as GeoJSONSource | undefined)?.setData(points(features, "compound"));
     };
     if (ready.current) apply();
     else instance.once("qayem:data", apply);
-  }, [features, outlines]);
+  }, [features, outlines, hexes]);
 
   useEffect(() => {
     const instance = map.current;

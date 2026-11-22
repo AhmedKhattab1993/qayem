@@ -114,8 +114,8 @@ export interface Unit {
   price_change?: PriceChange | null;
 }
 export interface UnitFull extends Unit {
-  /** Every photo the source published, in its order. */
-  images: string[];
+  /** Legacy field; always empty as third-party photos are never served. */
+  images?: string[];
   bathrooms: number | null;
   finishing: string | null;
   installments: boolean | null;
@@ -125,7 +125,6 @@ export interface UnitFull extends Unit {
   last_seen_at: string | null;
   first_seen_at?: string | null;
   unknowns: string[];
-  description: string | null;
 }
 export interface Comparable extends Unit {
   cash_ppm: number;
@@ -183,6 +182,15 @@ export interface Launch {
   median_gap: number | null;
   median_since_contract: number | null;
 }
+export interface ComparableCompound {
+  key: string;
+  name: string;
+  name_ar: string | null;
+  units: number;
+  median_ppm: number;
+  class: PropertyClass;
+  developer: Ref | null;
+}
 export interface Compound extends Profile {
   launch: Launch | null;
   key: string;
@@ -198,6 +206,7 @@ export interface Compound extends Profile {
   types: Record<string, number>;
   history?: History;
   guide?: EntityGuide | null;
+  comparable_compounds?: ComparableCompound[];
 }
 export interface Developer extends Profile {
   launch: Launch | null;
@@ -244,10 +253,34 @@ export interface District extends Profile {
   }[];
   history?: History;
 }
+export interface CompoundObservations {
+  count: number;
+  over_count: number;
+  median_over: number | null;
+  p25_over: number | null;
+  p75_over: number | null;
+  developer_offer_count: number;
+  median_developer_price: number | null;
+}
 export interface CompoundDetail {
   compound: Compound;
   district: District | null;
   developer: Developer | null;
+  observations?: CompoundObservations | null;
+}
+export interface FeeScheduleItem {
+  key: string;
+  label: string;
+  label_ar: string;
+  value: string;
+  value_ar: string;
+  note: string;
+  note_ar: string;
+}
+export interface FeeSchedule {
+  year: number;
+  source: string;
+  items: FeeScheduleItem[];
 }
 export interface Overview {
   total_records: number;
@@ -297,6 +330,8 @@ export interface Overview {
   guide?: GuideCounts | null;
   /** Months with a published Qayem Index, newest first. */
   index_months?: string[];
+  /** Statutory Egyptian property fee schedules (Law 9/2022 & market norms). */
+  fee_schedules?: FeeSchedule | null;
 }
 export interface Catalog {
   districts: { key: string; name: string; units: number }[];
@@ -312,8 +347,15 @@ export interface Catalog {
   developers: { key: string; name: string; name_ar: string | null; units: number }[];
   property_types: { value: string; class: PropertyClass | null; count: number }[];
 }
+export interface DistrictGuideComparison {
+  district: Ref;
+  segment: Segment;
+  gap: number;
+  cash_gap: number | null;
+  period: Period | null;
+}
 export interface Evaluation {
-  status: "compared" | "compound_not_found";
+  status: "compared" | "compound_not_found" | "district_guide";
   inputs: {
     property_type: string;
     class: PropertyClass | null;
@@ -332,6 +374,7 @@ export interface Evaluation {
   opportunity: Opportunity;
   comparables: Comparable[];
   unknowns: string[];
+  district_guide?: DistrictGuideComparison | null;
 }
 
 /* ——— The price guide, the map and the Qayem Index ——— */
@@ -426,6 +469,7 @@ export interface Segment {
   class: PropertyClass;
   size: string;
   delivery: "*" | "ready" | "under_2y" | "later";
+  finishing?: string;
   count: number;
   sources: SourceShare[];
   single_source: boolean;
@@ -448,10 +492,21 @@ export interface EntityGuide {
   segments: Segment[];
   headline: Segment | null;
 }
+export interface MapDeliveryRow {
+  median_ppm: number;
+  median_price: number;
+  count: number;
+  p25_ppm: number;
+  p75_ppm: number;
+  confidence: Confidence;
+  resale_vs_new: number | null;
+}
 export interface MapDistrict extends GuideDistrict {
   lat: number;
   lon: number;
   classes: GuideRow[];
+  deliveries?: Partial<Record<PropertyClass, Record<string, MapDeliveryRow>>>;
+  bedrooms?: Record<string, number>;
 }
 export interface MapCompound {
   key: string;
@@ -463,13 +518,26 @@ export interface MapCompound {
   units: number;
   listings: number;
   headline: GuideRow | null;
+  classes?: GuideRow[];
+  ready_share?: number | null;
+  bedrooms?: Record<string, number>;
   developer: Ref | string | null;
+}
+export interface MapHex {
+  id: string;
+  class: PropertyClass;
+  count: number;
+  median_ppm: number;
+  lat: number;
+  lon: number;
+  ring: [number, number][];
 }
 export interface MapData {
   period: Period;
   month: string;
   districts: MapDistrict[];
   compounds: MapCompound[];
+  hexes?: MapHex[];
   attribution: string;
   placed_compounds: number;
   compounds_with_figures: number;

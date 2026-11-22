@@ -1,0 +1,51 @@
+{
+  "year": 2026,
+  "updated_at": "2026-11-22",
+  "source": "Egyptian Real Estate Publicity Law 9/2022, Income Tax Law (Art. 42) and developer schedules",
+  "items": [
+    {
+      "key": "transfer_fee",
+      "name": "Developer transfer fee (تنازل)",
+      "name_ar": "رسوم التنازل عند المطور",
+      "typical_pct": 5.0,
+      "range_pct": [2.5, 10.0],
+      "paid_by": "buyer_or_split",
+      "note": "Set by each developer's contract; confirm in writing before paying a deposit."
+    },
+    {
+      "key": "brokerage",
+      "name": "Brokerage commission",
+      "name_ar": "عمولة السمسرة",
+      "typical_pct": 2.5,
+      "range_pct": [1.5, 2.5],
+      "paid_by": "buyer",
+      "note": "Customary resale brokerage rate in Egypt when a broker introduces the deal."
+    },
+    {
+      "key": "maintenance_deposit",
+      "name": "Maintenance deposit",
+      "name_ar": "وديعة الصيانة",
+      "typical_pct": 8.0,
+      "range_pct": [5.0, 10.0],
+      "paid_by": "buyer_if_unpaid",
+      "note": "Usually due before handover; check receipts if the unit is already delivered."
+    },
+    {
+      "key": "registration",
+      "name": "Real Estate Publicity registration (الشهر العقاري)",
+      "name_ar": "رسوم التسجيل بالشهر العقاري",
+      "flat_egp_range": [500, 2000],
+      "survey_fee_egp_max": 3900,
+      "paid_by": "buyer",
+      "note": "Law 9/2022 caps registration fees at EGP 2,000 plus surveying fees up to EGP 3,900."
+    },
+    {
+      "key": "disposition_tax",
+      "name": "Real estate disposition tax (ضريبة التصرفات العقارية)",
+      "name_ar": "ضريبة التصرفات العقارية",
+      "typical_pct": 2.5,
+      "paid_by": "seller",
+      "note": "2.5% of the sale value on non-village real estate transfers; legally due from the seller."
+    }
+  ]
+}

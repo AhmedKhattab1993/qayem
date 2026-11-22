@@ -93,11 +93,14 @@ def test_sitemap_robots_and_canonical_host(apps):
     local, cloud, *_ = apps
     assert local.get("/sitemap.xml").text == cloud.get("/sitemap.xml").text
     sitemap = cloud.get("/sitemap.xml").text
-    for path in ("/</loc>", "/compounds/garden<", "/districts/new-cairo<", "/developers/nile<", "/units/17<"):
+    for path in ("/</loc>", "/map<", "/index<", "/compounds/garden<", "/districts/new-cairo<", "/developers/nile<"):
         assert f"https://qayem.ai{path}" in sitemap
-    assert "/units/22<" not in sitemap  # not identified as resale: not listed
+    assert "/units/17<" not in sitemap and "/units/22<" not in sitemap  # unit pages fade out of search
+    assert 'content="noindex,follow"' in cloud.get("/units/17").text
     robots = cloud.get("/robots.txt").text
     assert "Sitemap: https://qayem.ai/sitemap.xml" in robots and "Disallow: /api" not in robots
+    for bot in ("OAI-SearchBot", "GPTBot", "ClaudeBot", "PerplexityBot", "Google-Extended"):
+        assert f"User-agent: {bot}" in robots
     llms = cloud.get("/llms.txt")
     assert llms.status_code == 200 and llms.text.startswith("# Qayem") and "https://qayem.ai/methodology" in llms.text
     assert local.get("/llms.txt").text == llms.text
@@ -182,7 +185,9 @@ def test_the_funnel_is_private_and_counts_humans(apps):
     _, cloud, *_ = apps
     browser = {"user-agent": "Mozilla/5.0 (Linux; Android 15) Mobile"}
     for visitor in ("v-aaaaaaaaaa", "v-bbbbbbbbbb", "v-aaaaaaaaaa"):
-        cloud.post("/api/events", json={"type": "pageview", "path": "/", "visitor": visitor}, headers=browser)
+        cloud.post("/api/events", json={"type": "pageview", "path": "/", "visitor": visitor,
+                                        "referrer": "https://chatgpt.com/c/123" if visitor == "v-bbbbbbbbbb" else ""},
+                   headers=browser)
     cloud.post("/api/events", json={"type": "pageview", "path": "/"}, headers={"user-agent": "curl/8"})
     cloud.post("/api/leads", json={"kind": "general", "email": "x@y.co"})
     assert cloud.get("/api/admin/funnel").status_code == 401
@@ -190,6 +195,7 @@ def test_the_funnel_is_private_and_counts_humans(apps):
     report = cloud.get("/api/admin/funnel", headers={"Authorization": "Bearer " + "a" * 40}).json()
     assert report["totals"]["visitors"] == 2 and report["totals"]["pageviews"] == 3 and report["totals"]["leads"] == 1
     assert report["totals"]["capture_rate"] == 0.5 and report["pages"] == [{"path": "/", "n": 3}]
+    assert report["ai_referrals"] == [{"source": "chatgpt.com", "visitors": 1, "pageviews": 1}]
 
 
 def test_dispatch_sends_new_matches_once_per_publication(apps):

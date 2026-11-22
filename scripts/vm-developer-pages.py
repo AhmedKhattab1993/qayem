@@ -56,6 +56,11 @@ def inside(site: str, token: str) -> list[dict]:
         if BLOCKED.search(text[:3000]) or len(text) < 200:
             out.append({"developer": page["developer"], "status": "skipped", "reason": "blocked, login or empty page"})
             continue
+        if page.get("kind") == "terms_check":
+            terms_note = bool(re.search(r"terms|شروط|privacy|خصوصية|copyright|حقوق", text, re.I))
+            out.append({"developer": page["developer"], "status": "terms_checked", "terms_found": terms_note,
+                        "chars": len(text)})
+            continue
         rows = [r for r in run_pi(text[:20_000], ROWS, instructions)["rows"] if r.get("price")]
         stored = api.post("/api/admin/inbox", {"source": page["url"], "text": text[:15_000], "rows": rows})
         out.append({"developer": page["developer"], "status": "queued", "rows": len(rows), "stored": stored["stored"]})

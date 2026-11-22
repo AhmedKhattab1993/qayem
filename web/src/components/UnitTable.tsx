@@ -6,7 +6,6 @@ import { t } from "../locale";
 import type { Unit } from "../types";
 import { BothTag, LevelBadge } from "./Opportunity";
 import { NameList } from "./Names";
-import { Thumb } from "./Gallery";
 
 export type UnitSort = "opportunity" | "launch_gap" | "peer_gap" | "price_asc" | "price_desc" | "area_desc" | "cash_ppm_asc" | "newest";
 
@@ -78,8 +77,7 @@ export function UnitTable({
             {items.map((unit) => (
               <tr key={unit.id}>
                 <th scope="row">
-                  <Link className="ledger-title has-thumb" to={`/units/${unit.id}`}>
-                    <Thumb url={unit.photo} />
+                  <Link className="ledger-title" to={`/units/${unit.id}`}>
                     <strong>{unitName(unit)}</strong>
                     <small>
                       <NameList

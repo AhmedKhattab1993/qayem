@@ -95,10 +95,6 @@ def _images(product: dict) -> list[str]:
     return list(dict.fromkeys(u for u in urls if isinstance(u, str) and u.startswith("https://")))
 
 
-def images_from_page(html: str) -> list[str]:
-    return _images(_jsonld(BeautifulSoup(html, "lxml")))
-
-
 def parse_detail(html: str, uid: str, lastmod: str | None = None) -> NormalizedListing | None:
     soup = BeautifulSoup(html, "lxml")
     product = _jsonld(soup)

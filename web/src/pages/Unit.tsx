@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Bookmark, Check, ExternalLink, Plus, TrendingDown } from "lucide-react";
 import { year, date, money, number, percent, safeExternalUrl, titleCase, useApi, useTitle, sep, nameOf, place } from "../lib";
@@ -10,7 +9,6 @@ import { Comparables, termsLabel, unitName } from "../components/UnitTable";
 import { isPinned, useStore } from "../store";
 import { NameList } from "../components/Names";
 import { DeveloperPrice } from "../components/DeveloperPrice";
-import { Gallery } from "../components/Gallery";
 import { Glance } from "../components/Glance";
 import { LeadCard } from "../components/Capture";
 import { DealCheckLink } from "../components/Observation";
@@ -39,7 +37,6 @@ export default function UnitPage() {
   const { id } = useParams();
   const valid = id && /^\d+$/.test(id);
   const { data, error, missing, retry } = useApi<UnitDetail>(valid ? `/units/${id}` : null);
-  const [fullText, setFullText] = useState(false);
   const { watch, toggleWatch, compare, toggleCompare } = useStore();
   useTitle(data && [unitName(data.unit), nameOf(data.unit.compound)].filter(Boolean).join(sep()));
   if (!valid)
@@ -184,7 +181,7 @@ export default function UnitPage() {
         <Glance unit={unit} />
       </div>
 
-      <div className={`page unit-grid${unit.images.length ? "" : " no-aside"}`}>
+      <div className="page unit-grid no-aside">
         <div className="unit-main">
           <section className="result-section">
             <h2>{t("The unit")}</h2>
@@ -203,19 +200,6 @@ export default function UnitPage() {
                 <span>{t("Resale evidence")}</span>
                 <span>{evidenceText(unit.resale_evidence)}</span>
               </p>
-            )}
-            {unit.description && (
-              <figure className="unit-quote">
-                <figcaption>{t("In the listing’s own words")}</figcaption>
-                <blockquote className={`unit-text${fullText ? "" : " is-clamped"}`} dir="auto">
-                  {unit.description}
-                </blockquote>
-                {unit.description.length > 420 && (
-                  <button className="link-arrow" aria-expanded={fullText} onClick={() => setFullText((v) => !v)}>
-                    {t(fullText ? "Show less" : "Read full description")}
-                  </button>
-                )}
-              </figure>
             )}
           </section>
           {unit.launch && (
@@ -239,11 +223,6 @@ export default function UnitPage() {
             <Unknowns items={unit.unknowns} />
           </section>
         </div>
-        {unit.images.length > 0 && (
-          <aside className="unit-aside">
-            <Gallery images={unit.images} title={unitName(unit)} source={unit.source_name} />
-          </aside>
-        )}
       </div>
 
       {comparables.length > 0 && (

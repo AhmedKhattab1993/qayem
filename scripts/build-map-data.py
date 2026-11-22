@@ -119,10 +119,21 @@ def places() -> None:
     PLACES.write_text(json.dumps(found, ensure_ascii=False))
 
 
-GENERIC = {"compound", "residence", "residences", "city", "the", "new", "park", "gardens", "hills", "phase"}
+GENERIC = {"compound", "residence", "residences", "city", "the", "new", "park", "gardens", "hills", "phase",
+           "resort", "village", "bay", "coast", "cairo", "october", "zayed", "sokhna", "capital"}
+STRIP_WORDS = ("compound", "كمبوند", "قرية", "منتجع", "new cairo", "sheikh zayed", "6th of october",
+               "north coast", "ain sokhna", "new capital", "mostakbal city", "october", "ras el hekma")
 
 
-def compounds() -> None:
+def _clean_name(value: str) -> str:
+    text = value.split("(")[0].strip()
+    folded = fold(text)
+    for word in STRIP_WORDS:
+        folded = folded.replace(fold(word), " ")
+    return " ".join(folded.split())
+
+
+def compounds(max_nominatim: int = 80) -> None:
     from qayem.config import crawled_sources, market_sources
     from qayem.website_data import Catalog
     database = os.environ.get("QAYEM_DB", str(ROOT / ".artifacts" / "development" / "qayem.db"))
@@ -131,41 +142,64 @@ def compounds() -> None:
     names: dict[str, list[tuple[str, dict]]] = {}
     for ref, place in osm.items():
         for name in {place["name"], place["name_en"], place["name_ar"]} - {None}:
-            cleaned = fold(name.replace("Compound", "").replace("كمبوند", ""))
-            if len(cleaned) >= 4:
-                names.setdefault(cleaned, []).append((ref, place))
+            for variant in (fold(name.replace("Compound", "").replace("كمبوند", "")), _clean_name(name)):
+                if len(variant) >= 4 and variant not in GENERIC:
+                    names.setdefault(variant, []).append((ref, place))
     saved = json.loads(COMPOUNDS.read_text()) if COMPOUNDS.exists() else {}
-    for key, compound in snapshot.compounds.items():
-        if key in saved or compound["units"] < 3:
+    # Highest-volume compounds (especially those with published guide headlines) first.
+    ranked = sorted(
+        snapshot.compounds.items(),
+        key=lambda kv: (0 if (kv[1].get("guide") or {}).get("headline") else 1, -kv[1]["units"]),
+    )
+    searched = 0
+    for key, compound in ranked:
+        has_head = bool((compound.get("guide") or {}).get("headline"))
+        if key in saved or (compound["units"] < 3 and not has_head):
             continue
-        district = market.BY_NAME.get(compound["district"])
+        district = (market.BY_KEY.get(compound.get("district_key") or "")
+                    or market.resolve(compound.get("district"), compound.get("name")))
         if district is None:
             continue
         hit = None
-        wanted = [w for w in {fold(compound["name"] or ""), fold(compound.get("name_ar") or "")} if len(w) >= 4]
+        wanted = [w for w in {
+            fold(compound["name"] or ""),
+            _clean_name(compound["name"] or ""),
+            fold(compound.get("name_ar") or ""),
+            _clean_name(compound.get("name_ar") or ""),
+        } if len(w) >= 4 and w not in GENERIC]
+        radius = 55 if district.key in ("north-coast", "ain-sokhna", "hurghada") else 35
         for name in wanted:
+            best = None
             for ref, place in names.get(name, []):
-                if km(district.lat, district.lon, place["lat"], place["lon"]) < 35:
-                    hit = {"lat": place["lat"], "lon": place["lon"], "source": f"osm:{ref}", "match": "name"}
-                    break
-            if hit:
+                dist = km(district.lat, district.lon, place["lat"], place["lon"])
+                if dist < radius and (best is None or dist < best[0]):
+                    best = (dist, ref, place)
+            if best:
+                _, ref, place = best
+                hit = {"lat": place["lat"], "lon": place["lon"], "source": f"osm:{ref}", "match": "name"}
                 break
         if hit is None:  # «Mivida» in «Emaar Mivida Compound»: one name contains the other, near the district
             near = [(km(district.lat, district.lon, place["lat"], place["lon"]), ref, place)
                     for folded, entries in names.items() for ref, place in entries
                     if any(len(w) >= 5 and (w in folded or (len(folded) >= 6 and folded in w)) for w in wanted)]
-            near = sorted(item for item in near if item[0] < 12)
+            near = sorted(item for item in near if item[0] < (35 if district.key in ("north-coast", "ain-sokhna") else 22))
             if near:
                 _, ref, place = near[0]
                 hit = {"lat": place["lat"], "lon": place["lon"], "source": f"osm:{ref}", "match": "contains"}
-        if hit is None and compound["units"] >= 5:
-            queries = [f"{compound['name']}, {district.name}, Egypt", f"{compound['name']} compound, Egypt"]
+        if hit is None and (has_head or compound["units"] >= 10) and searched < max_nominatim:
+            searched += 1
+            base_name = compound["name"].split("(")[0].strip()
+            queries = [f"{base_name}, {district.name}, Egypt", f"{base_name} compound, Egypt"]
             if compound.get("name_ar"):
                 queries.append(f"{compound['name_ar']}, {district.name_ar}")
             for query in queries:
-                for result in nominatim(query):
+                try:
+                    results = nominatim(query)
+                except httpx.HTTPError:
+                    continue
+                for result in results:
                     lat, lon = float(result["lat"]), float(result["lon"])
-                    if km(district.lat, district.lon, lat, lon) < 20 and result.get("addresstype") not in (
+                    if km(district.lat, district.lon, lat, lon) < radius and result.get("addresstype") not in (
                             "city", "state", "county", "town", "village", "road"):
                         hit = {"lat": round(lat, 5), "lon": round(lon, 5),
                                "source": f"osm:{result['osm_type']}/{result['osm_id']}", "match": "search"}
@@ -177,7 +211,9 @@ def compounds() -> None:
             print(key, hit["match"])
     COMPOUNDS.parent.mkdir(parents=True, exist_ok=True)
     COMPOUNDS.write_text(json.dumps(dict(sorted(saved.items())), ensure_ascii=False, indent=0))
-    print("placed", len(saved), "of", sum(1 for c in snapshot.compounds.values() if c["units"] >= 3))
+    with_head = sum(1 for c in snapshot.compounds.values() if (c.get("guide") or {}).get("headline"))
+    placed_head = sum(1 for k, c in snapshot.compounds.items() if k in saved and (c.get("guide") or {}).get("headline"))
+    print("placed", len(saved), "total;", placed_head, "of", with_head, "with guide figures")
 
 
 if __name__ == "__main__":

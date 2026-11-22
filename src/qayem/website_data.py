@@ -157,7 +157,7 @@ def contract_year(row: sqlite3.Row) -> int | None:
     return year if year and year >= 2000 else None
 
 
-def property_projection(row: sqlite3.Row, any_status: bool = False) -> dict | None:
+def property_projection(row: sqlite3.Row, any_status: bool = False, discount_rate: float = DISCOUNT_RATE) -> dict | None:
     """Return eligible sale inventory, with invalid optional fields omitted. `any_status` also
     projects delisted listings (for liquidity history); they are never published as units."""
     price = number(row["price"], MIN_PRICE, MAX_PRICE)
@@ -188,7 +188,7 @@ def property_projection(row: sqlite3.Row, any_status: bool = False) -> dict | No
         "delivery_status": clean_text(row["delivery_status"]),
         "delivery_date": delivery_date[:10] if delivery_date and re.match(r"\d{4}-\d{2}-\d{2}", delivery_date) else None,
         "installments": installments, "down_payment": down, "installment_months": months,
-        "payment": payment_terms(price, down, months, installments, source in CASH_WHEN_NO_PLAN),
+        "payment": payment_terms(price, down, months, installments, source in CASH_WHEN_NO_PLAN, rate=discount_rate),
         "is_resale": boolean(row["is_resale"]), "resale_evidence": clean_text(row["resale_evidence"]),
         "contract_year": contract_year(row) if source in CONTRACT_PRICE_SOURCES else None,
         "last_seen_at": iso_date(row["last_seen_at"]), "first_seen_at": iso_date(row["first_seen_at"]),
@@ -592,25 +592,31 @@ class Catalog:
                     aliases = entity_aliases(connection)
                     archive, rates = ledger.editions(connection), ledger.rates(connection)
                     from .reports import published as published_reports
+                    from .official import fee_schedules
                     developer_reports = published_reports(connection)
                     history = connection.execute("SELECT 1 FROM sqlite_master WHERE name='segment_history'").fetchone()
-                    snapshot = build_snapshot(rows, runs, moves, hidden, aliases, prices, self.market_sources)
+                    rate = _cbe_discount_rate(rates)
+                    snapshot = build_snapshot(rows, runs, moves, hidden, aliases, prices, self.market_sources,
+                                              discount_rate=rate)
                     snapshot.moves = ledger.moves(connection, snapshot.today) if history else []
                 attach_ledger(snapshot, archive, rates)
                 snapshot.overview["developer_reports"] = developer_reports
+                snapshot.overview["fee_schedules"] = fee_schedules()
             except sqlite3.Error as exc:
                 raise CatalogUnavailable("Qayem dataset is not ready. Point QAYEM_DB to a database containing the Qayem tables.") from exc
             with self._lock:
                 self._cached, self._fingerprint, self._built_at = snapshot, signature, time.monotonic()
             return snapshot
 
-    def description(self, property_id: int) -> str | None:
-        try:
-            with closing(self.connect()) as connection:
-                row = connection.execute("SELECT description FROM properties WHERE id = ?", (property_id,)).fetchone()
-        except sqlite3.Error as exc:
-            raise CatalogUnavailable("Qayem listing details are temporarily unavailable. Please retry.") from exc
-        return clean_text(row[0], 10_000) if row else None
+
+def _cbe_discount_rate(rates: dict | None) -> float:
+    """Use the CBE's overnight deposit rate when fetched and sensible, else DISCOUNT_RATE."""
+    dep = ((rates or {}).get("key") or {}).get("overnight_deposit")
+    if isinstance(dep, dict) and isinstance(dep.get("value"), (int, float)):
+        value = float(dep["value"]) / 100.0
+        if 0.05 <= value <= 0.50:
+            return round(value, 4)
+    return DISCOUNT_RATE
 
 
 def unreliable_price_ids(connection: sqlite3.Connection) -> set[int]:
@@ -674,13 +680,14 @@ def apply_aliases(records: list[dict], aliases: dict[str, dict]) -> dict[str, st
 
 def build_snapshot(rows: list, runs: list, moves: list, hidden: set[int] = frozenset(),
                    aliases: dict[str, dict] | None = None, prices: list = (),
-                   market_sources: Collection[str] = frozenset()) -> Snapshot:
+                   market_sources: Collection[str] = frozenset(),
+                   discount_rate: float = DISCOUNT_RATE) -> Snapshot:
     latest_by_source: dict[str, str] = {}
     for row in rows:
         if seen := iso_date(row["last_seen_at"]):
             latest_by_source[row["source"]] = max(seen, latest_by_source.get(row["source"], seen))
     projected = [item for row in rows if row["id"] not in hidden
-                 and (item := property_projection(row)) is not None
+                 and (item := property_projection(row, discount_rate=discount_rate)) is not None
                  and confirmed(item, latest_by_source.get(row["source"]))]
     launches = [item for item in projected if item["source"] in PRIMARY_SOURCES]
     market_items = [item for item in projected if item["source"] in market_sources]
@@ -700,7 +707,7 @@ def build_snapshot(rows: list, runs: list, moves: list, hidden: set[int] = froze
                 or row["source"] in PRIMARY_SOURCES or not (removed_at := iso_date(row["removed_at"]))
                 or (today - _day(removed_at)).days > PRICE_DAYS):
             continue
-        if (item := property_projection(row, any_status=True)) is not None:
+        if (item := property_projection(row, any_status=True, discount_rate=discount_rate)) is not None:
             item["removed_at"] = removed_at
             delisted.append(item)
     moved = price_changes(prices, today)
@@ -825,7 +832,7 @@ def build_snapshot(rows: list, runs: list, moves: list, hidden: set[int] = froze
                     "cohort_start": cohort_start.isoformat() if cohort_start else None,
                     "liquidity_days": LIQUIDITY_DAYS, "price_days": PRICE_DAYS},
         "scope": scope(default), "payment_terms": dict(terms), "plan_median_discount": _median(plan_discounts, 4),
-        "discount_rate": DISCOUNT_RATE,
+        "discount_rate": discount_rate,
         "launch": {"units": len(launches), "matched": sum(len(units) for units in matched.values()),
                    "unmatched": unmatched, "compounds": len(matched), "compared": len(compared),
                    "median_gap": _median([r["launch"]["gap"] for r in compared], 4)},
@@ -1152,7 +1159,8 @@ def attach_guide(price_guide: dict, compounds: dict, districts: dict, today: dat
     for key, entry in districts.items():
         place = market.BY_KEY.get(key)
         segments = by_district.get(key, [])
-        tops = [s for s in segments if s["compound"] == "*" and s["size"] == "*" and s["delivery"] == "*"]
+        tops = [s for s in segments if s["compound"] == "*" and s["size"] == "*" and s["delivery"] == "*"
+                and s.get("finishing", "*") == "*"]
         entry.update({"name_ar": place.name_ar if place else None, "region": place.region if place else None,
                       "location": {"lat": place.lat, "lon": place.lon} if place else None,
                       "guide": {"period": price_guide["period"], "segments": segments,
@@ -1160,8 +1168,32 @@ def attach_guide(price_guide: dict, compounds: dict, districts: dict, today: dat
                       "listings": max((s["count"] for s in tops), default=0) and sum(s["count"] for s in tops)})
     for key, entry in compounds.items():
         segments = by_compound.get(key, [])
-        tops = [s for s in segments if s["size"] == "*"]
+        tops = [s for s in segments if s["size"] == "*" and s["delivery"] == "*" and s.get("finishing", "*") == "*"]
         entry["guide"] = {"period": price_guide["period"], "segments": segments, "headline": guide.headline(tops)}
+    # Comparable compounds: up to 5 peers in the same district closest in median asking price/m².
+    by_dist_compounds: dict[str, list[dict]] = defaultdict(list)
+    for entry in compounds.values():
+        head = (entry.get("guide") or {}).get("headline")
+        if head and head.get("median_ppm"):
+            by_dist_compounds[entry["district_key"]].append(entry)
+    for entry in compounds.values():
+        head = (entry.get("guide") or {}).get("headline")
+        peers = []
+        if head and head.get("median_ppm"):
+            own_ppm, own_cls = head["median_ppm"], head["class"]
+            candidates = [other for other in by_dist_compounds.get(entry["district_key"], [])
+                          if other["key"] != entry["key"]]
+            candidates.sort(key=lambda o: (o["guide"]["headline"]["class"] != own_cls,
+                                           abs(o["guide"]["headline"]["median_ppm"] / own_ppm - 1),
+                                           -o["units"]))
+            for other in candidates[:5]:
+                oh = other["guide"]["headline"]
+                peers.append({"key": other["key"], "name": other["name"], "name_ar": other.get("name_ar"),
+                              "developer": other.get("developer"), "units": other["units"],
+                              "median_ppm": oh["median_ppm"], "p25_ppm": oh["p25_ppm"], "p75_ppm": oh["p75_ppm"],
+                              "class": oh["class"], "resale_vs_new": oh.get("resale_vs_new"),
+                              "confidence": oh["confidence"]})
+        entry["comparable_compounds"] = peers
 
 
 def attach_history(default: list[dict], delisted: list[dict], matched: dict[str, list[dict]], compounds: dict,
@@ -1206,28 +1238,61 @@ def comparables(snapshot: Snapshot, record: dict) -> list[dict]:
     return [{**public_unit(r), "cash_ppm": round(_cash_ppm(r))} for r in pool[:PEER_LIMIT]]
 
 
-def detail(snapshot: Snapshot, record: dict, description: str | None) -> dict:
-    return {"unit": {**public_unit(record, full=True), "description": description},
-            "comparables": comparables(snapshot, record)}
+def detail(snapshot: Snapshot, record: dict, description: str | None = None) -> dict:
+    """Unit detail without third-party listing descriptions or photos (docs/STRATEGY.md 5.1, 11)."""
+    return {"unit": public_unit(record, full=True), "comparables": comparables(snapshot, record)}
 
 
-def evaluate(snapshot: Snapshot, *, property_type: str, area: float, price: float, compound: str,
-             down_payment: float | None = None, installment_years: float | None = None, delivery: str = "",
-             finishing: str = "") -> dict:
-    """Compare a unit the user describes with the developer's price today and the similar units listed now."""
+def evaluate(snapshot: Snapshot, *, property_type: str, area: float, price: float, compound: str = "",
+             district: str = "", down_payment: float | None = None, installment_years: float | None = None,
+             delivery: str = "", finishing: str = "") -> dict:
+    """Compare a unit with the developer's price today and similar units (compound) or the district price guide."""
     kind = TYPE_ALIASES.get(property_type.strip().casefold(), property_type.strip().casefold())
     wanted = compound.strip().casefold()
-    entry = snapshot.compounds.get(slug(compound)) or next(
+    entry = (snapshot.compounds.get(slug(compound)) or next(
         (c for c in snapshot.compounds.values() if wanted in (c["name"].casefold(), (c["name_ar"] or "").casefold())), None)
+        if wanted else None)
+    rate = (snapshot.overview or {}).get("discount_rate") or DISCOUNT_RATE
     months = round(installment_years * 12) if installment_years else None
     plan = down_payment is not None and months
     payment = payment_terms(price, down_payment if plan else None, months if plan else None,
-                            True if plan else None, cash_when_not_installment=True)
+                            True if plan else None, cash_when_not_installment=True, rate=rate)
     inputs = {"property_type": kind, "class": CLASSES.get(kind), "area_m2": area, "price": price,
               "price_per_m2": round(price / area), "finishing_class": finishing_class(finishing),
               "compound": {"key": entry["key"], "name": entry["name"], "name_ar": entry["name_ar"]} if entry else None,
               "developer": entry["developer"] if entry else None, "district": entry["district"] if entry else None}
     if entry is None:
+        dist_key = slug(district) if district.strip() else ""
+        dist = snapshot.districts.get(dist_key) if dist_key else None
+        if dist is None and district.strip():
+            resolved = market.resolve(district)
+            dist = snapshot.districts.get(resolved.key) if resolved else None
+        if dist is not None:
+            inputs["district"] = dist["name"]
+            segs = (dist.get("guide") or {}).get("segments") or []
+            cls = inputs["class"] or "apartment"
+            outside = next((s for s in segs if s["compound"] == "outside" and s["class"] == cls and s["size"] == "*"
+                            and s["delivery"] == "*" and s.get("finishing", "*") == "*"), None)
+            overall = next((s for s in segs if s["compound"] == "*" and s["class"] == cls and s["size"] == "*"
+                            and s["delivery"] == "*" and s.get("finishing", "*") == "*"), None)
+            seg = outside or overall
+            if seg:
+                own_ppm = inputs["price_per_m2"]
+                gap = round(own_ppm / seg["median_ppm"] - 1, 4)
+                cash_ppm = round(payment["cash_equivalent"] / area) if payment.get("cash_equivalent") else None
+                cash_gap = (round(cash_ppm / seg["median_cash_ppm"] - 1, 4)
+                            if cash_ppm and seg.get("median_cash_ppm") else None)
+                return {
+                    "status": "district_guide", "inputs": inputs, "payment": payment, "launch": None, "peers": None,
+                    "district_guide": {
+                        "district": {"key": dist["key"], "name": dist["name"], "name_ar": dist.get("name_ar")},
+                        "scope": "outside_compounds" if seg["compound"] == "outside" else "district",
+                        "period": (dist.get("guide") or {}).get("period"),
+                        "segment": seg, "gap": gap, "cash_gap": cash_gap,
+                    },
+                    "opportunity": {"level": "unrated", "score": None, "signals": []}, "comparables": [],
+                    "unknowns": ["compound", "floor_and_view", "legal_status", "transfer_fee", "maintenance_deposit"],
+                }
         return {"status": "compound_not_found", "inputs": inputs, "payment": payment, "launch": None, "peers": None,
                 "opportunity": {"level": "unrated", "score": None, "signals": []}, "comparables": [], "unknowns": []}
     delivery_date = f"{delivery}-01"[:10] if re.fullmatch(r"\d{4}(-\d{2})?", delivery or "") else None

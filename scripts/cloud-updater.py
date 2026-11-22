@@ -27,8 +27,9 @@ def wrangler(*args, input=None):
                           input=input, text=True, check=True)
 
 
-def request(path, method="GET"):
-    req = urllib.request.Request(URL + path, data=b"{}" if method == "POST" else None, method=method,
+def request(path, method="GET", body=None):
+    data = json.dumps(body if body is not None else {}).encode() if method == "POST" else None
+    req = urllib.request.Request(URL + path, data=data, method=method,
         headers={"Authorization": "Bearer " + TOKEN.read_text().strip(), "Content-Type": "application/json",
                  "User-Agent": USER_AGENT})
     with urllib.request.urlopen(req, timeout=60) as response:
@@ -81,6 +82,7 @@ def verify_publication():
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("action", choices=["seed", "secrets", "run", "status", "stop", "verify", "disable-local"])
+parser.add_argument("--skip-crawl", action="store_true", help="For 'run': skip the crawl stage and republish from the current checkpoint.")
 args = parser.parse_args()
 
 if args.action == "seed":
@@ -105,7 +107,8 @@ elif args.action == "secrets":
     wrangler("secret", "put", "GLM_API_KEY", input=provider["key"] + "\n")
     print("Stored the Qayem administration and GLM credentials as Cloudflare Worker secrets.")
 elif args.action in {"run", "status", "stop"}:
-    result = request("/" + args.action, "POST" if args.action in {"run", "stop"} else "GET")
+    body = {"skip_crawl": True} if args.action == "run" and args.skip_crawl else None
+    result = request("/" + args.action, "POST" if args.action in {"run", "stop"} else "GET", body=body)
     path = ARTIFACTS / (args.action + "-latest.json")
     path.write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps(result, indent=2))
