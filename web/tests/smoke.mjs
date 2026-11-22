@@ -131,13 +131,19 @@ for (const [device, options] of Object.entries(viewports)) {
     const page = await context.newPage();
     const errors = [];
     page.on("pageerror", (error) => errors.push(`pageerror: ${error.message}`));
-    // A missing basemap file is reported by the browser itself; the map page says so and keeps its layers.
-    page.on("console", (m) => m.type() === "error" && !m.location()?.url?.includes("/tiles/") && errors.push(`console: ${m.text()}`));
+    // Ignore browser errors from a missing basemap or Cloudflare Turnstile's own sandboxed challenge iframe.
+    page.on("console", (m) => {
+      if (m.type() !== "error") return;
+      const url = m.location()?.url ?? "";
+      const text = m.text();
+      if (url.includes("/tiles/") || url.includes("challenges.cloudflare.com") || text.includes("challenges.cloudflare.com") || text.includes("font-size:0;color:transparent")) return;
+      errors.push(`console: ${text}`);
+    });
     page.on("response", (r) => r.url().includes("/api/") && !r.ok() && errors.push(`api ${r.status()}: ${r.url()}`));
     for (const [name, path] of pages) {
       errors.length = 0;
-      await page.goto(`${baseURL}${path}`, { waitUntil: "networkidle" });
-      await page.waitForFunction(() => !document.querySelector(".state-loading"), null, { timeout: 30_000 });
+      await page.goto(`${baseURL}${path}`, { waitUntil: "load" });
+      await page.waitForFunction(() => Boolean(document.querySelector("main h1")) && !document.querySelector(".state-loading"), null, { timeout: 30_000 });
       await page.waitForTimeout(700);
       const audit = await page.evaluate(([lang, names]) => {
         const width = window.innerWidth;
@@ -208,7 +214,7 @@ for (const [device, options] of Object.entries(viewports)) {
   const table = await csv.text();
   assert.ok(csv.ok && (csv.headers.get("content-type") ?? "").includes("csv") && table.includes("\n"), `the latest index CSV is served (${csv.status})`);
   for (const path of ["/articles", "/terms", "/corrections", "/deal-check"]) {
-    await page.goto(`${baseURL}${path}`, { waitUntil: "networkidle" });
+    await page.goto(`${baseURL}${path}`, { waitUntil: "load" });
     await page.locator("h1").first().waitFor();
   }
   const tiles = await fetch(`${baseURL}/tiles/egypt.pmtiles`, { headers: { Range: "bytes=0-126" } });
@@ -305,9 +311,10 @@ await context.close();
   }
 }
 
-// Capture: the verdict's card opens a two-field form, and a lead is accepted (needs QAYEM_LEADS_DB locally).
+// Capture: the verdict's card opens a two-field form, and a lead is accepted (needs QAYEM_LEADS_DB locally;
+// skipped when Turnstile is active so production is never sent synthetic test leads).
 const growth = await api("/config");
-if (growth.leads) {
+if (growth.leads && !growth.turnstile_site_key) {
   for (const [device, options] of Object.entries(viewports)) {
     const context = await browser.newContext(options);
     await context.addInitScript(() => localStorage.setItem("qayem:language", "en"));

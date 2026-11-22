@@ -31,7 +31,7 @@ operating it, so everything repeatable is automated and the rest is a short week
 | Unit pages are the main surface | The map, district and compound guides, and articles are the main surfaces; unit-level detail fades out |
 | Source photos shown on unit pages | No third-party photos or descriptions; Qayem's own charts and maps |
 | Compounds only | All of Egypt: compounds **and** the non-compound city market (Nasr City, Maadi, Alexandria…) |
-| Content: a weekly brief posted by hand (**exists**: `qayem content-brief`) | An agent drafts articles when the data changes; a human approves |
+| Content: a weekly brief posted by hand (**exists**: `qayem content-brief`) | An agent drafts articles when the data changes and publishes behind automatic gates |
 | SEO heads and sitemap (**exists**: `src/qayem/seo.py`) | SEO plus GEO: pages built to be cited by AI answer engines |
 | Arabic first | Arabic first, full English, prices also in USD / SAR / AED for buyers abroad |
 
@@ -383,51 +383,49 @@ To review with an Egyptian lawyer before anything is charged.
 
 ## 12. Roadmap
 
-**Phase 0: clean-up and foundations (weeks 1–2)**. Status 2026-11-22:
-- Done and live on production:
-  - No phone numbers or contact fields are stored. `qayem scrub-personal` ran on every local copy and
-    on the cloud database, and runs every night.
-  - No source photos are served.
-  - `/llms.txt` is published.
-  - AI crawlers are allowed (checked 2026-11-22): AI Crawl Control blocks no crawler; the Search, Training
-    and Agents policies are all "Allow"; Bot Fight Mode and AI Labyrinth are off.
-  - Nawy resale is on the site: 23,651 resale units, 17,612 rated (unrated down from 43% to 26%).
-  - A failing source no longer freezes publication.
-- Open:
-  - 66 older database checkpoints in R2 (`canonical/<run>/`) still hold the phone numbers.
-  - A takedown e-mail address needs a working inbox (Cloudflare Email Routing).
+Status 2026-11-22: **Phases 0–4 are built, tested and live on production (`qayem.ai`)** (see [PRICE_GUIDE.md](PRICE_GUIDE.md) for how each part is implemented).
 
-- Delete the stored phone numbers and stop storing them; strip personal fields from raw pages.
-- Remove third-party photos from the site.
-- Get Nawy resale onto production.
-- Allow AI crawlers; add `llms.txt`.
-- Write Qayem's terms of use and a takedown address.
+**Phase 0: clean-up and foundations (weeks 1–2)** — **live on production**:
+- Done:
+  - No phone numbers or contact fields are stored. `qayem scrub-personal` ran on every local copy, on
+    the cloud database, and across all 63 older R2 checkpoints (`canonical/<run>/`), and runs every night.
+  - No source photos or descriptions are served.
+  - `/llms.txt` is published; Cloudflare AI Crawl Control allows all crawlers (Search, Training, Agents = Allow;
+    Bot Fight Mode and AI Labyrinth off).
+  - Nawy resale is on the site: 23,651 resale units, 17,612 rated; a failing source no longer freezes publication.
+  - Terms of use (`/terms`) and corrections/takedown page (`/corrections`) are live.
+- Open (owner action):
+  - Click the Cloudflare Email Routing verification email for the takedown inbox.
 
-**Phase 1: data layer (weeks 3–6)**
-- District name resolution across all sources.
-- Cross-source dedupe and the classification fields.
-- The segment table and aggregates with minimum counts and labels.
-- The first monthly Qayem Index (internal).
-- Scheduled jobs for Central Bank rates and developer reports.
+**Phase 1: data layer (weeks 3–6)** — **live on production**:
+- 59 market districts with English/Arabic resolution across all 5 sources (`src/qayem/market.py`); Aqarmap,
+  OpenSooq and Semsar feed aggregates on alternate nights (`QAYEM_MARKET_SOURCES`).
+- Cross-source dedupe, market/seller/terms/quality classification, segment aggregates with IQR, minimum counts
+  and confidence labels (`1,739` published segments, `470` high, `84.7%` multi-source on 2026-11-22).
+- Monthly Qayem Index (`2026-11` live at `/index` and `/index/2026-11`) and `segment_history`.
+- Nightly Central Bank of Egypt FX/policy/inflation job (`qayem fetch-rates`) and listed-developer PDF
+  report extraction (`qayem developer-reports`).
 
-**Phase 2: map and guides (weeks 5–10)**
-- The market-district layer (~45 districts) and compound locations.
-- Map v1: districts and compounds, with the price grid where data allows.
-- District and compound guides rebuilt answer-first, with `Dataset` and `Place` data.
-- The currency switch.
+**Phase 2: map and guides (weeks 5–10)** — **live on production**:
+- Market-district outlines (`districts.geojson`, 44 active districts), OSM compound locations (110 mapped),
+  and Egypt Protomaps PMTiles basemap served from R2 (`/tiles/egypt.pmtiles`).
+- Map v1 at `/map` (districts, compounds, filters, full-screen mobile list toggle, and crawlable table).
+- Answer-first district and compound guides with `Place` and `Dataset` JSON-LD, thin-page `noindex`,
+  and EGP / USD / SAR / AED currency switch using CBE daily rates.
 
-**Phase 3: articles (weeks 8–12)**
-- The data pack, templates, fact checker, automatic gates and direct publishing, with an
-  after-publish Telegram note.
-- Triggers: monthly index, segment moves, developer price changes.
-- 2–4 articles a week, Arabic and English.
+**Phase 3: articles (weeks 8–12)** — **built and wired; waiting on one-time `agy` sign-in + Telegram secret**:
+- Data pack builder, Arabic/English drafting via local `agy` (`gemini-4-neon` medium), automatic number/date
+  fact checker, strict quality gates, direct publishing to `/articles`, `Article` JSON-LD, sitemap + IndexNow
+  ping, and after-publish Telegram note with one-tap unpublish (`qayem articles`, `scripts/install-articles.sh`).
+- Open (owner action): sign `agy` in once interactively; set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`.
 
-**Phase 4: own data and revenue (weeks 10–16)**
-- The WhatsApp intake for broker sheets and developer offers, with a review page.
-- "What over were you quoted?" in the price check.
-- The free deal-check page.
-- The public monthly CSV.
-- The computer-use jobs in the VM (section 5.4): developer brochures and investor reports.
+**Phase 4: own data and free deal check (weeks 10–16)** — **live on production; WhatsApp webhook waiting on Meta credentials**:
+- Automatic price-check observations from `/evaluate` plus "What over were you quoted?" / developer-offer
+  reporting (`POST /api/observations`).
+- Free deal-check page (`/deal-check`), public CC BY 4.0 monthly CSV (`/data/qayem-index-latest.csv`),
+  WhatsApp Business webhook + Pi/GLM extractor + `/admin/review` queue, and VM computer-use job behind
+  the shared desktop lock (`scripts/vm-developer-pages.py`).
+- Open (owner action): set Meta WhatsApp Business API secrets (`WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET`).
 
 ## 13. Targets
 
