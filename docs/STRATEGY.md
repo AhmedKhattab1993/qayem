@@ -389,10 +389,11 @@ To review with an Egyptian lawyer before anything is charged.
     on the cloud database, and runs every night.
   - No source photos are served.
   - `/llms.txt` is published.
+  - AI crawlers are allowed (checked 2026-11-22): AI Crawl Control blocks no crawler; the Search, Training
+    and Agents policies are all "Allow"; Bot Fight Mode and AI Labyrinth are off.
   - Nawy resale is on the site: 23,651 resale units, 17,612 rated (unrated down from 43% to 26%).
   - A failing source no longer freezes publication.
 - Open:
-  - Cloudflare's AI crawler setting: the VM's Qayem browser is not signed in to Cloudflare.
   - 66 older database checkpoints in R2 (`canonical/<run>/`) still hold the phone numbers.
   - A takedown e-mail address needs a working inbox (Cloudflare Email Routing).
 
