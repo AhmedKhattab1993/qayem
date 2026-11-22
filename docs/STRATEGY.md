@@ -383,7 +383,19 @@ To review with an Egyptian lawyer before anything is charged.
 
 ## 12. Roadmap
 
-**Phase 0: clean-up and foundations (weeks 1–2)**
+**Phase 0: clean-up and foundations (weeks 1–2)**. Status 2026-11-22:
+- Done and live on production:
+  - No phone numbers or contact fields are stored. `qayem scrub-personal` ran on every local copy and
+    on the cloud database, and runs every night.
+  - No source photos are served.
+  - `/llms.txt` is published.
+  - Nawy resale is on the site: 23,651 resale units, 17,612 rated (unrated down from 43% to 26%).
+  - A failing source no longer freezes publication.
+- Open:
+  - Cloudflare's AI crawler setting: the VM's Qayem browser is not signed in to Cloudflare.
+  - 66 older database checkpoints in R2 (`canonical/<run>/`) still hold the phone numbers.
+  - A takedown e-mail address needs a working inbox (Cloudflare Email Routing).
+
 - Delete the stored phone numbers and stop storing them; strip personal fields from raw pages.
 - Remove third-party photos from the site.
 - Get Nawy resale onto production.
