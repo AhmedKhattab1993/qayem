@@ -489,7 +489,9 @@ def test_only_the_configured_sources_are_shown_and_fitted(database: Path, monkey
     monkeypatch.setenv("QAYEM_SOURCES", "gpm")
     with TestClient(create_app(database)) as client:
         overview = client.get("/api/overview").json()
-        assert [source["id"] for source in overview["sources"]] == ["gpm"]
+        # market sources (the price guide's classifieds) are counted in the sources, never listed as units
+        assert [source["id"] for source in overview["sources"]][0] == "gpm"
+        assert {source["id"] for source in overview["sources"]} <= {"gpm", "aqarmap", "opensooq", "semsar"}
         assert {item["source"] for item in client.get("/api/units").json()["items"]} == {"gpm"}
         assert overview["launch"]["compared"] == 0  # launch benchmarks come from nawy_primary
         assert client.get("/api/units/1").status_code == 404  # a Nawy listing

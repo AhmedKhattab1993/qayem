@@ -177,11 +177,21 @@ def test_repeating_pages_are_reported_and_never_remove(engine, monkeypatch):
 def test_nightly_plan_covers_only_the_sources_in_use(monkeypatch):
     from qayem.crawl import active_plan
     monkeypatch.delenv("QAYEM_SOURCES")
-    # resale from AqarExit and Nawy; the developers' current prices from Nawy's developer sales
-    assert {scope.source for scope in active_plan()} == {"aqarexit", "nawy", "nawy_primary"}
+    # resale from AqarExit and Nawy; the developers' current prices from Nawy's developer sales;
+    # the price guide's market sources on alternate nights
+    market = {"aqarmap", "opensooq", "semsar"}
+    assert {scope.source for scope in active_plan()} == {"aqarexit", "nawy", "nawy_primary"} | market
     monkeypatch.setenv("QAYEM_BENCHMARK_SOURCES", "none")
+    monkeypatch.setenv("QAYEM_MARKET_SOURCES", "none")
     assert {scope.source for scope in active_plan()} == {"aqarexit", "nawy"}
+    monkeypatch.delenv("QAYEM_MARKET_SOURCES")
     monkeypatch.delenv("QAYEM_BENCHMARK_SOURCES")
+    from datetime import date
+    even, odd = date(2026, 11, 22), date(2026, 11, 23)
+    nights = [{s.source for s in active_plan(day)} for day in (even, odd)]
+    assert all({"aqarexit", "nawy", "nawy_primary"} <= night for night in nights)
+    for day, night in zip((even, odd), nights):
+        assert night & market == ({"aqarmap"} if day.toordinal() % 2 == 0 else {"opensooq", "semsar"})
     monkeypatch.setenv("QAYEM_SOURCES", "all")
     assert active_plan() == PLAN
 

@@ -12,6 +12,7 @@ import { Faq, compoundFaq } from "../components/Faq";
 import { track } from "../track";
 import { UnitTable } from "../components/UnitTable";
 import { NameList } from "../components/Names";
+import { GuideAnswer, SegmentTables, headlineOf } from "../components/Guide";
 
 export default function CompoundPage({ overview }: { overview: Overview | null }) {
   const { key = "" } = useParams();
@@ -27,6 +28,8 @@ export default function CompoundPage({ overview }: { overview: Overview | null }
     );
   if (!data) return <Loading />;
   const { compound, developer } = data;
+  const guide = compound.guide;
+  const headline = guide ? headlineOf(guide.segments, compound.key, guide.headline) : null;
   return (
     <div className="entity page-enter">
       <header className="page-head">
@@ -50,6 +53,7 @@ export default function CompoundPage({ overview }: { overview: Overview | null }
               ]}
             />
           </p>
+          {headline && <GuideAnswer place={nameOf(compound)!} segment={headline} period={guide?.period} />}
           <div className="entity-bar">
             <EntityActions kind="compound" entityKey={compound.key} name={compound.name} />
             <button
@@ -75,10 +79,19 @@ export default function CompoundPage({ overview }: { overview: Overview | null }
 
       <div className="page">
         {alerting && <AlertSignup query={`compound=${encodeURIComponent(compound.key)}`} label={nameOf(compound)!} />}
+        {guide && guide.segments.some((s) => s.compound === compound.key) && (
+          <section className="section-tight" aria-labelledby="guide-heading">
+            <span className="eyebrow">{t("Price guide")}</span>
+            <h2 id="guide-heading" className="display section-title">
+              {t("Asking prices in {name}, segment by segment", { name: nameOf(compound) })}
+            </h2>
+            <SegmentTables segments={guide.segments} scope={compound.key} period={guide.period} rules={overview?.guide?.rules} />
+          </section>
+        )}
         <section className="section-tight">
           <div className="section-row">
             <div>
-              <span className="eyebrow">{t("Prices here")}</span>
+              <span className="eyebrow">{t("Resale opportunities")}</span>
               <h2 className="display">
                 {compound.good_count
                   ? t("{n} strong or good opportunities", { n: number(compound.good_count), count: compound.good_count })

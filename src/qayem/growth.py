@@ -24,7 +24,8 @@ from fastapi.responses import HTMLResponse, JSONResponse, Response
 SITE = "https://qayem.ai"
 EVENT_TYPES = {"pageview", "outbound_click", "evaluate_run", "share_click", "cta_click", "lead_open",
                "alert_open", "sheet_view", "lookup"}
-LEAD_KINDS = {"developer_price", "resale_check", "deal_sheet", "seller", "broker", "general"}
+LEAD_KINDS = {"developer_price", "resale_check", "deal_sheet", "seller", "broker", "general", "deal_check",
+              "takedown", "correction"}
 ROLES = {"", "buyer", "investor", "seller", "broker"}
 CHANNELS = {"email", "whatsapp"}
 # Limits per visitor (a salted, daily IP hash): generous for a person, useless for a script.
@@ -71,6 +72,9 @@ class Settings:
     hash_salt: str = ""
     site: str = SITE
     environment: str = "production"
+    whatsapp_verify_token: str = ""
+    whatsapp_app_secret: str = ""
+    indexnow_key: str = ""
 
     @classmethod
     def read(cls, get: Callable[[str], Any]) -> "Settings":
@@ -84,7 +88,9 @@ class Settings:
                    telegram_token=text("TELEGRAM_BOT_TOKEN"), telegram_chat=text("TELEGRAM_CHAT_ID"),
                    resend_key=text("RESEND_API_KEY"), alert_from=text("ALERT_FROM", cls.alert_from),
                    admin_token=text("ADMIN_TOKEN"), hash_salt=text("HASH_SALT", "qayem-default-salt"),
-                   site=text("QAYEM_SITE", SITE), environment=text("QAYEM_ENVIRONMENT", "production"))
+                   site=text("QAYEM_SITE", SITE), environment=text("QAYEM_ENVIRONMENT", "production"),
+                   whatsapp_verify_token=text("WHATSAPP_VERIFY_TOKEN"), whatsapp_app_secret=text("WHATSAPP_APP_SECRET"),
+                   indexnow_key=text("INDEXNOW_KEY"))
 
 
 @dataclass

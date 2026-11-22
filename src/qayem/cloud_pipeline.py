@@ -248,6 +248,18 @@ class Pipeline:
             if self.command("health", ["health", "--write", str(self.directory / "health.json"),
                                        *[arg for name in required for arg in ("--require", name)]], 120):
                 raise RuntimeError("Source health needs attention; previous catalogue retained")
+            # The CBE's rates of the day (a failure keeps yesterday's; the site shows their date), then this
+            # month's Qayem Index and today's segment figures from the sources fit to publish.
+            fit = self.publish_sources()
+            for stage, arguments, budget in (
+                    ("rates", ["fetch-rates"], 5 * 60),
+                    # listed developers' new results (a few PDFs a quarter)
+                    ("reports", ["developer-reports", "--folder", str(self.directory / "reports")], 20 * 60),
+                    ("index", ["record-index", *[arg for name in sorted(fit or []) for arg in ("--source", name)]], 30 * 60)):
+                try:
+                    self.command(stage, arguments, budget)
+                except RuntimeError:  # a slow guide stage never holds back the catalogue
+                    self.status.setdefault("warnings", []).append(f"{stage} exceeded its time budget")
             self.status["stage"] = "publish"
             # Freeze the canonical state in R2 before making any public version active.
             self.stop_checkpoints.set()

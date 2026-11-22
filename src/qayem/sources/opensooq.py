@@ -1,5 +1,10 @@
 """OpenSooq Egypt — property classifieds.
 
+Since November 2026 the SERP is server-rendered without `__NEXT_DATA__`: each listing is a card
+`<a data-id1=… data-city=… data-nhood=…>` with its price, title, area, rooms and furnishing as text
+(`parse_cards`). The older `__NEXT_DATA__` shape below is still read when present. The card's masked
+phone number is never read.
+
 Endpoint: /en/{city}/{category-path}?page=N  (e.g.
 /en/cairo/property/apartments-for-sale?page=2)
 Data: `__NEXT_DATA__` → pageProps.serpApiResponse.listings.items (30/page)
@@ -18,6 +23,7 @@ from urllib.parse import urlencode
 from ..http_client import FetchError
 from ..normalization import (
     classify_resale,
+    detect_property_type,
     parse_highlights,
     parse_number,
     to_western_digits,
@@ -63,6 +69,49 @@ def parse_posted_at(text: str | None, now: datetime) -> datetime | None:
     return now - delta
 
 
+_CARD = re.compile(r'<a\s[^>]*data-id1="(\d+)"[^>]*>', re.S)
+_ATTR = re.compile(r'data-(city|nhood|user-target-type|cat2-code)="([^"]*)"')
+_HREF = re.compile(r'href="(/[^"]+)"')
+_PRICE = re.compile(r"([\d,]+)\s*EGP")
+_PAGE_LINK = re.compile(r"[?&]page=(\d+)")
+
+
+def _card_text(fragment: str) -> list[str]:
+    fragment = re.sub(r"<(svg|script|style|button)\b.*?</\1>", " ", fragment, flags=re.S)
+    return [" ".join(part.split()) for part in re.split(r"<[^>]+>", fragment) if part.strip()]
+
+
+def parse_cards(html: str) -> tuple[list[dict], int]:
+    """Listings as item dicts in the shape `parse_item` reads, and the last page number linked."""
+    items = []
+    starts = list(_CARD.finditer(html))
+    for index, match in enumerate(starts):
+        end = html.find("</a>", match.end())
+        stop = starts[index + 1].start() if index + 1 < len(starts) else len(html)
+        fragment = html[match.end(): end if 0 < end < stop else stop]
+        attrs = dict(_ATTR.findall(match.group(0)))
+        texts = _card_text(fragment)
+        price = next((m.group(1) for t in texts if (m := _PRICE.fullmatch(t.strip()))), None)
+        cps = [t for t in texts if re.search(r"Area:|Bedroom|Bathroom|furnished|Floor", t, re.I)]
+        title = next((t for t in texts if len(t) > 15 and not _PRICE.search(t) and t not in cps
+                      and not re.search(r"\bago\b|^Compare$|^Chat$|XX$", t)), None)
+        href = _HREF.search(match.group(0))
+        items.append({
+            "id": int(match.group(1)), "price_amount": price.replace(",", "") if price else None,
+            "price_currency_iso": "EGP", "title": title, "cps": cps,
+            "city_label": attrs.get("city"), "nhood_label": attrs.get("nhood"),
+            "user_target_type": attrs.get("user-target-type"), "cat2_code": attrs.get("cat2-code"),
+            "post_url": href.group(1).lstrip("/").removeprefix("en/") if href else None,
+            "posted_at": next((t for t in texts if re.search(r"\bago\b", t)), None),
+        })
+    pages = max((int(n) for n in _PAGE_LINK.findall(html)), default=1)
+    return items, pages
+
+
+CAT2_TYPES = {"ApartmentsForSale": "apartment", "VillasPalacesForSale": "villa", "TownhousesForSale": "townhouse",
+              "FarmsChaletsForSale": "chalet", "WholeBuildingsForSale": "building"}
+
+
 def parse_item(item: dict, now: datetime) -> NormalizedListing | None:
     item_id = item.get("id")
     if item_id is None:
@@ -94,6 +143,8 @@ def parse_item(item: dict, now: datetime) -> NormalizedListing | None:
         purpose="sale",
         is_resale=resale,
         resale_evidence=evidence or "no resale signals in title/attributes",
+        property_type=detect_property_type(title) if item.get("cat2_code") == "FarmsChaletsForSale" and detect_property_type(title)
+        else CAT2_TYPES.get(item.get("cat2_code") or "") or detect_property_type(title),
         price=price,
         currency=item.get("price_currency_iso") or "EGP",
         area_m2=highlights.get("area_m2"),
@@ -145,8 +196,14 @@ class OpenSooqSource(BaseSource):
                 return False
             self.pages_fetched += 1
             try:
-                props = extract_next_data(html)["props"]["pageProps"]
-                listings = props["serpApiResponse"]["listings"]
+                if "__NEXT_DATA__" in html:
+                    props = extract_next_data(html)["props"]["pageProps"]
+                    listings = props["serpApiResponse"]["listings"]
+                else:
+                    cards, last = parse_cards(html)
+                    if not cards and page == 1:
+                        raise ValueError("no listing cards on the first page")
+                    listings = {"items": cards, "meta": {"current_page": page, "pages": max(last, page)}}
             except Exception as exc:  # noqa: BLE001
                 self.errors.append(f"{city}/{cat_path} page {page}: parse failed: {exc}")
                 return False

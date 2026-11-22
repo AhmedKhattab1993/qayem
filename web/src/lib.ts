@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { getLanguage, t } from "./locale";
 import { keepsServerHead, serverTitle } from "./head";
-import type { Catalog, Payment } from "./types";
+import { convert, getCurrency } from "./currency";
+import type { Catalog, Payment, Period } from "./types";
 
 const locale = () => (getLanguage() === "ar" ? "ar-EG" : "en-GB");
 
@@ -13,12 +14,23 @@ export const compact = (value: number | null | undefined) =>
     ? "—"
     : new Intl.NumberFormat(locale(), { notation: "compact", maximumFractionDigits: 1 }).format(value);
 
-export const money = (value: number | null | undefined, short = false) =>
+/** An amount in EGP, always in EGP: for figures beside EGP inputs. */
+export const egp = (value: number | null | undefined, short = false) =>
   value == null
     ? "—"
     : getLanguage() === "ar"
       ? `${short ? compact(value) : number(value)} ${t("EGP")}`
       : `${t("EGP")} ${short ? compact(value) : number(value)}`;
+
+/** An amount stored in EGP, in the reader's display currency (EGP unless they switched, at the CBE rate). */
+export const money = (value: number | null | undefined, short = false) => {
+  if (value == null) return "—";
+  const currency = getCurrency();
+  if (currency === "EGP") return egp(value, short);
+  const converted = convert(value);
+  const figure = short ? compact(converted) : number(converted);
+  return getLanguage() === "ar" ? `${figure} ${t(currency)}` : `${t(currency)} ${figure}`;
+};
 
 export const percent = (value: number | null | undefined, digits = 0) =>
   value == null ? "—" : `${number(value * 100, digits)}${getLanguage() === "ar" ? "٪" : "%"}`;
@@ -111,6 +123,19 @@ export const date = (value: string | null | undefined, style: "day" | "month" = 
         timeZone: "UTC",
       });
 };
+
+/** A month ("2026-11") in words: "November 2026" / «نوفمبر ٢٠٢٦». */
+export const monthLabel = (month: string | null | undefined) => {
+  if (!month) return t("Not available");
+  const parsed = new Date(`${month.slice(0, 7)}-01T00:00:00Z`);
+  return Number.isNaN(parsed.getTime())
+    ? month
+    : parsed.toLocaleDateString(locale(), { month: "long", year: "numeric", timeZone: "UTC" });
+};
+
+/** The listing window behind a figure: "23 Oct – 22 Nov 2026". */
+export const periodLabel = (period: Period | null | undefined) =>
+  period ? t("{start} to {end}", { start: date(period.start), end: date(period.end) }) : t("Not available");
 
 export class ApiError extends Error {
   status: number;

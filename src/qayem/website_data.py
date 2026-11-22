@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from collections import Counter, defaultdict
 from contextlib import closing
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date, datetime, timezone
 from html import unescape
 import json
@@ -23,6 +23,7 @@ import time
 from typing import Any, Collection
 from urllib.parse import urlsplit
 
+from . import guide, ledger, market
 from .valuation import (
     CLASSES, DISCOUNT_RATE, alias_key, canonical_district, delivery_bucket, developer_key, finishing_class, fold,
     majority, payment_terms, slug,
@@ -181,7 +182,7 @@ def property_projection(row: sqlite3.Row, any_status: bool = False) -> dict | No
         "property_type": kind, "class": CLASSES.get(kind), "price": price, "area_m2": area,
         "price_per_m2": round(price / area), "bedrooms": integer(row["bedrooms"], 12),
         "bathrooms": integer(row["bathrooms"], 12),
-        "district": canonical_district(district or compound), "compound_name": compound,
+        "district": _market_name(district, compound, row), "compound_name": compound,
         "developer_name": clean_text(row["developer"]), "finishing": clean_text(row["finishing"]),
         "finishing_class": finishing_class(clean_text(row["finishing"])),
         "delivery_status": clean_text(row["delivery_status"]),
@@ -194,6 +195,12 @@ def property_projection(row: sqlite3.Row, any_status: bool = False) -> dict | No
         # Sources' photos are their copyright: never served, linked or shared (docs/STRATEGY.md, 11).
         "images": [],
     }
+
+
+def _market_name(district: str | None, compound: str | None, row: sqlite3.Row) -> str | None:
+    """The market district (market.py) the listing is in; the source's own spelling when none matches."""
+    found = market.resolve(district, compound, city=row["city"], url=row["url"], title=row["title"])
+    return found.name if found else canonical_district(district or compound)
 
 
 def _day(value: str | None) -> date | None:
@@ -318,6 +325,10 @@ class Snapshot:
     urls: dict[str, int]
     launches: dict[str, list[dict]]  # the developer's current units per compound key
     peers: dict[tuple[str, str], list[dict]]  # resale units per (compound key, unit type)
+    guide: dict = field(default_factory=dict)  # the price guide's segments (guide.py)
+    index: dict = field(default_factory=dict)  # this month's Qayem Index
+    editions: dict = field(default_factory=dict)  # every month's edition, by month (ledger.py)
+    moves: list = field(default_factory=list)  # segment figures that moved over 30 days
 
 
 def majority_or_none(counter: Counter | None) -> str | None:
@@ -480,10 +491,14 @@ def public_unit(record: dict, full: bool = False) -> dict:
 class Catalog:
     """Share sanitized immutable-by-convention projections, never live sessions."""
 
-    def __init__(self, path: str | Path, refresh_seconds: float = 300, sources: Collection[str] | None = None):
+    def __init__(self, path: str | Path, refresh_seconds: float = 300, sources: Collection[str] | None = None,
+                 market_sources: Collection[str] = ()):
         self.path = Path(path).expanduser().resolve()
         # Only these sources are shown and fitted (None: every source); other rows are never read.
-        self.sources = tuple(sorted(sources)) if sources is not None else None
+        # Market sources (Aqarmap, OpenSooq, Semsar) feed the price guide's figures only: their
+        # listings are never published one by one (docs/STRATEGY.md, 5.1).
+        self.market_sources = frozenset(market_sources)
+        self.sources = (tuple(sorted(set(sources) | self.market_sources)) if sources is not None else None)
         # A crawl commits every few seconds; the model is refitted at most this often.
         self.refresh_seconds = refresh_seconds
         self._lock = Lock()  # guards the fields below; never held while building
@@ -575,7 +590,14 @@ class Catalog:
                     ).fetchall()
                     hidden = unreliable_price_ids(connection)
                     aliases = entity_aliases(connection)
-                snapshot = build_snapshot(rows, runs, moves, hidden, aliases, prices)
+                    archive, rates = ledger.editions(connection), ledger.rates(connection)
+                    from .reports import published as published_reports
+                    developer_reports = published_reports(connection)
+                    history = connection.execute("SELECT 1 FROM sqlite_master WHERE name='segment_history'").fetchone()
+                    snapshot = build_snapshot(rows, runs, moves, hidden, aliases, prices, self.market_sources)
+                    snapshot.moves = ledger.moves(connection, snapshot.today) if history else []
+                attach_ledger(snapshot, archive, rates)
+                snapshot.overview["developer_reports"] = developer_reports
             except sqlite3.Error as exc:
                 raise CatalogUnavailable("Qayem dataset is not ready. Point QAYEM_DB to a database containing the Qayem tables.") from exc
             with self._lock:
@@ -651,7 +673,8 @@ def apply_aliases(records: list[dict], aliases: dict[str, dict]) -> dict[str, st
 
 
 def build_snapshot(rows: list, runs: list, moves: list, hidden: set[int] = frozenset(),
-                   aliases: dict[str, dict] | None = None, prices: list = ()) -> Snapshot:
+                   aliases: dict[str, dict] | None = None, prices: list = (),
+                   market_sources: Collection[str] = frozenset()) -> Snapshot:
     latest_by_source: dict[str, str] = {}
     for row in rows:
         if seen := iso_date(row["last_seen_at"]):
@@ -660,7 +683,9 @@ def build_snapshot(rows: list, runs: list, moves: list, hidden: set[int] = froze
                  and (item := property_projection(row)) is not None
                  and confirmed(item, latest_by_source.get(row["source"]))]
     launches = [item for item in projected if item["source"] in PRIMARY_SOURCES]
-    records = {item["id"]: item for item in projected if item["source"] not in PRIMARY_SOURCES}
+    market_items = [item for item in projected if item["source"] in market_sources]
+    records = {item["id"]: item for item in projected
+               if item["source"] not in PRIMARY_SOURCES and item["source"] not in market_sources}
     dates = [d for row in rows if (d := iso_date(row["last_seen_at"]))]
     firsts = [d for row in rows if (d := iso_date(row["first_seen_at"]))]
     last_updated = max(dates) if dates else None
@@ -757,6 +782,9 @@ def build_snapshot(rows: list, runs: list, moves: list, hidden: set[int] = froze
     developers = build_developers(default, compounds, matched, moves)
     districts = build_districts(default, compounds, matched)
     attach_history(default, delisted, matched, compounds, developers, districts, today, cohort_start)
+    price_guide = guide.build(default, market_items, launches, compounds, matched, today)
+    attach_guide(price_guide, compounds, districts, today, cohort_start)
+    edition = guide.index(price_guide, today)
 
     run_status = {run["source"]: run["status"] or "unknown" for run in runs}
     source_counts = Counter(row["source"] for row in rows)
@@ -827,9 +855,13 @@ def build_snapshot(rows: list, runs: list, moves: list, hidden: set[int] = froze
     urls = Counter(key for r in records.values() if (key := url_key(r["source_url"])))
     unique_urls = {key: r["id"] for r in records.values()
                    if (key := url_key(r["source_url"])) and urls[key] == 1}
+    overview["guide"] = {**price_guide["counts"], "period": price_guide["period"], "rules": price_guide["rules"],
+                         "index_month": edition["month"]}
+    catalog["districts"] = [{"key": d["key"], "name": d["name"], "name_ar": d.get("name_ar"), "units": d["units"],
+                             "listings": d.get("listings", 0)} for d in districts.values()]
     return Snapshot(records=records, default=default, today=today, compounds=compounds,
                     developers=developers, districts=districts, overview=overview, catalog=catalog,
-                    urls=unique_urls, launches=dict(matched), peers=groups)
+                    urls=unique_urls, launches=dict(matched), peers=groups, guide=price_guide, index=edition)
 
 
 def _cash_ppm(record: dict) -> float | None:
@@ -1079,6 +1111,57 @@ def build_districts(default: list[dict], compounds: dict[str, dict], matched: di
                           for c in compounds.values() if c["district_key"] == key][:60],
         }
     return dict(sorted(districts.items(), key=lambda pair: (-pair[1]["units"], pair[0])))
+
+
+def attach_ledger(snapshot: Snapshot, archive: dict[str, dict], rates: dict | None) -> None:
+    """Earlier editions of the index, this month's as built now, and the CBE's rates of the day."""
+    editions = dict(archive)
+    current = snapshot.index.get("month")
+    if current and not (current in editions and not editions[current].get("provisional", True)):
+        editions[current] = snapshot.index
+    snapshot.editions = editions
+    months = sorted(editions)
+    snapshot.overview["rates"] = rates
+    snapshot.overview["index_months"] = months
+    if current:
+        snapshot.index["changes"] = guide.changes(snapshot.index, editions.get(_previous(months, current)))
+
+
+def _previous(months: list[str], month: str) -> str | None:
+    earlier = [m for m in months if m < month]
+    return earlier[-1] if earlier else None
+
+
+def attach_guide(price_guide: dict, compounds: dict, districts: dict, today: date, cohort_start: date | None) -> None:
+    """Each district and compound page gets its segments; a district seen only on market sources
+    (Alexandria's classifieds) gets a page too, with figures and no units."""
+    by_district: dict[str, list[dict]] = defaultdict(list)
+    by_compound: dict[str, list[dict]] = defaultdict(list)
+    for segment in price_guide["segments"]:
+        if segment["compound"] in ("*", "outside"):
+            by_district[segment["district"]].append(segment)
+        else:
+            by_compound[segment["compound"]].append(segment)
+    for key, segments in by_district.items():
+        if key not in districts:
+            place = market.BY_KEY.get(key)
+            districts[key] = {
+                "key": key, "name": place.name if place else segments[0]["district_name"], "units": 0, "classes": [],
+                "compound_count": 0, "scope": scope([]), **_profile([]), "good_count": 0, "compounds": [],
+                "history": history_of([], [], [], today, cohort_start)}
+    for key, entry in districts.items():
+        place = market.BY_KEY.get(key)
+        segments = by_district.get(key, [])
+        tops = [s for s in segments if s["compound"] == "*" and s["size"] == "*" and s["delivery"] == "*"]
+        entry.update({"name_ar": place.name_ar if place else None, "region": place.region if place else None,
+                      "location": {"lat": place.lat, "lon": place.lon} if place else None,
+                      "guide": {"period": price_guide["period"], "segments": segments,
+                                "headline": guide.headline(tops)},
+                      "listings": max((s["count"] for s in tops), default=0) and sum(s["count"] for s in tops)})
+    for key, entry in compounds.items():
+        segments = by_compound.get(key, [])
+        tops = [s for s in segments if s["size"] == "*"]
+        entry["guide"] = {"period": price_guide["period"], "segments": segments, "headline": guide.headline(tops)}
 
 
 def attach_history(default: list[dict], delisted: list[dict], matched: dict[str, list[dict]], compounds: dict,

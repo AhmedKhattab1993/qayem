@@ -8,12 +8,12 @@ from pathlib import Path
 from threading import Thread
 from typing import Collection, Literal
 
-from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi import FastAPI, HTTPException, Path as PathParam, Query, Request
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 
-from . import seo
-from .config import crawled_sources, db_path as configured_db_path
+from . import editorial, guide_api, seo
+from .config import crawled_sources, db_path as configured_db_path, market_sources
 from .growth import Growth, LocalDatabase, LocalHttp, Settings, client_details, growth_router
 from .valuation import developer_key, slug
 from .website_data import Catalog, CatalogUnavailable, detail, evaluate, opportunity_key, public_unit, url_key
@@ -47,7 +47,8 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
         refresh_seconds = float(os.environ.get("QAYEM_REFRESH_SECONDS", "300"))
     if sources is _CONFIGURED:
         sources = crawled_sources()  # benchmark rows are read for launch prices, never listed
-    catalog = Catalog(db_path if db_path is not None else configured_db_path(), refresh_seconds, sources)
+    catalog = Catalog(db_path if db_path is not None else configured_db_path(), refresh_seconds, sources,
+                      market_sources() if sources is not None else ())
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI):
@@ -74,6 +75,12 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
         if kind == "unit_detail":
             record = snapshot.records.get(int(key))
             return {"unit": public_unit(record, full=True)} if record else None
+        if kind == "article":
+            return await editorial.article(Growth(leads, public, config, None), key)
+        if kind in ("index", "map", "guide"):
+            if kind == "index":
+                return snapshot.index if not key else snapshot.editions.get(key)
+            return guide_api.map_payload(snapshot) if kind == "map" else guide_api.summary(snapshot)
         return {"compound": snapshot.compounds, "developer": snapshot.developers,
                 "district": snapshot.districts}[kind].get(key)
 
@@ -248,8 +255,44 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
             raise HTTPException(404, "We have no identified resale listings for this district.")
         return district
 
+    @app.get("/api/guide")
+    def price_guide() -> dict:
+        return guide_api.summary(catalog.snapshot())
+
+    @app.get("/api/guide/{key}")
+    def district_guide(key: str) -> dict:
+        entry = guide_api.segments_by_district(catalog.snapshot()).get(key)
+        if entry is None:
+            raise HTTPException(404, "No published figures for this district yet.")
+        return entry
+
+    @app.get("/api/map")
+    def map_data() -> dict:
+        return guide_api.map_payload(catalog.snapshot())
+
+    @app.get("/api/index")
+    def index_latest() -> dict:
+        return catalog.snapshot().index
+
+    @app.get("/api/index/{month}")
+    def index_month(month: str = PathParam(..., pattern=r"^\d{4}-\d{2}$")) -> dict:
+        entry = catalog.snapshot().editions.get(month)
+        if entry is None:
+            raise HTTPException(404, "No Qayem Index was published for this month.")
+        return entry
+
+    @app.get("/data/{name}", include_in_schema=False)
+    def index_csv(name: str) -> Response:
+        month = seo.csv_month(name)
+        snapshot = catalog.snapshot()
+        edition = None if month is None else snapshot.index if month == "latest" else snapshot.editions.get(month)
+        if edition is None:
+            raise HTTPException(404, "No Qayem Index was published for this month.")
+        return Response(guide_api.csv_text(edition), media_type="text/csv; charset=utf-8")
+
     @app.get("/api/evaluate")
-    def evaluate_unit(
+    async def evaluate_unit(
+        request: Request,
         property_type: str = Query(..., min_length=2, max_length=64),
         area: float = Query(..., ge=20, le=5_000, allow_inf_nan=False),
         price: float = Query(..., ge=100_000, le=1_000_000_000, allow_inf_nan=False),
@@ -263,9 +306,11 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
             raise HTTPException(422, "The down payment cannot exceed the total price.")
         if not compound.strip():
             raise HTTPException(422, "Choose the unit's compound.")
-        return evaluate(catalog.snapshot(), property_type=property_type, area=area, price=price,
-                        compound=compound, down_payment=down_payment, installment_years=installment_years,
-                        delivery=delivery, finishing=finishing)
+        result = evaluate(catalog.snapshot(), property_type=property_type, area=area, price=price,
+                          compound=compound, down_payment=down_payment, installment_years=installment_years,
+                          delivery=delivery, finishing=finishing)
+        await editorial.log_check(await growth(request), result["inputs"], result["status"])
+        return result
 
     @app.get("/api/lookup")
     def lookup(url: str = Query(..., min_length=8, max_length=2048)) -> dict:
@@ -276,6 +321,7 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
         return {"id": unit_id}
 
     app.include_router(growth_router(growth))
+    app.include_router(editorial.editorial_router(growth))
 
     @app.api_route("/api", methods=["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
     @app.api_route("/api/{path:path}", methods=["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
@@ -290,8 +336,16 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
     def llms() -> PlainTextResponse:
         return PlainTextResponse(seo.llms_txt())
 
+    @app.get("/tiles/{name}", include_in_schema=False)
+    def tiles(name: str) -> Response:
+        """The basemap archive for local development (in production: the Worker, from R2)."""
+        folder = Path(os.environ.get("QAYEM_TILES_DIR", Path(__file__).resolve().parents[2] / ".artifacts" / "map"))
+        if name != "egypt.pmtiles" or not (folder / name).is_file():
+            raise HTTPException(404, "Not found.")
+        return FileResponse(folder / name, media_type="application/octet-stream")
+
     @app.get("/sitemap.xml", include_in_schema=False)
-    def sitemap() -> Response:
+    async def sitemap() -> Response:
         snapshot = catalog.snapshot()
         minimum = seo.SITEMAP_MIN_UNITS
         paths = seo.sitemap_paths(
@@ -299,6 +353,8 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
             [k for k, d in snapshot.developers.items() if d["units"] >= minimum],
             [d["key"] for d in snapshot.catalog["districts"] if d["units"] >= minimum],
             sorted(r["id"] for r in snapshot.default if r["opportunity"]["level"] != "unrated"))
+        paths += seo.guide_paths(snapshot.overview.get("index_months") or [])
+        paths += [p for p, _ in await editorial.article_paths(Growth(leads, public, config, None))]
         return Response(seo.sitemap_xml(paths, snapshot.today), media_type="application/xml")
 
     if (static_root / "assets").is_dir():

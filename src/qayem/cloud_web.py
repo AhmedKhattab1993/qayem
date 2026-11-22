@@ -5,10 +5,10 @@ from datetime import date
 import json
 from typing import Literal
 
-from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from fastapi import Depends, FastAPI, HTTPException, Path, Query, Request
 from fastapi.responses import JSONResponse, PlainTextResponse, RedirectResponse, Response
 
-from . import seo
+from . import editorial, guide_api, seo
 from .growth import Growth, Settings, WorkerHttp, client_details, growth_router
 from .valuation import developer_key, slug
 from .web_common import DELIVERY_PATTERN, RANK_MIN_COMPOUND, RANK_MIN_DEVELOPER, Sort, search_query
@@ -418,6 +418,32 @@ def create_cloud_app(database=None, *, leads=_FROM_ENV, http=None, settings=None
             raise HTTPException(404, "We have no identified resale listings for this district.")
         return entry
 
+    @app.get("/api/guide")
+    async def price_guide(data=Depends(store)):
+        return await data.document("guide", required=True)
+
+    @app.get("/api/guide/{key}")
+    async def district_guide(key: str, data=Depends(store)):
+        entry = await data.document("segments", key)
+        if entry is None:
+            raise HTTPException(404, "No published figures for this district yet.")
+        return entry
+
+    @app.get("/api/map")
+    async def map_data(data=Depends(store)):
+        return await data.document("map", required=True)
+
+    @app.get("/api/index")
+    async def index_latest(data=Depends(store)):
+        return await data.document("index", required=True)
+
+    @app.get("/api/index/{month}")
+    async def index_month(month: str = Path(..., pattern=r"^\d{4}-\d{2}$"), data=Depends(store)):
+        entry = await data.document("index", month)
+        if entry is None:
+            raise HTTPException(404, "No Qayem Index was published for this month.")
+        return entry
+
     @app.get("/api/evaluate")
     async def evaluate_unit(property_type: str = Query(..., min_length=2, max_length=64),
         area: float = Query(..., ge=20, le=5_000, allow_inf_nan=False),
@@ -426,14 +452,17 @@ def create_cloud_app(database=None, *, leads=_FROM_ENV, http=None, settings=None
         down_payment: float | None = Query(None, ge=0, le=1_000_000_000, allow_inf_nan=False),
         installment_years: float | None = Query(None, gt=0, le=15, allow_inf_nan=False),
         delivery: str = Query("", pattern=r"^(|ready|\d{4}(-\d{2})?)$"),
-        finishing: Literal["", "core_shell", "semi_finished", "finished", "furnished"] = "", data=Depends(store)):
+        finishing: Literal["", "core_shell", "semi_finished", "finished", "furnished"] = "", data=Depends(store),
+        g=Depends(growth)):
         if down_payment is not None and down_payment > price:
             raise HTTPException(422, "The down payment cannot exceed the total price.")
         if not compound.strip():
             raise HTTPException(422, "Choose the unit's compound.")
-        return evaluate(await data.evaluation_snapshot(compound), property_type=property_type, area=area, price=price,
-                        compound=compound, down_payment=down_payment, installment_years=installment_years,
-                        delivery=delivery, finishing=finishing)
+        result = evaluate(await data.evaluation_snapshot(compound), property_type=property_type, area=area, price=price,
+                          compound=compound, down_payment=down_payment, installment_years=installment_years,
+                          delivery=delivery, finishing=finishing)
+        await editorial.log_check(g, result["inputs"], result["status"])
+        return result
 
     @app.get("/api/lookup")
     async def lookup(url: str = Query(..., min_length=8, max_length=2048), data=Depends(store)):
@@ -444,6 +473,7 @@ def create_cloud_app(database=None, *, leads=_FROM_ENV, http=None, settings=None
         return {"id": rows[0]["id"]}
 
     app.include_router(growth_router(growth))
+    app.include_router(editorial.editorial_router(growth))
 
     @app.api_route("/api", methods=["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
     @app.api_route("/api/{path:path}", methods=["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
@@ -460,20 +490,44 @@ def create_cloud_app(database=None, *, leads=_FROM_ENV, http=None, settings=None
             raise HTTPException(404, "Not found.")
         return PlainTextResponse(seo.llms_txt(), headers={"Cache-Control": "public, max-age=3600"})
 
+    @app.get("/data/{name}", include_in_schema=False)
+    async def index_csv(name: str, data=Depends(store)):
+        month = seo.csv_month(name)
+        if month is None:
+            raise HTTPException(404, "Not found.")
+        edition = await data.document("index", "" if month == "latest" else month)
+        if edition is None:
+            raise HTTPException(404, "No Qayem Index was published for this month.")
+        return Response(guide_api.csv_text(edition), media_type="text/csv; charset=utf-8",
+                        headers={"Cache-Control": "public, max-age=3600",
+                                 "Content-Disposition": f'inline; filename="qayem-index-{edition["month"]}.csv"'})
+
     @app.get("/sitemap.xml", include_in_schema=False)
-    async def sitemap(data=Depends(store)):
-        return Response(seo.sitemap_xml(await data.sitemap(), data.today), media_type="application/xml",
+    async def sitemap(request: Request, data=Depends(store)):
+        overview = await data.document("overview", required=True)
+        articles = await editorial.article_paths(await growth(request))
+        paths = [*await data.sitemap(), *seo.guide_paths(overview.get("index_months") or []), *(p for p, _ in articles)]
+        return Response(seo.sitemap_xml(paths, data.today), media_type="application/xml",
                         headers={"Cache-Control": "public, max-age=3600"})
 
     @app.get("/{path:path}", include_in_schema=False)
     async def page(request: Request, path: str = ""):
         """The single-page app's index.html with this route's head and summary (see seo.py)."""
         if "." in path.rsplit("/", 1)[-1]:
+            g = await growth(request)
+            if g.settings.indexnow_key and path == f"{g.settings.indexnow_key}.txt":
+                return PlainTextResponse(g.settings.indexnow_key)
             raise HTTPException(404, "Page not found.")
         html = await index_html(request)
         try:
             data = await store(request)
-            meta = await seo.page_meta("/" + path, dict(request.query_params), data.load)
+            g = await growth(request)
+
+            async def load(kind, key):
+                if kind == "article":
+                    return await editorial.article(g, key)
+                return await data.load(kind, key)
+            meta = await seo.page_meta("/" + path, dict(request.query_params), load)
         except Exception as exc:  # never let the head fail the page: the app shows its own retry state
             if not isinstance(exc, Unavailable):
                 print("Page head failed:", type(exc).__name__, path[:120])

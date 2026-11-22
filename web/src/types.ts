@@ -197,6 +197,7 @@ export interface Compound extends Profile {
   area_range: [number, number];
   types: Record<string, number>;
   history?: History;
+  guide?: EntityGuide | null;
 }
 export interface Developer extends Profile {
   launch: Launch | null;
@@ -221,6 +222,12 @@ export interface Developer extends Profile {
 export interface District extends Profile {
   key: string;
   name: string;
+  name_ar?: string | null;
+  region?: string | null;
+  location?: { lat: number; lon: number } | null;
+  /** Every listing in the price guide, across all sources (resale units compared are `units`). */
+  listings?: number;
+  guide?: EntityGuide | null;
   units: number;
   good_count?: number;
   classes: ClassSummary[];
@@ -285,6 +292,11 @@ export interface Overview {
   };
   developer_gaps: { key: string; name: string; name_ar: string | null; gap: number; units: number }[];
   history?: History & { cohort_start: string | null; liquidity_days: number; price_days: number };
+  /** The Central Bank of Egypt's rates of the day, for the currency switch. */
+  rates?: Rates | null;
+  guide?: GuideCounts | null;
+  /** Months with a published Qayem Index, newest first. */
+  index_months?: string[];
 }
 export interface Catalog {
   districts: { key: string; name: string; units: number }[];
@@ -320,4 +332,219 @@ export interface Evaluation {
   opportunity: Opportunity;
   comparables: Comparable[];
   unknowns: string[];
+}
+
+/* ——— The price guide, the map and the Qayem Index ——— */
+export type Confidence = "high" | "medium" | "indicative";
+export interface Rates {
+  day: string;
+  source: string;
+  /** EGP per one unit of each currency, keyed by lower-case code. */
+  egp_per: Record<string, number>;
+  key?: Record<string, { day: string; value: number } | null>;
+}
+export interface SourceShare {
+  id: string;
+  name: string;
+  count: number;
+  share: number;
+}
+export interface Period {
+  start: string;
+  end: string;
+  days?: number;
+}
+export interface GuideRules {
+  min_multi: number;
+  min_single: number;
+  high_min: number;
+  high_max_share: number;
+  window_days: number;
+  method_version?: string;
+  [key: string]: unknown;
+}
+export interface GuideCounts {
+  listings: number;
+  kept: number;
+  duplicates: number;
+  suspect: number;
+  developer_listings: number;
+  segments: number;
+  high: number;
+  medium: number;
+  indicative: number;
+  multi_source_share: number;
+  sources: SourceShare[];
+  period?: Period;
+  rules?: GuideRules;
+  index_month?: string;
+}
+/** One class's figures in a district or compound (the map, the guide's headline, the index). */
+export interface GuideRow {
+  class: PropertyClass;
+  count: number;
+  confidence: Confidence;
+  single_source: boolean;
+  median_ppm: number;
+  p25_ppm: number;
+  p75_ppm: number;
+  median_cash_ppm: number | null;
+  median_price: number;
+  /** Resale against buying new today, in today's money: negative means resale is cheaper. */
+  resale_vs_new: number | null;
+  sources: string[];
+  developer_ppm: number | null;
+}
+export interface GuideDistrict {
+  key: string;
+  name: string;
+  name_ar: string | null;
+  region: string;
+  listings: number;
+  units: number;
+  headline: GuideRow | null;
+}
+export interface Guide {
+  period: Period;
+  counts: GuideCounts;
+  rules: GuideRules;
+  index_month: string;
+  regions: Record<string, { name: string; name_ar: string }>;
+  districts: GuideDistrict[];
+  moves: IndexChange[];
+}
+export interface Segment {
+  key: string;
+  district: string;
+  district_name: string;
+  district_name_ar: string | null;
+  region: string;
+  /** "*" for the whole district, "outside" for listings outside any compound, else the compound's key. */
+  compound: string;
+  compound_name: string | null;
+  compound_name_ar: string | null;
+  class: PropertyClass;
+  size: string;
+  delivery: "*" | "ready" | "under_2y" | "later";
+  count: number;
+  sources: SourceShare[];
+  single_source: boolean;
+  confidence: Confidence;
+  median_ppm: number;
+  p25_ppm: number;
+  p75_ppm: number;
+  median_cash_ppm: number | null;
+  median_price: number;
+  p25_price: number;
+  p75_price: number;
+  median_area: number;
+  plan_share: number | null;
+  price_cuts: number | null;
+  developer: { count: number; median_ppm: number | null; median_cash_ppm: number | null } | null;
+  resale_vs_new: number | null;
+}
+export interface EntityGuide {
+  period: Period;
+  segments: Segment[];
+  headline: Segment | null;
+}
+export interface MapDistrict extends GuideDistrict {
+  lat: number;
+  lon: number;
+  classes: GuideRow[];
+}
+export interface MapCompound {
+  key: string;
+  name: string;
+  name_ar: string | null;
+  district: string;
+  lat: number;
+  lon: number;
+  units: number;
+  listings: number;
+  headline: GuideRow | null;
+  developer: Ref | string | null;
+}
+export interface MapData {
+  period: Period;
+  month: string;
+  districts: MapDistrict[];
+  compounds: MapCompound[];
+  attribution: string;
+  placed_compounds: number;
+  compounds_with_figures: number;
+}
+export interface IndexChange {
+  kind: string;
+  key: string;
+  name: string;
+  name_ar: string | null;
+  class: PropertyClass;
+  from: number;
+  to: number;
+  change: number;
+  count: number;
+  previous_count: number;
+}
+export interface QayemIndex {
+  name: string;
+  name_ar: string;
+  month: string;
+  label: string;
+  label_ar: string;
+  period: Period;
+  as_of: string;
+  provisional: boolean;
+  method_version: string;
+  counts: GuideCounts;
+  districts: { key: string; name: string; name_ar: string | null; region: string; count: number; classes: GuideRow[] }[];
+  compounds: {
+    key: string;
+    name: string;
+    name_ar: string | null;
+    district: string;
+    district_name: string;
+    count: number;
+    classes: GuideRow[];
+  }[];
+  changes: IndexChange[];
+  licence: string;
+  attribution: string;
+}
+
+/* ——— Articles ——— */
+export interface ArticleRef {
+  key: string;
+  name: string;
+  name_ar: string | null;
+}
+export interface ArticleSummary {
+  slug: string;
+  lang: "ar" | "en";
+  title: string;
+  summary: string;
+  kind: string;
+  published_at: string;
+  district: ArticleRef | null;
+  compound: ArticleRef | null;
+}
+export type ArticleBlock =
+  | { type: "h2"; text: string }
+  | { type: "p"; text: string }
+  | { type: "list"; items: string[] }
+  | { type: "table"; columns: string[]; rows: (string | number)[][] }
+  | { type: "figure"; label: string; value: string | number; note?: string };
+export interface Article extends ArticleSummary {
+  updated_at: string | null;
+  byline: string;
+  translation: string | null;
+  period: Period | null;
+  sources: { name: string; url?: string }[];
+  blocks: ArticleBlock[];
+}
+export interface ArticlePage {
+  items: ArticleSummary[];
+  total: number;
+  page: number;
+  pages: number;
 }

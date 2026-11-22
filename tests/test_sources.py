@@ -471,3 +471,18 @@ def test_aqarexit_term_is_derived_when_years_left_is_missing():
     raw = {"years_left": None, "remaining_to_developer": 1_200_000, "installment": 100_000, "installment_every_months": 6}
     assert terms_from_raw(raw) == {"installment_months": 72}
     assert terms_from_raw({}) == {}
+
+
+def test_opensooq_cards_without_next_data():
+    """November 2026 SERP: server-rendered cards, no __NEXT_DATA__; the masked phone is never read."""
+    from datetime import datetime, timezone
+    from qayem.sources.opensooq import parse_cards, parse_item
+    items, pages = parse_cards((FIXTURES / "opensooq_cards.html").read_text())
+    assert pages == 53 and len(items) == 3
+    parsed = [parse_item(item, datetime.now(timezone.utc)) for item in items]
+    first = parsed[0]
+    assert first.source_listing_id == "290309662" and first.price == 10_000_000 and first.area_m2 == 150
+    assert first.bedrooms == 3 and first.district == "New Cairo" and first.city == "cairo"
+    assert first.url == "https://eg.opensooq.com/en/search/290309662"
+    assert all("XX" not in str(item) for item in items)
+    assert {p.property_type for p in parsed} == {"apartment"}

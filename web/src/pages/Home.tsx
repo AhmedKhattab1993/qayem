@@ -1,8 +1,9 @@
 import { useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, ArrowUpRight, Banknote, Building2, Landmark, Link2, PlayCircle, Scale, Users, type LucideIcon } from "lucide-react";
-import type { Overview, Page, Unit } from "../types";
-import { date, number, percent, sep, signed, useApi, useCatalog, nameOf } from "../lib";
+import { ArrowRight, ArrowUpRight, Banknote, BarChart3, Building2, Landmark, Link2, Map as MapIcon, PlayCircle, Scale, Users, type LucideIcon } from "lucide-react";
+import type { Guide, Overview, Page, Unit } from "../types";
+import { classLabel, date, money, monthLabel, number, percent, periodLabel, sep, signed, tone, useApi, useCatalog, nameOf } from "../lib";
+import { ConfidenceBadge, NoSalePrices, RateNote } from "../components/Guide";
 import { t } from "../locale";
 import { ErrorState, Loading } from "../components/States";
 import { DivergingBars, ScopeNote } from "../components/Opportunity";
@@ -38,6 +39,71 @@ function BestGroup({ id, icon: Icon, title, note, items, caption, to, more }: {
         </Link>
       </div>
     </div>
+  );
+}
+
+/** The price guide's headline figures: the busiest districts, each a link to its guide, and the way into the map. */
+function GuideHeadlines() {
+  const { data } = useApi<Guide>("/guide");
+  const places = (data?.districts ?? []).filter((d) => d.headline).slice(0, 6);
+  if (!data || !places.length) return null;
+  const month = monthLabel(data.index_month);
+  return (
+    <section className="page section guide-home" aria-labelledby="guide-heading">
+      <div className="section-head">
+        <div>
+          <span className="eyebrow">{t("Price guide, {month}", { month })}</span>
+          <h2 id="guide-heading" className="display">
+            {t("What a square metre")} <em>{t("asks, place by place.")}</em>
+          </h2>
+        </div>
+        <p className="lede">
+          {t("Median asking prices from {n} listings across {s} sites, seen {period}, with duplicates removed. Every district and compound is on the map.", {
+            n: number(data.counts.kept),
+            s: number(data.counts.sources.length),
+            period: periodLabel(data.period),
+          })}
+        </p>
+      </div>
+      <ul className="guide-cards">
+        {places.map((d) => (
+          <li key={d.key}>
+            <Link to={`/districts/${encodeURIComponent(d.key)}`}>
+              <span className="guide-card-head">
+                <b dir="auto">{nameOf(d)}</b>
+                <ConfidenceBadge confidence={d.headline!.confidence} />
+              </span>
+              <strong className="num">
+                {money(d.headline!.median_ppm, true)} <small>/ {t("m²")}</small>
+              </strong>
+              <span className="muted num">
+                {classLabel(d.headline!.class)}
+                {sep()}
+                {t("{n} listings", { n: number(d.headline!.count), count: d.headline!.count })}
+              </span>
+              {d.headline!.resale_vs_new != null && (
+                <span className={`num guide-card-gap ${tone(d.headline!.resale_vs_new)}`}>
+                  {t("Resale vs new {gap}", { gap: signed(d.headline!.resale_vs_new) })}
+                </span>
+              )}
+            </Link>
+          </li>
+        ))}
+      </ul>
+      <div className="section-foot">
+        <Link className="btn btn-brass" to="/map">
+          <MapIcon size={16} /> {t("Open the price map")}
+        </Link>
+        <Link className="btn btn-ink" to="/index">
+          <BarChart3 size={16} /> {t("The Qayem Index, {month}", { month })}
+        </Link>
+        <Link className="link-arrow" to="/districts">
+          {t("All districts")} <ArrowUpRight size={16} className="flip-rtl" />
+        </Link>
+      </div>
+      <NoSalePrices />
+      <RateNote />
+    </section>
   );
 }
 
@@ -103,6 +169,9 @@ export default function Home({ data, error, retry }: { data: Overview | null; er
               </button>
             </form>
             <div className="hero-alts">
+              <Link className="hero-alt hero-alt-map" to="/map">
+                <MapIcon size={15} /> {t("See prices on the map")}
+              </Link>
               <Link className="hero-alt" to="/evaluate?mode=link">
                 <Link2 size={15} /> {t("Or paste a listing link")}
               </Link>
@@ -153,6 +222,7 @@ export default function Home({ data, error, retry }: { data: Overview | null; er
         </div>
       ) : (
         <>
+          <GuideHeadlines />
           {((belowDeveloper.data?.items.length ?? 0) > 0 || (belowPeers.data?.items.length ?? 0) > 0) && (
             <section className="page section" aria-labelledby="best-heading">
               <div className="section-head">

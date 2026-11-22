@@ -59,3 +59,51 @@ async def serve_film(request, env, films):
     if cached is None:
         return Response("Film cache temporarily unavailable.", status=503, headers={"Retry-After": "5"})
     return Response(cached)
+
+
+TILE_FILES = {"egypt.pmtiles"}
+
+
+async def serve_tiles(request, env):
+    """The basemap (one PMTiles archive in the private `qayem-map` R2 bucket), by byte range.
+
+    MapLibre's PMTiles protocol reads the archive's header, directories and tiles as ranges; each is
+    answered straight from R2 and cached at the edge. No tile server, no per-view cost.
+    """
+    from js import Object, caches
+    from pyodide.ffi import to_js
+    from workers import Request, Response
+
+    url = urlsplit(request.url)
+    name = url.path.removeprefix("/tiles/")
+    bucket = getattr(env, "TILES", None)
+    if name not in TILE_FILES or bucket is None:
+        return Response("Not found.", status=404)
+    if request.method not in {"GET", "HEAD"}:
+        return Response("Method not allowed.", status=405, headers={"Allow": "GET, HEAD"})
+    head = await bucket.head(name)
+    if head is None:
+        return Response("Not found.", status=404)
+    size, etag = int(head.size), str(head.httpEtag)
+    try:
+        start, end, status = byte_range(request.headers.get("Range"), size)
+    except ValueError:
+        return Response(status=416, headers={"Content-Range": f"bytes */{size}"})
+    headers = {"Accept-Ranges": "bytes", "Content-Type": "application/octet-stream", "ETag": etag,
+               "Cache-Control": "public, max-age=86400", "Content-Length": str(end - start + 1),
+               "Access-Control-Allow-Origin": "*", "X-Content-Type-Options": "nosniff"}
+    if status == 206:
+        headers["Content-Range"] = f"bytes {start}-{end}/{size}"
+    if request.method == "HEAD":
+        return Response(status=status, headers=headers)
+    key = f"{url.scheme}://{url.netloc}{url.path}?v={etag.strip(chr(34))}&r={start}-{end}"
+    cached = await caches.default.match(key)
+    if cached is not None:
+        return Response(cached.body, status=status, headers=headers)
+    options = to_js({"range": {"offset": start, "length": end - start + 1}}, dict_converter=Object.fromEntries)
+    body = await bucket.get(name, options)
+    if body is None:
+        return Response("Not found.", status=404)
+    data = await body.arrayBuffer()
+    await caches.default.put(key, Response(data, status=200, headers=headers).js_object)
+    return Response(data, status=status, headers=headers)

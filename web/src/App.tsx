@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { Link, NavLink, Route, Routes, useLocation } from "react-router-dom";
-import { ArrowRight, Bookmark, Building2, Calculator, Check, Compass, Landmark, MapPin, Rows3, Scale, Search, X } from "lucide-react";
+import { ArrowRight, BarChart3, Bookmark, Building2, Calculator, Check, Compass, Landmark, Map as MapIcon, MapPin, Rows3, Scale, Search, X } from "lucide-react";
 import Home from "./pages/Home";
 import Evaluate from "./pages/Evaluate";
 import Units from "./pages/Units";
@@ -16,6 +16,8 @@ import DistrictPage from "./pages/District";
 import Districts from "./pages/Districts";
 import Sheet from "./pages/Sheet";
 import Privacy from "./pages/Privacy";
+import { Loading } from "./components/States";
+import { CURRENCIES, CurrencyContext, chosenCurrency, getCurrency, rateOf, setCurrency, setRates, type Currency } from "./currency";
 import { track } from "./track";
 import { keepsServerHead, serverTitle } from "./head";
 import { CommandPalette } from "./components/CommandPalette";
@@ -25,13 +27,35 @@ import { api, date, number } from "./lib";
 import { getLanguage, setLanguage, t, type Language } from "./locale";
 import type { Overview } from "./types";
 
+// The newer pages load on first visit, so the main bundle stays the size it was.
+const MapPage = lazy(() => import("./pages/Map"));
+const IndexPage = lazy(() => import("./pages/Index"));
+const Articles = lazy(() => import("./pages/Articles").then((m) => ({ default: m.Articles })));
+const ArticlePage = lazy(() => import("./pages/Articles").then((m) => ({ default: m.ArticlePage })));
+const Terms = lazy(() => import("./pages/Terms").then((m) => ({ default: m.Terms })));
+const Corrections = lazy(() => import("./pages/Terms").then((m) => ({ default: m.Corrections })));
+const DealCheck = lazy(() => import("./pages/DealCheck"));
+
 const nav = [
+  { to: "/map", label: "Map", short: "Map", icon: MapIcon },
   { to: "/evaluate", label: "Compare a unit", short: "Evaluate", icon: Calculator },
   { to: "/compounds", label: "Compounds", short: "Compounds", icon: Building2 },
   { to: "/developers", label: "Developers", short: "Developers", icon: Landmark },
   { to: "/districts", label: "Districts", short: "Districts", icon: MapPin },
+  { to: "/index", label: "Qayem Index", short: "Index", icon: BarChart3 },
   { to: "/units", label: "Units", short: "Units", icon: Rows3 },
-  { to: "/methodology", label: "Methodology", short: "Methodology", icon: Compass },
+];
+const tabs = ["/map", "/evaluate", "/compounds", "/units"];
+const footerLinks = [
+  ...nav,
+  { to: "/articles", label: "Articles" },
+  { to: "/deal-check", label: "Free deal check" },
+  { to: "/methodology", label: "Methodology" },
+  { to: "/watchlist", label: "Watchlist" },
+  { to: "/compare", label: "Compare" },
+  { to: "/terms", label: "Terms of use" },
+  { to: "/corrections", label: "Corrections and takedowns" },
+  { to: "/privacy", label: "Privacy" },
 ];
 const titles: [RegExp, string][] = [
   [/^\/$/, "Resale opportunities"],
@@ -49,6 +73,13 @@ const titles: [RegExp, string][] = [
   [/^\/districts/, "Districts"],
   [/^\/sheet/, "Deal sheet"],
   [/^\/privacy/, "Privacy"],
+  [/^\/map/, "Price map"],
+  [/^\/index/, "Qayem Index"],
+  [/^\/articles\/.+/, "Article"],
+  [/^\/articles/, "Articles"],
+  [/^\/terms/, "Terms of use"],
+  [/^\/corrections/, "Corrections and takedowns"],
+  [/^\/deal-check/, "Free deal check"],
 ];
 
 export default function App() {
@@ -59,8 +90,14 @@ export default function App() {
   const [language, setCurrentLanguage] = useState<Language>(getLanguage);
   const [palette, setPalette] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [currency, setCurrentCurrency] = useState<Currency>(chosenCurrency);
   const location = useLocation();
   setLanguage(language);
+  // Money is formatted by plain functions: they read the rates and the choice from the currency module.
+  setRates(overview?.rates);
+  setCurrency(currency);
+  const shown = getCurrency();
+  const currencies = CURRENCIES.filter((code) => rateOf(code));
 
   useEffect(() => {
     const controller = new AbortController();
@@ -109,13 +146,14 @@ export default function App() {
   }, []);
 
   const toggleLanguage = useCallback(() => setCurrentLanguage((current) => (current === "ar" ? "en" : "ar")), []);
+  const changeCurrency = useCallback((next: Currency) => setCurrentCurrency(next), []);
   const closePalette = useCallback(() => setPalette(false), []);
   const onDark = location.pathname === "/" && !scrolled;
   const counts: Record<string, number> = { "/watchlist": watch.length, "/compare": compare.length };
   const retry = () => setRetryKey((k) => k + 1);
 
   return (
-    <>
+    <CurrencyContext.Provider value={{ currency: shown, currencies, change: changeCurrency }}>
       <a className="skip-link" href="#main">
         {t("Skip to content")}
       </a>
@@ -152,6 +190,18 @@ export default function App() {
                 {counts[to] > 0 && <span className="nav-badge num">{number(counts[to])}</span>}
               </NavLink>
             ))}
+            {currencies.length > 1 && (
+              <label className="nav-currency" title={t("Show prices in")}>
+                <span className="sr-only">{t("Show prices in")}</span>
+                <select value={shown} onChange={(event) => changeCurrency(event.target.value as Currency)}>
+                  {currencies.map((code) => (
+                    <option key={code} value={code}>
+                      {t(code)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
             <button
               type="button"
               className="nav-lang"
@@ -165,7 +215,23 @@ export default function App() {
         </div>
       </header>
 
+      {shown !== "EGP" && overview?.rates && (
+        <div className="rate-bar" role="status">
+          <p className="page num">
+            {t("Prices in {currency} at the Central Bank of Egypt rate of {day}: 1 {currency} = {rate}.", {
+              currency: t(shown),
+              day: date(overview.rates.day),
+              rate: `${number(rateOf(shown), 2)} ${t("EGP")}`,
+            })}{" "}
+            <button type="button" className="link-button" onClick={() => changeCurrency("EGP")}>
+              {t("Show in EGP")}
+            </button>
+          </p>
+        </div>
+      )}
+
       <main id="main" key={language}>
+        <Suspense fallback={<Loading />}>
         <Routes>
           <Route path="/" element={<Home data={overview} error={error} retry={retry} />} />
           <Route path="/evaluate" element={<Evaluate />} />
@@ -182,6 +248,14 @@ export default function App() {
           <Route path="/districts/:key" element={<DistrictPage overview={overview} />} />
           <Route path="/sheet/:id" element={<Sheet />} />
           <Route path="/privacy" element={<Privacy />} />
+          <Route path="/map" element={<MapPage overview={overview} />} />
+          <Route path="/index" element={<IndexPage overview={overview} />} />
+          <Route path="/index/:month" element={<IndexPage overview={overview} />} />
+          <Route path="/articles" element={<Articles />} />
+          <Route path="/articles/:slug" element={<ArticlePage />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/corrections" element={<Corrections />} />
+          <Route path="/deal-check" element={<DealCheck />} />
           <Route
             path="*"
             element={
@@ -198,6 +272,7 @@ export default function App() {
             }
           />
         </Routes>
+        </Suspense>
       </main>
 
       <footer className="footer" key={`f-${language}`}>
@@ -210,7 +285,7 @@ export default function App() {
             <span>{t("Resale units against what you could buy instead, in Egypt’s property market.")}</span>
           </div>
           <nav className="footer-links" aria-label={t("Footer")}>
-            {[...nav, { to: "/watchlist", label: "Watchlist" }, { to: "/compare", label: "Compare" }, { to: "/privacy", label: "Privacy" }].map((item) => (
+            {footerLinks.map((item) => (
               <Link key={item.to} to={item.to}>
                 {t(item.label)}
               </Link>
@@ -234,7 +309,7 @@ export default function App() {
       </footer>
 
       <nav className="tabbar" aria-label={t("Quick navigation")} key={`t-${language}`}>
-        {[...nav.filter((item) => item.to !== "/districts").slice(0, 4), { to: "/watchlist", short: "Watchlist", icon: Bookmark }].map(({ to, short, icon: Icon }) => (
+        {[...nav.filter((item) => tabs.includes(item.to)), { to: "/watchlist", short: "Watchlist", icon: Bookmark }].map(({ to, short, icon: Icon }) => (
           <NavLink key={to} to={to} className={({ isActive }) => (isActive ? "is-active" : "")}>
             <span className="tabbar-icon">
               <Icon size={20} />
@@ -255,7 +330,15 @@ export default function App() {
         </div>
       )}
 
-      {palette && <CommandPalette onClose={closePalette} onToggleLanguage={toggleLanguage} />}
-    </>
+      {palette && (
+        <CommandPalette
+          onClose={closePalette}
+          onToggleLanguage={toggleLanguage}
+          currencies={currencies.length > 1 ? currencies : []}
+          currency={shown}
+          onCurrency={changeCurrency}
+        />
+      )}
+    </CurrencyContext.Provider>
   );
 }

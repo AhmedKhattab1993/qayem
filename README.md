@@ -36,6 +36,9 @@ even for robots.txt); it is not crawled.
 - **Pipeline:** eight parsers into one SQLite database with a full lifecycle per
   listing and a nightly crawl. See [docs/OPERATIONS.md](docs/OPERATIONS.md).
 - Product direction: [docs/VISION.md](docs/VISION.md).
+- **Price guide (November 2026 direction):** market districts across every source, cross-source
+  dedupe, published segments with confidence labels, the monthly Qayem Index and CSV, the map,
+  the article agent and Qayem's own price observations. See [docs/PRICE_GUIDE.md](docs/PRICE_GUIDE.md).
 - **Growth:** page heads and sitemap for search, first-party visit counts, lead capture,
   WhatsApp/e-mail alerts, the funnel report and the weekly content brief. See
   [docs/GROWTH.md](docs/GROWTH.md).
@@ -105,6 +108,11 @@ qayem removed --since 2026-09-01    # removal audit
 qayem resolve-entities --dry-run     # spelling pairs waiting for canonical names
 qayem resolve-entities               # resolve them (glm-5.3-flash, 120 pairs per Pi call)
 qayem content-brief --png            # this week's three Arabic data stories, cards and tracked links
+qayem fetch-rates                    # today's CBE exchange rates, policy rates and inflation (nightly in the cloud)
+qayem record-index                   # this month's Qayem Index and today's segment figures (nightly in the cloud)
+qayem developer-reports              # listed developers' new results PDFs, read for their key figures (Pi/GLM)
+qayem articles --dry-run             # the article agent: draft with agy, fact-check, gate (publishes without --dry-run)
+qayem extract-inbox                  # WhatsApp broker sheets → price rows for /admin/review
 ```
 
 Every `parse` prints a summary: pages fetched, seen / created / updated /

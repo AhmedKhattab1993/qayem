@@ -10,6 +10,7 @@ import { DeveloperPrice } from "../components/DeveloperPrice";
 import { Comparables } from "../components/UnitTable";
 import { NameList } from "../components/Names";
 import { LeadCard, SellerForm } from "../components/Capture";
+import { DealCheckLink, ObservationAsk } from "../components/Observation";
 import { ShareBar } from "../components/Share";
 import { track } from "../track";
 
@@ -416,6 +417,15 @@ function Result({ data, selling }: { data: Evaluation; selling: boolean }) {
         <>
           <OpportunitySummary unit={data} />
           {selling ? <SellerForm compound={inputs.compound} price={inputs.price} /> : <LeadCard unit={subject} />}
+          {!selling && (
+            <DealCheckLink
+              compound={inputs.compound?.name}
+              propertyType={inputs.property_type}
+              area={inputs.area_m2}
+              price={inputs.price}
+              terms={data.payment.terms}
+            />
+          )}
           <div className="result-share">
             <ShareBar text={evaluationText(data)} path={`${window.location.pathname}${window.location.search}`} sheet={false} />
           </div>
@@ -450,6 +460,15 @@ function Result({ data, selling }: { data: Evaluation; selling: boolean }) {
           <Unknowns items={data.unknowns.filter((item) => !CALCULATED.includes(item))} />
           <p className="fineprint">{t("Ask the seller and the developer about each of these before you commit.")}</p>
         </section>
+      )}
+      {!selling && data.status === "compared" && (
+        <ObservationAsk
+          key={`${inputs.compound?.key}-${inputs.area_m2}-${inputs.price}`}
+          compound={inputs.compound}
+          propertyType={inputs.property_type}
+          area={inputs.area_m2}
+          price={inputs.price}
+        />
       )}
       {data.comparables.length > 0 && (
         <section className="result-section">

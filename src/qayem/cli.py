@@ -384,7 +384,10 @@ def crawl(
     if unknown:
         raise typer.BadParameter(f"unknown source(s): {', '.join(sorted(unknown))}")
     outcomes: dict[str, int] = {}
-    for scope in active_plan():
+    from datetime import date as _date
+    from zoneinfo import ZoneInfo
+    tonight = datetime.now(ZoneInfo("Africa/Cairo")).date() if not only else None
+    for scope in active_plan(tonight if isinstance(tonight, _date) else None):
         if only and scope.source not in only:
             continue
         console.print(f"[bold]→ {scope.label}[/bold] (budget {scope.budget_minutes} min)")
@@ -462,11 +465,11 @@ def content_brief(
     png: bool = typer.Option(False, help="Also render each card as PNG with a local Chrome (for posting)."),
 ) -> None:
     """Three Arabic data stories for this week's posts, with chart cards and tracked links, from the catalogue."""
-    from .config import crawled_sources, db_path
+    from .config import crawled_sources, db_path, market_sources
     from .content import build, find_chrome, write
     from .website_data import Catalog
 
-    snapshot = Catalog(db_path(), refresh_seconds=0, sources=crawled_sources()).snapshot()
+    snapshot = Catalog(db_path(), refresh_seconds=0, sources=crawled_sources(), market_sources=market_sources()).snapshot()
     chrome = find_chrome() if png else None
     if png and not chrome:
         console.print("[yellow]No Chrome found: writing SVG cards only.[/yellow]")
@@ -475,6 +478,100 @@ def content_brief(
     console.print(f"Wrote {result['stories']} stories to {result['out']} (campaign {result['campaign']}).")
     for story in stories:
         console.print(f"  • {story.title}")
+
+
+@app.command("record-index")
+def record_index(
+    source: list[str] = typer.Option(None, "--source", help="Sources to build the figures from (default: those in use)."),
+) -> None:
+    """Write this month's Qayem Index and today's segment figures into the database (nightly)."""
+    import sqlite3
+    from .config import crawled_sources, db_path, market_sources
+    from .ledger import record_index as write
+    from .website_data import Catalog
+
+    sources = frozenset(source) if source else crawled_sources()
+    snapshot = Catalog(db_path(), refresh_seconds=0, sources=sources,
+                       market_sources=market_sources() if sources is not None else ()).snapshot()
+    with sqlite3.connect(db_path()) as connection:
+        result = write(connection, snapshot)
+    counts = snapshot.guide["counts"]
+    console.print(f"Index {result['month']}: {counts['segments']} segments ({counts['high']} high, {counts['medium']} medium, "
+                  f"{counts['indicative']} indicative), {counts['duplicates']} cross-source duplicates; "
+                  f"{result['segments']} figures recorded for {result['day']}.")
+
+
+@app.command("fetch-rates")
+def fetch_rates() -> None:
+    """Today's Central Bank of Egypt exchange rates, policy rates and inflation (nightly)."""
+    import sqlite3
+    from .config import db_path
+    from .ledger import record_rates
+    from .rates import fetch
+
+    try:
+        figures = fetch()
+    except Exception as exc:  # a failed fetch keeps yesterday's rates; the site shows their date
+        console.print(f"[red]CBE rates unavailable:[/red] {type(exc).__name__}: {str(exc)[:200]}")
+        raise typer.Exit(1)
+    with sqlite3.connect(db_path()) as connection:
+        count = record_rates(connection, figures)
+    console.print(f"CBE {figures['day']}: {count} figures; USD {figures['fx'].get('usd')} EGP, "
+                  f"overnight deposit {figures['key'].get('overnight_deposit')}%.")
+
+
+@app.command("articles")
+def articles_run(
+    site: str = typer.Option("https://qayem.ai", help="The site whose published figures are written about, and where to publish."),
+    token_file: Path = typer.Option(Path(".artifacts/cloudflare/admin-token"), help="File holding that site's ADMIN_TOKEN."),
+    dry_run: bool = typer.Option(False, help="Draft and check, but publish nothing."),
+    limit: int = typer.Option(1, min=1, max=4, help="Article pairs (Arabic and English) to publish at most this run."),
+    log_dir: Path = typer.Option(Path(".artifacts/articles"), help="Where every pack, draft and verdict is kept."),
+) -> None:
+    """The article agent: draft from the live figures with agy, fact-check, gate, publish (no approval step)."""
+    from .articles import Site, run
+
+    token = token_file.read_text().strip() if token_file.is_file() else ""
+    if not token:
+        console.print(f"[red]No admin token in {token_file}[/red]")
+        raise typer.Exit(1)
+    outcomes = run(Site(site, token), dry_run=dry_run, limit=limit, log_dir=log_dir)
+    for outcome in outcomes:
+        console.print(json.dumps(outcome, ensure_ascii=False)[:600])
+    if any(o["status"] == "failed" for o in outcomes):
+        raise typer.Exit(2)
+
+
+@app.command("extract-inbox")
+def extract_inbox(
+    site: str = typer.Option("https://qayem.ai", help="The site whose WhatsApp inbox is read."),
+    token_file: Path = typer.Option(Path(".artifacts/cloudflare/admin-token"), help="File holding that site's ADMIN_TOKEN."),
+) -> None:
+    """Read new WhatsApp broker sheets and offers into price rows for review on /admin/review (Pi/GLM)."""
+    from .articles import Site
+    from .intake import run as read_inbox
+
+    token = token_file.read_text().strip() if token_file.is_file() else ""
+    if not token:
+        console.print(f"[red]No admin token in {token_file}[/red]")
+        raise typer.Exit(1)
+    for outcome in read_inbox(Site(site, token), Path(".artifacts/intake")):
+        console.print(json.dumps(outcome, ensure_ascii=False))
+
+
+@app.command("developer-reports")
+def developer_reports(
+    folder: Path = typer.Option(Path(".artifacts/reports"), help="Where downloaded report PDFs are kept."),
+    limit: int = typer.Option(6, help="New reports to read at most."),
+) -> None:
+    """New earnings releases and presentations from listed developers, read for their key figures (Pi/GLM)."""
+    import sqlite3
+    from .config import db_path
+    from .reports import run as read_reports
+
+    with sqlite3.connect(db_path()) as connection:
+        for outcome in read_reports(connection, folder, limit=limit):
+            console.print(json.dumps(outcome, ensure_ascii=False))
 
 
 @app.command()

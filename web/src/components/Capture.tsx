@@ -16,7 +16,7 @@ const CODES = [
   { code: "+", label: "Other" },
 ];
 
-type Channel = "whatsapp" | "email";
+export type Channel = "whatsapp" | "email";
 type Role = "" | "buyer" | "investor" | "seller" | "broker";
 
 /** The promise every form makes, before anyone types a number. */
@@ -61,6 +61,7 @@ function Contact({
   code,
   setCode,
   emailAllowed = true,
+  emailOnly = false,
 }: {
   channel: Channel;
   setChannel: (channel: Channel) => void;
@@ -69,10 +70,11 @@ function Contact({
   code: string;
   setCode: (code: string) => void;
   emailAllowed?: boolean;
+  emailOnly?: boolean;
 }) {
   return (
     <div className="contact">
-      {emailAllowed && (
+      {emailAllowed && !emailOnly && (
         <div className="segmented" role="group" aria-label={t("How should we reach you?")}>
           <button type="button" aria-pressed={channel === "whatsapp"} onClick={() => setChannel("whatsapp")}>
             <MessageCircle size={14} /> {t("WhatsApp")}
@@ -141,7 +143,7 @@ function fullNumber(code: string, value: string) {
   return `${code}${digits.replace(/^0+/, "")}`;
 }
 
-function Chips<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: [T, string][]; onChange: (v: T) => void }) {
+export function Chips<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: [T, string][]; onChange: (v: T) => void }) {
   return (
     <div className="choice" role="group" aria-label={t(label)}>
       <span className="field-label">{t(label)}</span>
@@ -157,14 +159,16 @@ function Chips<T extends string>({ label, value, options, onChange }: { label: s
 }
 
 /** The shared form body: contact, optional name and intent chips, verification, the pledge, and a done state. */
-function CaptureForm({
+export function CaptureForm({
   cta,
   done,
   send,
   children,
   askName = false,
   emailAllowed = true,
+  emailOnly = false,
   roles = true,
+  validate,
 }: {
   cta: string;
   done: ReactNode;
@@ -172,10 +176,14 @@ function CaptureForm({
   children?: ReactNode;
   askName?: boolean;
   emailAllowed?: boolean;
+  /** Only an e-mail address is asked (corrections and takedowns, which need a written reply). */
+  emailOnly?: boolean;
   roles?: boolean;
+  /** The form's own fields: a problem to show, or nothing when they are complete. */
+  validate?: () => string | null;
 }) {
   const config = useGrowthConfig();
-  const [channel, setChannel] = useState<Channel>("whatsapp");
+  const [channel, setChannel] = useState<Channel>(emailOnly ? "email" : "whatsapp");
   const [value, setValue] = useState("");
   const [code, setCode] = useState("+20");
   const [name, setName] = useState("");
@@ -189,6 +197,8 @@ function CaptureForm({
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
     const destination = channel === "whatsapp" ? fullNumber(code, value) : value.trim();
+    const invalid = validate?.();
+    if (invalid) return setProblem(t(invalid));
     if (!value.trim()) return setProblem(t(channel === "whatsapp" ? "Enter your WhatsApp number." : "Enter your e-mail address."));
     if (needsToken && !token) return setProblem(t("Please wait a moment while we check this browser."));
     setState("busy");
@@ -232,6 +242,7 @@ function CaptureForm({
         code={code}
         setCode={setCode}
         emailAllowed={emailAllowed}
+        emailOnly={emailOnly}
       />
       {/* People never see this field; form-filling scripts do. */}
       <label className="honeypot" aria-hidden="true">
@@ -284,7 +295,7 @@ export function Checklist({ price }: { price?: number }) {
   );
 }
 
-const lead = (kind: string, extra: Record<string, unknown>) => async (contact: {
+export const lead = (kind: string, extra: Record<string, unknown> | (() => Record<string, unknown>)) => async (contact: {
   channel: Channel;
   destination: string;
   name: string;
@@ -299,7 +310,7 @@ const lead = (kind: string, extra: Record<string, unknown>) => async (contact: {
     [contact.channel === "whatsapp" ? "whatsapp" : "email"]: contact.destination,
     turnstile: contact.turnstile,
     website: contact.website,
-    ...extra,
+    ...(typeof extra === "function" ? extra() : extra),
   });
 
 /** A capture card that follows the verdict: a good deal gets a checklist before the deposit; a unit that is

@@ -9,7 +9,7 @@ and its latest yield has not collapsed against its own recent runs.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from statistics import median
 
 from sqlalchemy import select
@@ -25,6 +25,11 @@ class Scope:
     params: dict
     budget_minutes: int
     min_interval: float | None = None  # seconds between requests; None → the global default
+    every_days: int = 1  # a market source is refreshed every other night, so a night's crawl stays in budget
+    offset: int = 0  # which night of the cycle (day number modulo every_days)
+
+    def due(self, day: date) -> bool:
+        return day.toordinal() % self.every_days == self.offset
 
     @property
     def label(self) -> str:
@@ -43,18 +48,28 @@ PLAN: tuple[Scope, ...] = (
     # sitemap-driven and incremental: only new or changed unit pages are fetched
     Scope("aqarexit", {}, 120),
     Scope("gpm", {"max_details": 5000}, 60),
-    *(Scope("opensooq", {"city": city, "category": category}, 15)
-      for city in OPENSOOQ_CITIES for category in OPENSOOQ_CATEGORIES),
-    *(Scope("aqarmap", {"city": city}, 45) for city in ("cairo", "giza", "alexandria")),
-    *(Scope("semsar", {"category": category}, 60) for category in ("apartments", "villas", "chalets")),
+    # Market sources (price-guide aggregates only) alternate nights: Aqarmap one night, OpenSooq and
+    # Semsar the next. Each listing is still re-observed well inside the 14-day confirmation window.
+    *(Scope("aqarmap", {"city": city}, 30, every_days=2, offset=0) for city in ("cairo", "giza", "alexandria")),
+    *(Scope("opensooq", {"city": city, "category": category}, 8, every_days=2, offset=1)
+      for city in OPENSOOQ_CITIES for category in ("apartments", "villas")),
+    *(Scope("semsar", {"category": category}, 25, every_days=2, offset=1) for category in ("apartments", "villas")),
     # ~24k sitemap URLs need one detail fetch each; the newest slice is refreshed nightly.
     Scope("coldwellbanker", {"max_details": 400}, 40),
 )
 
-def active_plan() -> tuple[Scope, ...]:
-    """The scopes of the sources in use and the price benchmarks (AqarExit and Nawy's developer sales by default)."""
+def active_plan(day: date | None = None) -> tuple[Scope, ...]:
+    """The scopes of the sources in use, the price benchmarks and the market sources. With `day`,
+    only the scopes due that night."""
     sources = crawled_sources()
-    return tuple(scope for scope in PLAN if sources is None or scope.source in sources)
+    return tuple(scope for scope in PLAN if (sources is None or scope.source in sources)
+                 and (day is None or scope.due(day)))
+
+
+def stale_after(source: str) -> timedelta:
+    """A source crawled every other night is stale only after it missed its night."""
+    every = max((scope.every_days for scope in PLAN if scope.source == source), default=1)
+    return STALE_AFTER + timedelta(days=every - 1)
 
 
 STALE_AFTER = timedelta(hours=36)
@@ -132,7 +147,7 @@ def source_health(session: Session, now: datetime, sources: list[str] | None = N
             state, detail = "failing", "no run has produced listings"
         elif len(recent) == 2 and all(r.status == "failed" for r in recent):
             state, detail = "failing", f"last two runs failed: {(recent[0].errors or ['unknown'])[0]}"
-        elif now - last_success > STALE_AFTER:
+        elif now - last_success > stale_after(name):
             state, detail = "stale", f"last listings {int((now - last_success).total_seconds() // 3600)} h ago"
         elif typical and latest_seen < DROP_RATIO * typical:
             state, detail = "dropped", f"latest run saw {latest_seen} listings, typically {typical:.0f}"

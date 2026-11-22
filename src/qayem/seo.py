@@ -203,8 +203,156 @@ def _summary(heading: str, lead: str, facts: list[str] = (), faq: list[tuple[str
     return '<div class="seo-summary">' + "".join(parts) + "</div>"
 
 
-NAV = [("قارن وحدة", "/evaluate"), ("الكمبوندات", "/compounds"), ("المطورون", "/developers"),
-       ("المناطق", "/districts"), ("الوحدات", "/units"), ("المنهجية", "/methodology")]
+NAV = [("خريطة الأسعار", "/map"), ("مؤشر قيّم", "/index"), ("قارن وحدة", "/evaluate"), ("الكمبوندات", "/compounds"),
+       ("المطورون", "/developers"), ("المناطق", "/districts"), ("مقالات", "/articles"), ("المنهجية", "/methodology")]
+
+
+# --- the price guide: answer-first sentences -----------------------------------------------
+
+MONTHS_AR = ("يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر",
+             "نوفمبر", "ديسمبر")
+CONFIDENCE_AR = {"high": "ثقة عالية", "medium": "ثقة متوسطة", "indicative": "تقديري"}
+SIZE_AR = {"*": "كل المساحات"}
+DELIVERY_AR = {"ready": "جاهزة للاستلام", "under_2y": "استلام خلال سنتين", "later": "استلام بعد سنتين"}
+
+
+def month_ar(day: str | None) -> str:
+    if not day:
+        return ""
+    return f"{MONTHS_AR[int(day[5:7]) - 1]} {day[:4]}"
+
+
+def thousands_ar(value: float | None) -> str:
+    return "—" if value is None else f"{round(value / 1000, 1):g} ألف جنيه"
+
+
+def answer_ar(segment: dict | None, place: str, day: str | None) -> str:
+    """«سعر المتر للشقق في القاهرة الجديدة حوالي 66.8 ألف جنيه (نوفمبر 2026)…»: the number, the place, the month."""
+    if not segment or not segment.get("median_ppm"):
+        return ""
+    what = CLASS_AR.get(segment["class"], "الوحدات")
+    text = (f"متوسط سعر المتر المطلوب في {what} في {place} حوالي {thousands_ar(segment['median_ppm'])} "
+            f"({month_ar(day)})، ومعظمها معروض بين {thousands_ar(segment['p25_ppm'])} و{thousands_ar(segment['p75_ppm'])} "
+            f"للمتر، من {segment['count']:,} إعلان")
+    gap = segment.get("resale_vs_new")
+    if gap is not None:
+        text += f"؛ وبقيمة اليوم بعد خصم الأقساط، الشراء ريسيل {gap_ar(gap, 'شراء وحدة مماثلة من المطور')}"
+    return text + ". الأسعار أسعار مطلوبة: مصر لا تنشر أسعار البيع الفعلية."
+
+
+def guide_rows(segments: list[dict]) -> list[str]:
+    """The crawlable figures of a page: one line per class, size band and delivery."""
+    rows = []
+    for s in segments:
+        label = CLASS_AR.get(s["class"], s["class"])
+        if s["size"] != "*":
+            label += f" {s['size']} م²"
+        if s["delivery"] != "*":
+            label += f" ({DELIVERY_AR.get(s['delivery'], s['delivery'])})"
+        if s["compound"] == "outside":
+            label += " خارج الكمبوندات"
+        rows.append(f"{label}: {ppm_ar(s['median_ppm'])} (من {ppm_ar(s['p25_ppm'])} إلى {ppm_ar(s['p75_ppm'])})، "
+                    f"{s['count']:,} إعلان، {CONFIDENCE_AR.get(s['confidence'], '')}")
+    return rows
+
+
+def place_jsonld(name: str, latin: str, path: str, location: dict | None, description: str) -> dict:
+    place = {"@context": "https://schema.org", "@type": "Place", "name": name, "alternateName": latin,
+             "url": SITE + path, "description": description,
+             "address": {"@type": "PostalAddress", "addressCountry": "EG"}}
+    if location:
+        place["geo"] = {"@type": "GeoCoordinates", "latitude": location["lat"], "longitude": location["lon"]}
+    return place
+
+
+def dataset_jsonld(edition: dict) -> dict:
+    month = edition["month"]
+    return {"@context": "https://schema.org", "@type": "Dataset", "name": f"مؤشر قيّم — {month_ar(month + '-01')}",
+            "alternateName": f"Qayem Index — {edition.get('label', month)}", "url": f"{SITE}/index/{month}",
+            "description": "متوسط وأسعار المتر المطلوبة للعقارات في مصر حسب المنطقة والكمبوند ونوع الوحدة، من إعلانات عامة "
+                           "وأسعار المطورين المنشورة، مجمّعة فقط.",
+            "temporalCoverage": f"{edition['period']['start']}/{edition['period']['end']}", "dateModified": edition["as_of"],
+            "license": "https://creativecommons.org/licenses/by/4.0/", "isAccessibleForFree": True,
+            "creator": {"@type": "Organization", "name": "Qayem", "url": SITE + "/"},
+            "spatialCoverage": {"@type": "Place", "name": "Egypt"}, "inLanguage": ["ar", "en"],
+            "measurementTechnique": f"{SITE}/methodology",
+            "distribution": [{"@type": "DataDownload", "encodingFormat": "text/csv",
+                              "contentUrl": f"{SITE}/data/qayem-index-{month}.csv"}]}
+
+
+def guide_paths(months: list[str]) -> list[str]:
+    return ["/map", "/index", *(f"/index/{m}" for m in months), "/articles", "/deal-check", "/terms", "/corrections"]
+
+
+def _table(columns: list[str], rows: list[list]) -> str:
+    head = "".join(f"<th>{escape(str(c))}</th>" for c in columns)
+    body = "".join("<tr>" + "".join(f"<td>{escape(str(c))}</td>" for c in row) + "</tr>" for row in rows)
+    return f"<table><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table>"
+
+
+def index_meta(edition: dict | None, month: str = "") -> Meta:
+    path = f"/index/{month}" if month else "/index"
+    if not edition:
+        return not_found(path) if month else Meta("مؤشر قيّم لأسعار العقارات في مصر | قيّم",
+                                                  "أسعار المتر المطلوبة في كل منطقة وكمبوند في مصر، شهريًا.", path)
+    label = month_ar(edition["month"] + "-01")
+    title = f"مؤشر قيّم لأسعار العقارات في مصر — {label} | قيّم"
+    top = [d for d in edition["districts"] if d["classes"]][:5]
+    lead = "؛ ".join(f"{place_ar(d['name']) if not d.get('name_ar') else d['name_ar']} "
+                     f"{thousands_ar(d['classes'][0]['median_ppm'])} للمتر" for d in top)
+    description = (f"مؤشر قيّم {label}: متوسط سعر المتر المطلوب في {len(edition['districts'])} منطقة و"
+                   f"{len(edition['compounds'])} كمبوند، من {edition['counts']['kept']:,} إعلان. {lead}.")
+    rows = [[d.get("name_ar") or d["name"], CLASS_AR.get(c["class"], c["class"]), ppm_ar(c["median_ppm"]),
+             f"{ppm_ar(c['p25_ppm'])} – {ppm_ar(c['p75_ppm'])}", c["count"], CONFIDENCE_AR.get(c["confidence"], "")]
+            for d in edition["districts"] for c in d["classes"]][:200]
+    body = (_summary(f"مؤشر قيّم — {label}", description, links=[("ملف CSV", f"/data/qayem-index-{edition['month']}.csv"),
+                                                                  ("الخريطة", "/map"), ("المنهجية", "/methodology")])
+            .replace("</div>", _table(["المنطقة", "النوع", "متوسط سعر المتر", "النطاق", "الإعلانات", "الثقة"], rows) + "</div>", 1))
+    # the current month's page is canonical at /index/<month>, /index points to it
+    return Meta(title, description, f"/index/{edition['month']}", jsonld=[dataset_jsonld(edition),
+                breadcrumbs(("قيّم", "/"), ("مؤشر قيّم", "/index"), (label, f"/index/{edition['month']}"))], body=body)
+
+
+def map_meta(data: dict | None) -> Meta:
+    title = "خريطة أسعار العقارات في مصر — سعر المتر في كل منطقة وكمبوند | قيّم"
+    description = "خريطة لمتوسط سعر المتر المطلوب في كل منطقة وكمبوند في مصر، الريسيل مقابل سعر المطور اليوم، محدثة يوميًا."
+    body = _summary("خريطة أسعار العقارات في مصر", description, links=NAV)
+    if data:
+        rows = [[d.get("name_ar") or d["name"], CLASS_AR.get(d["headline"]["class"], ""), ppm_ar(d["headline"]["median_ppm"]),
+                 f"{ppm_ar(d['headline']['p25_ppm'])} – {ppm_ar(d['headline']['p75_ppm'])}", d["headline"]["count"]]
+                for d in data.get("districts", [])]
+        body = body.replace("</div>", _table(["المنطقة", "النوع", "متوسط سعر المتر", "النطاق", "الإعلانات"], rows) + "</div>", 1)
+    return Meta(title, description, "/map", body=body)
+
+
+def article_meta(article: dict | None, slug: str) -> Meta:
+    if not article:
+        return not_found(f"/articles/{quote(slug)}")
+    path = f"/articles/{quote(article['slug'])}"
+    parts = [f"<h1>{escape(article['title'])}</h1>", f"<p>{escape(article['summary'])}</p>"]
+    for block in article.get("blocks", []):
+        kind = block["type"]
+        if kind == "h2":
+            parts.append(f"<h2>{escape(block['text'])}</h2>")
+        elif kind == "p":
+            parts.append(f"<p>{escape(block['text'])}</p>")
+        elif kind == "list":
+            parts.append("<ul>" + "".join(f"<li>{escape(i)}</li>" for i in block["items"]) + "</ul>")
+        elif kind == "table":
+            parts.append(_table(block["columns"], block["rows"]))
+        elif kind == "figure":
+            parts.append(f"<p><strong>{escape(block['label'])}: {escape(block['value'])}</strong> {escape(block.get('note') or '')}</p>")
+    by = "Qayem data desk" if article["lang"] == "en" else "مكتب بيانات قيّم"
+    parts.append(f"<p>{escape(by)} · {escape(article['published_at'][:10])}</p>")
+    jsonld = {"@context": "https://schema.org", "@type": "Article", "headline": article["title"][:110],
+              "description": article["summary"], "inLanguage": article["lang"], "url": SITE + path,
+              "datePublished": article["published_at"], "dateModified": article.get("updated_at") or article["published_at"],
+              "author": {"@type": "Organization", "name": "Qayem data desk", "url": SITE + "/methodology"},
+              "publisher": {"@type": "Organization", "name": "Qayem", "url": SITE + "/", "logo": SITE + "/favicon.svg"},
+              "isBasedOn": SITE + "/index"}
+    return Meta(f"{article['title']} | قيّم", article["summary"], path, kind="article",
+                jsonld=[jsonld, breadcrumbs(("قيّم", "/"), ("مقالات", "/articles"), (article["title"][:60], path))],
+                body='<div class="seo-summary">' + "".join(parts) + "</div>")
 
 
 # --- per-route meta --------------------------------------------------------------------
@@ -222,7 +370,8 @@ def home_meta(overview: dict | None) -> Meta:
             "inLanguage": ["ar", "en"], "potentialAction": {"@type": "SearchAction",
             "target": SITE + "/units?q={search_term_string}", "query-input": "required name=search_term_string"}}
     organization = {"@context": "https://schema.org", "@type": "Organization", "name": "Qayem", "url": SITE + "/",
-                    "logo": SITE + "/favicon.svg"}
+                    "logo": SITE + "/favicon.svg", "publishingPrinciples": SITE + "/methodology",
+                    "description": "دليل أسعار العقارات في مصر: أسعار المتر المطلوبة حسب المنطقة والكمبوند، من بيانات عامة مجمّعة."}
     return Meta(title, description, "/", jsonld=[site, organization],
                 body=_summary("هل هي فرصة حقيقية؟", description, links=NAV))
 
@@ -240,6 +389,14 @@ STATIC = {
                    "أسعار المتر ريسيل وسعر المطور اليوم وعدد الفرص في كل منطقة: القاهرة الجديدة، ٦ أكتوبر، الساحل الشمالي، المستقبل، العاصمة الإدارية."),
     "/methodology": ("كيف يقارن قيّم وحدات الريسيل بسعر المطور — المنهجية | قيّم",
                      "مقارنتان لكل وحدة: بسعر المطور اليوم لوحدة مماثلة، وبالوحدات المماثلة المعروضة الآن، كاش وبقيمة الأقساط اليوم. لا يوجد سعر عادل."),
+    "/articles": ("مقالات قيّم — أسعار العقارات في مصر بالأرقام | قيّم",
+                  "قصص بيانات وشروح عن أسعار العقارات في مصر، مكتوبة من أرقام قيّم ومراجعة آليًا: أين تتحرك الأسعار، والريسيل مقابل المطور."),
+    "/deal-check": ("فحص صفقة مجاني قبل أن تشتري — للمصريين في الخارج | قيّم",
+                    "أرسل الوحدة المعروضة عليك: نقارنها بسعر المطور اليوم وبالوحدات المماثلة، ونرسل لك قائمة نقل الملكية. مجانًا."),
+    "/terms": ("شروط الاستخدام | قيّم",
+               "قيّم يعرض مقارنات وأسعارًا مطلوبة مجمّعة من إعلانات عامة، وليس تقييمًا رسميًا أو نصيحة استثمارية."),
+    "/corrections": ("التصحيحات وطلبات الإزالة | قيّم",
+                     "أبلغ عن رقم خاطئ أو اطلب إزالة محتوى: نراجع كل طلب ونرد خلال أيام عمل قليلة."),
     "/privacy": ("الخصوصية — ماذا يحفظ قيّم ولماذا | قيّم",
                  "ما الذي يحفظه قيّم عند طلب تنبيه أو عرض، ولماذا، وكيف تلغي. لن نشارك رقمك مع سماسرة بدون إذنك."),
 }
@@ -315,7 +472,8 @@ def compound_meta(compound: dict | None, key: str) -> Meta:
     if launch and launch.get("median_gap") is not None:
         parts.append(f"الريسيل {gap_ar(launch['median_gap'], 'المطور')}")
     parts.append(f"{compound.get('good_count', 0)} فرصة قوية أو جيدة")
-    description = "، ".join(parts) + "."
+    guide = compound.get("guide") or {}
+    description = answer_ar(guide.get("headline"), name, (guide.get("period") or {}).get("end")) or "، ".join(parts) + "."
     faq = compound_faq(compound)
     path = f"/compounds/{quote(compound['key'])}"
     crumbs = [("قيّم", "/"), ("الكمبوندات", "/compounds")]
@@ -328,9 +486,11 @@ def compound_meta(compound: dict | None, key: str) -> Meta:
         links.append((developer, f"/developers/{quote(compound['developer']['key'])}"))
     if compound.get("district_key"):
         links.append((place_ar(compound.get("district")), f"/districts/{quote(compound['district_key'])}"))
-    jsonld = [breadcrumbs(*crumbs)] + ([faq_jsonld(faq)] if faq else [])
+    jsonld = ([breadcrumbs(*crumbs), place_jsonld(name, compound["name"], path, None, description)]
+              + ([faq_jsonld(faq)] if faq else []))
     return Meta(title, description, path, jsonld=jsonld,
-                body=_summary(f"أسعار ريسيل {both_names(compound)}", description, faq=faq, links=links))
+                body=_summary(f"أسعار ريسيل {both_names(compound)}", description,
+                              facts=guide_rows(guide.get("segments", [])[:16]), faq=faq, links=links))
 
 
 def developer_meta(developer: dict | None, key: str) -> Meta:
@@ -357,8 +517,22 @@ def developer_meta(developer: dict | None, key: str) -> Meta:
 def district_meta(district: dict | None, key: str) -> Meta:
     if not district:
         return not_found(f"/districts/{quote(key)}")
-    name = place_ar(district["name"])
-    title = f"أفضل فرص الريسيل في {name} اليوم — أسعار المتر كاش وتقسيط | قيّم"
+    name = district.get("name_ar") or place_ar(district["name"])
+    guide = district.get("guide") or {}
+    head = guide.get("headline")
+    period_end = (guide.get("period") or {}).get("end")
+    answer = answer_ar(head, name, period_end)
+    if not district.get("units"):  # figures from classifieds only: a price guide, no units to rank
+        title = f"أسعار الشقق والعقارات في {name} اليوم — سعر المتر {month_ar(period_end)} | قيّم"
+        description = answer or f"أسعار العقارات في {name} من الإعلانات العامة."
+        path = f"/districts/{quote(district['key'])}"
+        facts = guide_rows([s for s in guide.get("segments", []) if s["compound"] in ("*", "outside")][:30])
+        jsonld = [breadcrumbs(("قيّم", "/"), ("المناطق", "/districts"), (name, path)),
+                  place_jsonld(name, district["name"], path, district.get("location"), description)]
+        return Meta(title, description, path, jsonld=jsonld,
+                    body=_summary(f"أسعار العقارات في {name}", description, facts=facts, links=NAV))
+    title = (f"سعر المتر في {name} اليوم ({month_ar(period_end)}) — الريسيل مقابل المطور وأفضل الفرص | قيّم" if head
+             else f"أفضل فرص الريسيل في {name} اليوم — أسعار المتر كاش وتقسيط | قيّم")
     main = _primary_class(district.get("classes") or [])
     opportunities = district.get("opportunities") or {}
     good = opportunities.get("strong", 0) + opportunities.get("good", 0)
@@ -366,7 +540,7 @@ def district_meta(district: dict | None, key: str) -> Meta:
     if main and main.get("median_asking_ppm"):
         parts.append(f"متوسط سعر المتر {ppm_ar(main['median_asking_ppm'])}")
     parts.append(f"{good} فرصة قوية أو جيدة مقارنة بسعر المطور والوحدات المماثلة")
-    description = "، ".join(parts) + "."
+    description = answer or "، ".join(parts) + "."
     faq = district_faq(district)
     path = f"/districts/{quote(district['key'])}"
     compounds = district.get("compounds") or []
@@ -374,7 +548,10 @@ def district_meta(district: dict | None, key: str) -> Meta:
              for c in compounds[:12]]
     links = [(name_ar(c), f"/compounds/{quote(c['key'])}") for c in compounds[:12]]
     links.append((f"كل وحدات {name}", f"/units?district={quote(district['key'])}"))
-    jsonld = [breadcrumbs(("قيّم", "/"), ("المناطق", "/districts"), (name, path))] + ([faq_jsonld(faq)] if faq else [])
+    facts = guide_rows([s for s in guide.get("segments", []) if s["compound"] in ("*", "outside")][:24]) + facts
+    jsonld = ([breadcrumbs(("قيّم", "/"), ("المناطق", "/districts"), (name, path)),
+               place_jsonld(name, district["name"], path, district.get("location"), description)]
+              + ([faq_jsonld(faq)] if faq else []))
     return Meta(title, description, path, jsonld=jsonld,
                 body=_summary(f"فرص الريسيل في {name}", description, facts=facts, faq=faq, links=links))
 
@@ -403,6 +580,14 @@ async def page_meta(path: str, query: dict[str, str], load: Loader) -> Meta:
         return private_meta(path)
     if path == "/evaluate":
         return evaluate_meta(query)
+    if path == "/map":
+        return map_meta(await load("map", ""))
+    if path == "/index":
+        return index_meta(await load("index", ""))
+    if match := re.fullmatch(r"/index/(\d{4}-\d{2})", path):
+        return index_meta(await load("index", match.group(1)), match.group(1))
+    if match := re.fullmatch(r"/articles/([a-z0-9-]{3,121})", path):
+        return article_meta(await load("article", match.group(1)), match.group(1))
     if path in STATIC:
         title, description = STATIC[path]
         if path == "/units" and query.get("price_dropped") == "true":
@@ -518,6 +703,13 @@ def llms_txt() -> str:
 - [Developers]({SITE}/developers): each developer's resale market against its own prices today, and its delivery record
 - [Price check]({SITE}/evaluate): is a specific unit's price a good one, against the developer and similar units
 
+## The Qayem Index and the map
+
+- [Qayem Index]({SITE}/index): this month's median asking price per m² for every district and compound, with ranges, listing counts and confidence
+- [Monthly CSV]({SITE}/data/qayem-index-latest.csv): the same figures as CSV, CC BY 4.0, aggregates only
+- [Price map]({SITE}/map): Egypt by district and compound, coloured by price per m²
+- [Articles]({SITE}/articles): data stories written from the index, checked automatically against its figures
+
 ## How the figures are made
 
 - [Methodology]({SITE}/methodology): the comparison rules, the cash-today conversion, sources, coverage and limits
@@ -526,6 +718,12 @@ def llms_txt() -> str:
 
 Please cite figures with their month and link the page they come from.
 """
+
+
+def csv_month(name: str) -> str | None:
+    """`qayem-index-2026-11.csv` → "2026-11"; `qayem-index-latest.csv` → "latest"."""
+    match = re.fullmatch(r"qayem-index-(\d{4}-\d{2}|latest)\.csv", name)
+    return match.group(1) if match else None
 
 
 # Thin pages are left out of the sitemap (they stay reachable and indexable through links).

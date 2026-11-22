@@ -99,7 +99,7 @@ export function districtFaq(district: District): Item[] {
         name,
       }),
     ]);
-  if (district.history)
+  if (district.history && district.units)
     items.push([
       t("How fast do resale units sell in {name}?", { name }),
       t("{n} listings left in the last 30 days ({share} of the stock).", {

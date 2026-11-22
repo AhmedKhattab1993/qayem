@@ -32,3 +32,29 @@ CREATE TABLE IF NOT EXISTS deliveries (
   channel TEXT NOT NULL, matches INTEGER NOT NULL, status TEXT NOT NULL, UNIQUE(alert_id, version)
 );
 CREATE TABLE IF NOT EXISTS state (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+-- Articles written by the article agent (src/qayem/articles.py) from Qayem's own figures. They publish
+-- without approval once the fact check and gates pass; `status='unpublished'` takes one down.
+CREATE TABLE IF NOT EXISTS articles (
+  slug TEXT PRIMARY KEY, lang TEXT NOT NULL, title TEXT NOT NULL, summary TEXT NOT NULL, body TEXT NOT NULL,
+  kind TEXT NOT NULL, trigger_key TEXT NOT NULL, district TEXT, compound TEXT, translation TEXT, meta TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'published', published_at TEXT NOT NULL, updated_at TEXT NOT NULL,
+  unpublish_token TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS articles_published ON articles(status, lang, published_at);
+CREATE INDEX IF NOT EXISTS articles_trigger ON articles(trigger_key);
+-- First-party price observations: price checks run, what visitors were quoted, broker sheets.
+-- No names or contact details: a check is a price, an area and a compound.
+CREATE TABLE IF NOT EXISTS observations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT NOT NULL, day TEXT NOT NULL, kind TEXT NOT NULL,
+  source TEXT NOT NULL, compound TEXT, district TEXT, property_type TEXT, area_m2 REAL, price REAL,
+  over REAL, developer_price REAL, paid_price REAL, month TEXT, fingerprint TEXT NOT NULL, ip_hash TEXT,
+  status TEXT NOT NULL DEFAULT 'accepted', inbox_id INTEGER, UNIQUE(fingerprint)
+);
+CREATE INDEX IF NOT EXISTS observations_day ON observations(day, kind);
+-- Incoming WhatsApp Business messages (broker inventory sheets, developers' offers), for extraction and review.
+CREATE TABLE IF NOT EXISTS inbox (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT NOT NULL, channel TEXT NOT NULL, message_id TEXT NOT NULL UNIQUE,
+  sender_hash TEXT NOT NULL, kind TEXT NOT NULL, text TEXT, media_id TEXT, status TEXT NOT NULL DEFAULT 'new',
+  extracted TEXT, reviewed_at TEXT
+);
+CREATE INDEX IF NOT EXISTS inbox_status ON inbox(status, id);

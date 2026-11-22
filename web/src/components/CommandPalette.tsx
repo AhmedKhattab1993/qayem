@@ -2,6 +2,11 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowUpRight,
+  BarChart3,
+  Banknote,
+  ClipboardCheck,
+  Map as MapIcon,
+  Newspaper,
   Bookmark,
   Building2,
   Calculator,
@@ -15,10 +20,24 @@ import {
 } from "lucide-react";
 import { number, useCatalog, sep, nameOf, place } from "../lib";
 import { getLanguage, t } from "../locale";
+import type { Currency } from "../currency";
 
 type Item = { id: string; group: string; label: string; meta?: string; icon: ReactNode; run: () => void };
 
-export function CommandPalette({ onClose, onToggleLanguage }: { onClose: () => void; onToggleLanguage: () => void }) {
+export function CommandPalette({
+  onClose,
+  onToggleLanguage,
+  currencies = [],
+  currency = "EGP",
+  onCurrency,
+}: {
+  onClose: () => void;
+  onToggleLanguage: () => void;
+  /** Currencies with a rate today; empty hides the choice. */
+  currencies?: Currency[];
+  currency?: Currency;
+  onCurrency?: (currency: Currency) => void;
+}) {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
@@ -74,6 +93,10 @@ export function CommandPalette({ onClose, onToggleLanguage }: { onClose: () => v
         run: go(`/districts/${encodeURIComponent(district.key)}`),
       });
     const pages: [string, string, ReactNode][] = [
+      ["/map", "Map", <MapIcon size={17} />],
+      ["/index", "Qayem Index", <BarChart3 size={17} />],
+      ["/articles", "Articles", <Newspaper size={17} />],
+      ["/deal-check", "Free deal check", <ClipboardCheck size={17} />],
       ["/evaluate", "Compare a unit", <Calculator size={17} />],
       ["/compounds", "Compounds", <Building2 size={17} />],
       ["/developers", "Developers", <Landmark size={17} />],
@@ -92,6 +115,18 @@ export function CommandPalette({ onClose, onToggleLanguage }: { onClose: () => v
         icon: <Search size={17} />,
         run: go(`/units?q=${encodeURIComponent(query.trim())}`),
       });
+    for (const code of currencies)
+      if (code !== currency && matches("currency", "العملة", code, t(code), t("Show prices in {currency}", { currency: t(code) })))
+        result.push({
+          id: `currency-${code}`,
+          group: "Preferences",
+          label: t("Show prices in {currency}", { currency: t(code) }),
+          icon: <Banknote size={17} />,
+          run: () => {
+            onCurrency?.(code);
+            onClose();
+          },
+        });
     if (matches("language", "english", "arabic", "العربية", "اللغة"))
       result.push({
         id: "language",
@@ -104,7 +139,7 @@ export function CommandPalette({ onClose, onToggleLanguage }: { onClose: () => v
         },
       });
     return result;
-  }, [query, catalog, navigate, onClose, onToggleLanguage]);
+  }, [query, catalog, navigate, onClose, onToggleLanguage, currencies, currency, onCurrency]);
 
   useEffect(() => setActive(0), [query]);
   useEffect(() => {

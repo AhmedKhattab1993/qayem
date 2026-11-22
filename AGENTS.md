@@ -22,6 +22,8 @@ to report, never a reason to fall back to the Mac. Details: `docs/STRATEGY.md` s
 - `docs/CLOUDFLARE.md`, `docs/CLOUD_UPDATES.md`: deployment and the nightly updater.
 - `docs/GROWTH.md`: page heads, leads, alerts, secrets, the funnel and the weekly content brief.
 - `docs/STRATEGY.md`: the direction from 2026-11-22: Egypt-wide price guide, data sources, map, article agent, SEO/GEO.
+- `docs/PRICE_GUIDE.md`: how it is built: market districts, dedupe, segments, the Qayem Index, CBE rates, developer
+  reports, the map, the article agent (`qayem articles`, agy `gemini-4-neon` medium), WhatsApp intake and observations.
 
 Run `.venv/bin/python -m pytest -q` and `npm --prefix web run build` before committing; the end-to-end
 check is `QAYEM_WEB_URL=… npm --prefix web run test:e2e`.

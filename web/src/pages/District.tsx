@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, ArrowUpRight, BellRing, Calculator } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, BellRing, Calculator, Map as MapIcon } from "lucide-react";
 import { nameOf, number, place, sep, signed, useApi, useTitle } from "../lib";
 import { t } from "../locale";
 import type { District, Overview, Page, Unit } from "../types";
@@ -11,13 +11,15 @@ import { UnitTable } from "../components/UnitTable";
 import { AlertSignup } from "../components/Capture";
 import { Faq, districtFaq } from "../components/Faq";
 import { track } from "../track";
+import { GuideAnswer, SegmentTables, headlineOf } from "../components/Guide";
 
 export default function DistrictPage({ overview }: { overview: Overview | null }) {
   const { key = "" } = useParams();
   const { data, error, missing, retry } = useApi<District>(`/districts/${encodeURIComponent(key)}`);
-  const units = useApi<Page<Unit>>(`/units?district=${encodeURIComponent(key)}&page_size=10&sort=opportunity`);
   const [alerting, setAlerting] = useState(false);
-  useTitle(data && place(data.name));
+  const hasUnits = Boolean(data && data.units > 0);
+  const units = useApi<Page<Unit>>(hasUnits ? `/units?district=${encodeURIComponent(key)}&page_size=10&sort=opportunity` : null);
+  useTitle(data && (data.name_ar ? nameOf({ name: data.name, name_ar: data.name_ar }) : place(data.name)));
   if (error)
     return (
       <div className="page">
@@ -25,7 +27,10 @@ export default function DistrictPage({ overview }: { overview: Overview | null }
       </div>
     );
   if (!data) return <Loading />;
-  const name = place(data.name)!;
+  const name = data.name_ar ? nameOf({ name: data.name, name_ar: data.name_ar })! : place(data.name)!;
+  const guide = data.guide;
+  const headline = guide ? headlineOf(guide.segments, "*", guide.headline) : null;
+  const listings = data.listings ?? data.units;
   const compounds = data.compounds ?? [];
   const priced = compounds.filter((c) => c.median_gap != null && c.compared >= 5);
   const good = (data.opportunities.strong ?? 0) + (data.opportunities.good ?? 0);
@@ -38,29 +43,39 @@ export default function DistrictPage({ overview }: { overview: Overview | null }
           </Link>
           <span className="eyebrow">{t("District")}</span>
           <h1 className="display" dir="auto">
-            {t("Resale opportunities in {name}", { name })}
+            {t("Property prices in {name}", { name })}
           </h1>
+          {headline && <GuideAnswer place={name} segment={headline} period={guide?.period} />}
           <p className="unit-place num">
-            {t("{n} listings", { n: number(data.units), count: data.units })}
-            {sep()}
-            {t("{n} compounds", { n: number(data.compound_count), count: data.compound_count })}
-            {sep()}
-            {t("{n} strong or good opportunities", { n: number(good), count: good })}
+            {t("{n} listings", { n: number(listings), count: listings })}
+            {hasUnits && (
+              <>
+                {sep()}
+                {t("{n} compounds", { n: number(data.compound_count), count: data.compound_count })}
+                {sep()}
+                {t("{n} strong or good opportunities", { n: number(good), count: good })}
+              </>
+            )}
           </p>
           <div className="entity-bar">
-            <button
-              type="button"
-              className={`btn btn-sm${alerting ? " btn-ink" : ""}`}
-              aria-expanded={alerting}
-              onClick={() => {
-                setAlerting((open) => !open);
-                if (!alerting) track("alert_open", { entity: data.key, meta: { cta: "district_alert" } });
-              }}
-            >
-              <BellRing size={15} /> {t("Alert me about deals here")}
-            </button>
+            {hasUnits && (
+              <button
+                type="button"
+                className={`btn btn-sm${alerting ? " btn-ink" : ""}`}
+                aria-expanded={alerting}
+                onClick={() => {
+                  setAlerting((open) => !open);
+                  if (!alerting) track("alert_open", { entity: data.key, meta: { cta: "district_alert" } });
+                }}
+              >
+                <BellRing size={15} /> {t("Alert me about deals here")}
+              </button>
+            )}
             <Link className="btn btn-sm btn-brass" to="/evaluate">
               <Calculator size={15} /> {t("Compare a unit here")}
+            </Link>
+            <Link className="btn btn-sm" to={`/map?focus=${encodeURIComponent(data.key)}`}>
+              <MapIcon size={15} /> {t("See it on the map")}
             </Link>
           </div>
         </div>
@@ -68,10 +83,29 @@ export default function DistrictPage({ overview }: { overview: Overview | null }
 
       <div className="page">
         {alerting && <AlertSignup query={`district=${encodeURIComponent(data.key)}`} label={name} />}
+        {guide && guide.segments.length > 0 && (
+          <section className="section-tight" aria-labelledby="guide-heading">
+            <span className="eyebrow">{t("Price guide")}</span>
+            <h2 id="guide-heading" className="display section-title">
+              {t("Asking prices in {name}, segment by segment", { name })}
+            </h2>
+            <SegmentTables segments={guide.segments} scope="*" period={guide.period} rules={overview?.guide?.rules} />
+          </section>
+        )}
+        {!hasUnits && (
+          <p className="notice notice-soft">
+            <span>
+              {t("Qayem has no identified resale units to compare in {name} yet: the figures above come from classified listings only.", { name })}{" "}
+              <Link to="/districts">{t("All districts")}</Link>
+            </span>
+          </p>
+        )}
+        {hasUnits && (
+          <>
         <section className="section-tight">
           <div className="section-row">
             <div>
-              <span className="eyebrow">{t("Prices here")}</span>
+              <span className="eyebrow">{t("Resale opportunities")}</span>
               <h2 className="display">{t("What resale units here cost")}</h2>
             </div>
             <ScopeNote scope={data.scope} />
@@ -155,6 +189,8 @@ export default function DistrictPage({ overview }: { overview: Overview | null }
         </section>
 
         <HistoryPanel history={data.history} overview={overview} />
+          </>
+        )}
         <Faq items={districtFaq(data)} />
       </div>
     </div>

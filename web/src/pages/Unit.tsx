@@ -13,6 +13,7 @@ import { DeveloperPrice } from "../components/DeveloperPrice";
 import { Gallery } from "../components/Gallery";
 import { Glance } from "../components/Glance";
 import { LeadCard } from "../components/Capture";
+import { DealCheckLink } from "../components/Observation";
 import { ShareBar, unitShareText } from "../components/Share";
 import { track } from "../track";
 
@@ -172,6 +173,14 @@ export default function UnitPage() {
 
       <div className="page">
         <LeadCard unit={unit} />
+        <DealCheckLink
+          unitId={unit.id}
+          compound={unit.compound?.name}
+          propertyType={unit.property_type}
+          area={unit.area_m2}
+          price={unit.price}
+          terms={unit.payment.terms}
+        />
         <Glance unit={unit} />
       </div>
 

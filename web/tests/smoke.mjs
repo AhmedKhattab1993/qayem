@@ -34,12 +34,20 @@ const launched = (await api("/compounds?page_size=100")).items.find((c) => c.lau
 const verified = (await api("/units?source=aqarexit&terms=plan&page_size=1")).items[0];
 const belowDeveloper = (await api("/units?sort=launch_gap&page_size=1")).items[0];
 const belowPeers = (await api("/units?sort=peer_gap&page_size=1")).items[0];
+// The price guide, the map and the Qayem Index.
+const guide = await api("/guide");
+const qayemIndex = await api("/index");
+const classifiedOnly = guide.districts.find((d) => d.units === 0 && d.headline);
 // Data never needs translating: entity names, source names, source-quoted evidence.
 const dataNames = [
   ...catalog.compounds.map((c) => c.name),
   ...catalog.developers.map((d) => d.name),
   ...catalog.districts.map((d) => d.name),
   ...overview.sources.map((s) => s.name),
+  ...guide.counts.sources.map((s) => s.name),
+  ...guide.districts.filter((d) => !d.name_ar).map((d) => d.name),
+  ...qayemIndex.compounds.filter((c) => !c.name_ar).map((c) => c.name),
+  ...qayemIndex.districts.filter((d) => !d.name_ar).map((d) => d.name),
 ]
   .filter((name) => /[A-Za-z]/.test(name))
   .sort((a, b) => b.length - a.length);
@@ -86,6 +94,16 @@ const pages = [
   ["privacy", "/privacy"],
   ["evaluate-sell", `/evaluate?mode=sell&${evaluate}`],
   ["units-price-cut", "/units?price_dropped=true"],
+  ["map", "/map"],
+  ["map-gap", "/map?show=gap&type=house"],
+  ["index", "/index"],
+  ["index-month", `/index/${qayemIndex.month}`],
+  ["district-guide", "/districts/new-cairo"],
+  ...(classifiedOnly ? [["district-classified", `/districts/${encodeURIComponent(classifiedOnly.key)}`]] : []),
+  ["articles", "/articles"],
+  ["terms", "/terms"],
+  ["corrections", "/corrections"],
+  ["deal-check", `/deal-check?compound=${encodeURIComponent(compound.name)}&area=140`],
 ];
 const pinned = [
   { kind: "compound", key: compound.key, name: compound.name },
@@ -113,7 +131,8 @@ for (const [device, options] of Object.entries(viewports)) {
     const page = await context.newPage();
     const errors = [];
     page.on("pageerror", (error) => errors.push(`pageerror: ${error.message}`));
-    page.on("console", (m) => m.type() === "error" && errors.push(`console: ${m.text()}`));
+    // A missing basemap file is reported by the browser itself; the map page says so and keeps its layers.
+    page.on("console", (m) => m.type() === "error" && !m.location()?.url?.includes("/tiles/") && errors.push(`console: ${m.text()}`));
     page.on("response", (r) => r.url().includes("/api/") && !r.ok() && errors.push(`api ${r.status()}: ${r.url()}`));
     for (const [name, path] of pages) {
       errors.length = 0;
@@ -147,7 +166,7 @@ for (const [device, options] of Object.entries(viewports)) {
             if (!node.parentElement || node.parentElement.closest(skip)) continue;
             let text = node.textContent;
             for (const name of names) text = text.split(name).join("");
-            text = text.replace(/\b(EGP|m²|log|Esc|EN|qayem|QAYEM|https)\b/g, "");
+            text = text.replace(/\b(EGP|m²|log|Esc|EN|qayem|QAYEM|https|CSV)\b/g, "");
             if (/[A-Za-z]{3,}/.test(text)) latin.push(text.trim().slice(0, 80));
           }
         }
@@ -167,6 +186,35 @@ for (const [device, options] of Object.entries(viewports)) {
     }
     await context.close();
   }
+}
+
+// The guide pages answer first, and the map's figures are also a table that needs no map.
+{
+  const context = await browser.newContext({ ...viewports.mobile });
+  await context.addInitScript(() => localStorage.setItem("qayem:language", "ar"));
+  const page = await context.newPage();
+  await page.goto(`${baseURL}/map`, { waitUntil: "networkidle" });
+  const rows = await page.locator("#map-table tbody tr").count();
+  assert.ok(rows >= guide.districts.filter((d) => d.headline).length, `the map's table lists every district (${rows})`);
+  await page.getByRole("button", { name: "اعرض القائمة" }).click();
+  assert.equal(await page.locator(".map-shell").isVisible(), false, "the list toggle hides the map on a phone");
+  await page.goto(`${baseURL}/districts/new-cairo`, { waitUntil: "networkidle" });
+  const sentence = await page.locator(".guide-sentence").textContent();
+  assert.match(sentence, /سعر المتر المطلوب .* القاهرة الجديدة .*\(/, `the district opens with its answer: ${sentence}`);
+  assert.ok((await page.locator(".guide-tables tbody tr").count()) > 0, "the district's segments are tabled");
+  await page.goto(`${baseURL}/index`, { waitUntil: "networkidle" });
+  await page.locator(`a[href="/data/qayem-index-${qayemIndex.month}.csv"]`).first().waitFor();
+  const csv = await fetch(`${baseURL}/data/qayem-index-latest.csv`);
+  const table = await csv.text();
+  assert.ok(csv.ok && (csv.headers.get("content-type") ?? "").includes("csv") && table.includes("\n"), `the latest index CSV is served (${csv.status})`);
+  for (const path of ["/articles", "/terms", "/corrections", "/deal-check"]) {
+    await page.goto(`${baseURL}${path}`, { waitUntil: "networkidle" });
+    await page.locator("h1").first().waitFor();
+  }
+  const tiles = await fetch(`${baseURL}/tiles/egypt.pmtiles`, { headers: { Range: "bytes=0-126" } });
+  await tiles.arrayBuffer().catch(() => null);
+  if (tiles.status !== 206) console.warn(`warning: /tiles/egypt.pmtiles answered ${tiles.status}; the map shows its layers without a basemap`);
+  await context.close();
 }
 
 // Interaction: evaluate a unit through the form on a phone, in English.

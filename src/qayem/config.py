@@ -61,10 +61,24 @@ def required_sources() -> frozenset[str] | None:
     return frozenset(names) if names else None
 
 
+# Market sources: classifieds and portals read only for the price guide's aggregates (district and
+# compound figures, docs/STRATEGY.md 5). Their listings are never published one by one.
+DEFAULT_MARKET_SOURCES = ("aqarmap", "opensooq", "semsar")
+
+
+def market_sources() -> frozenset[str]:
+    """QAYEM_MARKET_SOURCES=aqarmap,opensooq overrides the default; QAYEM_MARKET_SOURCES=none turns them off."""
+    value = os.environ.get("QAYEM_MARKET_SOURCES", "").strip().casefold()
+    if value == "none":
+        return frozenset()
+    names = [name.strip() for name in value.split(",") if name.strip()] if value else DEFAULT_MARKET_SOURCES
+    return frozenset(names)
+
+
 def crawled_sources() -> frozenset[str] | None:
-    """Sources in use plus the benchmarks (None: every source)."""
+    """Sources in use plus the benchmarks and the market sources (None: every source)."""
     sources = active_sources()
-    return None if sources is None else sources | benchmark_sources()
+    return None if sources is None else sources | benchmark_sources() | market_sources()
 
 
 def db_path() -> Path:

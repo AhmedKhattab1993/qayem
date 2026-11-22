@@ -186,8 +186,9 @@ def test_health_failure_preserves_private_history_without_publishing(database, t
 def test_publication_uses_only_the_sources_health_found_fit(database, tmp_path, monkeypatch):
     monkeypatch.setenv("QAYEM_SOURCES", "aqarexit,nawy")
     monkeypatch.setenv("QAYEM_BENCHMARK_SOURCES", "nawy_primary")
+    monkeypatch.setenv("QAYEM_MARKET_SOURCES", "aqarmap")
     job = pipeline.Pipeline("run-2", bridge=object(), database=tmp_path / "cloud.db")
-    assert job.publish_sources() == frozenset({"aqarexit", "nawy", "nawy_primary"})  # no report yet
+    assert job.publish_sources() == frozenset({"aqarexit", "nawy", "nawy_primary", "aqarmap"})  # no report yet
     (job.directory / "health.json").write_text(json.dumps({"publishable": ["aqarexit", "nawy_primary"]}))
     assert job.publish_sources() == frozenset({"aqarexit", "nawy_primary"})
     assert job.status["published_sources"] == ["aqarexit", "nawy_primary"]

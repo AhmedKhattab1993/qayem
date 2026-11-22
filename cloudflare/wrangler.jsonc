@@ -3,46 +3,161 @@
   "account_id": "8157d695115b808345ee82fce21007f3",
   "main": "build/main.py",
   "compatibility_date": "2026-10-04",
-  "compatibility_flags": ["python_workers"],
+  "compatibility_flags": [
+    "python_workers"
+  ],
   "workers_dev": true,
   "routes": [
-    {"pattern": "qayem.ai", "custom_domain": true, "zone_id": "616067124bd2dcdc329de9e77c2e7a0a"},
-    {"pattern": "www.qayem.ai", "custom_domain": true, "zone_id": "616067124bd2dcdc329de9e77c2e7a0a"}
+    {
+      "pattern": "qayem.ai",
+      "custom_domain": true,
+      "zone_id": "616067124bd2dcdc329de9e77c2e7a0a"
+    },
+    {
+      "pattern": "www.qayem.ai",
+      "custom_domain": true,
+      "zone_id": "616067124bd2dcdc329de9e77c2e7a0a"
+    }
   ],
   "assets": {
     "directory": "../web/dist",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/api", "/api/*", "/media/*.mp4", "/", "/evaluate", "/units", "/units/*", "/compounds",
-      "/compounds/*", "/developers", "/developers/*", "/districts", "/districts/*", "/methodology", "/privacy",
-      "/compare", "/watchlist", "/sheet/*", "/sitemap.xml", "/robots.txt", "/llms.txt"]
+    "run_worker_first": [
+      "/api",
+      "/api/*",
+      "/media/*.mp4",
+      "/",
+      "/evaluate",
+      "/units",
+      "/units/*",
+      "/compounds",
+      "/compounds/*",
+      "/developers",
+      "/developers/*",
+      "/districts",
+      "/districts/*",
+      "/methodology",
+      "/privacy",
+      "/compare",
+      "/watchlist",
+      "/sheet/*",
+      "/sitemap.xml",
+      "/robots.txt",
+      "/llms.txt",
+      "/map",
+      "/index",
+      "/index/*",
+      "/articles",
+      "/articles/*",
+      "/terms",
+      "/corrections",
+      "/deal-check",
+      "/data/*",
+      "/tiles/*",
+      "/admin/*",
+      "/cddefcbf956baeb89bcb951980d8630e.txt"
+    ]
   },
   "d1_databases": [
-    {"binding": "DB", "database_name": "qayem-public", "database_id": "3249fecc-5050-4913-afaa-329fa561e0ad"},
-    {"binding": "LEADS_DB", "database_name": "qayem-leads", "database_id": "cf37f558-e536-4407-a190-3be940d0856f"}
+    {
+      "binding": "DB",
+      "database_name": "qayem-public",
+      "database_id": "3249fecc-5050-4913-afaa-329fa561e0ad"
+    },
+    {
+      "binding": "LEADS_DB",
+      "database_name": "qayem-leads",
+      "database_id": "cf37f558-e536-4407-a190-3be940d0856f"
+    }
   ],
-  "triggers": {"crons": ["17 * * * *"]},
-  "vars": {"TURNSTILE_SITE_KEY": "0x4AAAAAAGMCjcYNvvUR8a8A"},
-  "observability": {"enabled": true},
+  "triggers": {
+    "crons": [
+      "17 * * * *"
+    ]
+  },
+  "vars": {
+    "TURNSTILE_SITE_KEY": "0x4AAAAAAGMCjcYNvvUR8a8A",
+    "INDEXNOW_KEY": "cddefcbf956baeb89bcb951980d8630e"
+  },
+  "observability": {
+    "enabled": true
+  },
   "env": {
     "staging": {
       "workers_dev": true,
       "routes": [],
-      "vars": {"QAYEM_ENVIRONMENT": "staging"},
+      "vars": {
+        "QAYEM_ENVIRONMENT": "staging",
+        "INDEXNOW_KEY": "cddefcbf956baeb89bcb951980d8630e"
+      },
       "assets": {
         "directory": "../web/dist-staging",
         "binding": "ASSETS",
         "not_found_handling": "single-page-application",
-        "run_worker_first": ["/api", "/api/*", "/media/*.mp4", "/", "/evaluate", "/units", "/units/*", "/compounds",
-          "/compounds/*", "/developers", "/developers/*", "/districts", "/districts/*", "/methodology", "/privacy",
-          "/compare", "/watchlist", "/sheet/*", "/sitemap.xml", "/robots.txt", "/llms.txt"]
+        "run_worker_first": [
+          "/api",
+          "/api/*",
+          "/media/*.mp4",
+          "/",
+          "/evaluate",
+          "/units",
+          "/units/*",
+          "/compounds",
+          "/compounds/*",
+          "/developers",
+          "/developers/*",
+          "/districts",
+          "/districts/*",
+          "/methodology",
+          "/privacy",
+          "/compare",
+          "/watchlist",
+          "/sheet/*",
+          "/sitemap.xml",
+          "/robots.txt",
+          "/llms.txt",
+          "/map",
+          "/index",
+          "/index/*",
+          "/articles",
+          "/articles/*",
+          "/terms",
+          "/corrections",
+          "/deal-check",
+          "/data/*",
+          "/tiles/*",
+          "/admin/*",
+          "/cddefcbf956baeb89bcb951980d8630e.txt"
+        ]
       },
       "d1_databases": [
-        {"binding": "DB", "database_name": "qayem-staging", "database_id": "a5519958-fe4b-40d8-b9ae-7061b73adc3a"},
-        {"binding": "LEADS_DB", "database_name": "qayem-leads-staging",
-         "database_id": "6b5451b1-c549-498e-b983-5fc552c03ba2"}
+        {
+          "binding": "DB",
+          "database_name": "qayem-staging",
+          "database_id": "a5519958-fe4b-40d8-b9ae-7061b73adc3a"
+        },
+        {
+          "binding": "LEADS_DB",
+          "database_name": "qayem-leads-staging",
+          "database_id": "6b5451b1-c549-498e-b983-5fc552c03ba2"
+        }
       ],
-      "triggers": {"crons": []}
+      "triggers": {
+        "crons": []
+      },
+      "r2_buckets": [
+        {
+          "binding": "TILES",
+          "bucket_name": "qayem-map"
+        }
+      ]
     }
-  }
+  },
+  "r2_buckets": [
+    {
+      "binding": "TILES",
+      "bucket_name": "qayem-map"
+    }
+  ]
 }

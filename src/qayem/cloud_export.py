@@ -41,10 +41,17 @@ def export_sql(database: Path, output: Path, *, sources=None, version: str | Non
     a transactionally consistent source. Existing D1 versions remain available for rollback.
     """
     version = version or uuid4().hex
-    catalog = Catalog(database, refresh_seconds=0, sources=sources)
+    from .config import market_sources
+    catalog = Catalog(database, refresh_seconds=0, sources=sources,
+                      market_sources=market_sources() if sources is not None else ())
     snapshot = catalog.snapshot()
     generated = datetime.now(timezone.utc).isoformat()
-    documents = [("overview", "", snapshot.overview), ("catalog", "", snapshot.catalog)]
+    from . import guide_api
+    documents = [("overview", "", snapshot.overview), ("catalog", "", snapshot.catalog),
+                 ("guide", "", guide_api.summary(snapshot)), ("map", "", guide_api.map_payload(snapshot)),
+                 ("index", "", snapshot.index)]
+    documents.extend(("index", month, edition) for month, edition in snapshot.editions.items())
+    documents.extend(("segments", key, value) for key, value in guide_api.segments_by_district(snapshot).items())
     for kind, entries in [("compound", snapshot.compounds), ("developer", snapshot.developers),
                           ("district", snapshot.districts)]:
         documents.extend((kind, key, value) for key, value in entries.items())

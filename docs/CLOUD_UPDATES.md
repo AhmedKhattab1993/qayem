@@ -37,6 +37,15 @@ last good crawl for up to seven days. `health.json` lists the `publishable` sour
 records `published_sources`. Nawy is not retried from another network: a block is respected.
 Each run also runs `qayem scrub-personal`, so no personal data stays in the canonical database.
 
+**The price guide's market sources and stages (2026-11-22).** Aqarmap, OpenSooq and Semsar
+(`QAYEM_MARKET_SOURCES`, default in `config.py`) are crawled on alternate nights (Aqarmap one night,
+OpenSooq and Semsar the next, `Scope.every_days`), so a night's crawl stays inside its four hours; a
+market source counts as stale only after it missed its night. They feed the guide's figures, never
+the unit listings, and none of them is required. After the health check the run adds `fetch-rates`
+(CBE), `developer-reports` (new results PDFs, Pi/GLM) and `record-index` (this month's Qayem Index and
+today's segment figures, from the sources fit to publish); a failure in any of them never holds back
+publication. Details: [PRICE_GUIDE.md](PRICE_GUIDE.md).
+
 ## Schedule and operation
 
 The service starts at **02:30 Africa/Cairo every day**, including daylight-saving

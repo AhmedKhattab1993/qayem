@@ -1,0 +1,1674 @@
+{
+"205-arkan-palm": {
+"lat": 29.96565,
+"lon": 31.09383,
+"source": "osm:node/6483488440",
+"match": "search",
+"name": "205 Arkan Palm",
+"district": "el-sheikh-zayed"
+},
+"97-hills": {
+"lat": 30.06037,
+"lon": 31.60552,
+"source": "osm:node/14039151376",
+"match": "search",
+"name": "97 Hills",
+"district": "new-cairo"
+},
+"acasia": {
+"lat": 30.05096,
+"lon": 31.49212,
+"source": "osm:way/252868619",
+"match": "name",
+"name": "Acasia",
+"district": "new-cairo"
+},
+"agora-sidi-abdelrahman": {
+"lat": 30.96584,
+"lon": 28.7405,
+"source": "osm:way/101848531",
+"match": "contains",
+"name": "Agora Sidi Abdelrahman",
+"district": "sidi-abdel-rahman"
+},
+"al-ashrafeya": {
+"lat": 30.03777,
+"lon": 31.48261,
+"source": "osm:way/252868628",
+"match": "name",
+"name": "Al Ashrafeya",
+"district": "new-cairo"
+},
+"al-burouj": {
+"lat": 30.20051,
+"lon": 31.68048,
+"source": "osm:way/880654136",
+"match": "name",
+"name": "Al Burouj",
+"district": "el-shorouk"
+},
+"al-fustat-view": {
+"lat": 30.00319,
+"lon": 31.24922,
+"source": "osm:way/990530550",
+"match": "contains",
+"name": "Al Fustat View",
+"district": "central-cairo"
+},
+"al-karma-4": {
+"lat": 30.07203,
+"lon": 30.9745,
+"source": "osm:way/545569068",
+"match": "name",
+"name": "Al Karma 4",
+"district": "northern-expansion"
+},
+"al-rabwa": {
+"lat": 30.06631,
+"lon": 30.98768,
+"source": "osm:way/81478823",
+"match": "name",
+"name": "Al Rabwa",
+"district": "6th-of-october-city"
+},
+"allegria": {
+"lat": 30.07288,
+"lon": 30.95967,
+"source": "osm:way/696642637",
+"match": "name",
+"name": "Allegria",
+"district": "el-sheikh-zayed"
+},
+"alma": {
+"lat": 30.02779,
+"lon": 31.00838,
+"source": "osm:way/697551087",
+"match": "search",
+"name": "ALMA",
+"district": "el-sheikh-zayed"
+},
+"almaza-bay": {
+"lat": 31.19379,
+"lon": 27.56133,
+"source": "osm:relation/8928705",
+"match": "name",
+"name": "Almaza Bay",
+"district": "sidi-heneish"
+},
+"amwaj": {
+"lat": 30.99682,
+"lon": 28.68137,
+"source": "osm:way/301413329",
+"match": "contains",
+"name": "Amwaj",
+"district": "sidi-abdel-rahman"
+},
+"ancient-hill": {
+"lat": 27.42125,
+"lon": 33.65274,
+"source": "osm:way/1381264097",
+"match": "name",
+"name": "Ancient Hill",
+"district": "el-gouna"
+},
+"aria": {
+"lat": 30.05579,
+"lon": 31.61768,
+"source": "osm:way/686920815",
+"match": "name",
+"name": "Aria",
+"district": "mostakbal-city"
+},
+"ashgar-city": {
+"lat": 29.93934,
+"lon": 31.02828,
+"source": "osm:way/544128676",
+"match": "name",
+"name": "Ashgar City",
+"district": "october-gardens"
+},
+"at-east": {
+"lat": 30.0784,
+"lon": 31.59434,
+"source": "osm:way/1367258695",
+"match": "search",
+"name": "At East",
+"district": "mostakbal-city"
+},
+"atrio": {
+"lat": 30.04422,
+"lon": 31.01372,
+"source": "osm:way/697579842",
+"match": "name",
+"name": "ATRIO",
+"district": "el-sheikh-zayed"
+},
+"azad": {
+"lat": 30.01199,
+"lon": 31.50856,
+"source": "osm:way/685383538",
+"match": "name",
+"name": "AZAD",
+"district": "new-cairo"
+},
+"bamboo-iii": {
+"lat": 30.00919,
+"lon": 31.02392,
+"source": "osm:node/6477505483",
+"match": "search",
+"name": "Bamboo III",
+"district": "6th-of-october-city"
+},
+"bellagio": {
+"lat": 30.0398,
+"lon": 31.5004,
+"source": "osm:way/262989531",
+"match": "name",
+"name": "Bellagio",
+"district": "new-cairo"
+},
+"belle-vie": {
+"lat": 30.06202,
+"lon": 30.89767,
+"source": "osm:way/1369233603",
+"match": "name",
+"name": "Belle Vie",
+"district": "new-zayed"
+},
+"beverly-hills": {
+"lat": 30.06032,
+"lon": 30.94879,
+"source": "osm:way/696946818",
+"match": "name",
+"name": "Beverly Hills",
+"district": "6th-of-october-city"
+},
+"bianchi": {
+"lat": 30.99966,
+"lon": 28.69759,
+"source": "osm:way/301413330",
+"match": "name",
+"name": "Bianchi",
+"district": "sidi-abdel-rahman"
+},
+"bianchi-ilios": {
+"lat": 30.99966,
+"lon": 28.69759,
+"source": "osm:way/301413330",
+"match": "contains",
+"name": "Bianchi Ilios",
+"district": "sidi-abdel-rahman"
+},
+"bloomfields": {
+"lat": 30.06692,
+"lon": 31.64963,
+"source": "osm:way/687344736",
+"match": "name",
+"name": "Bloomfields",
+"district": "mostakbal-city"
+},
+"blumar-sidi-abd-el-rahman": {
+"lat": 30.96584,
+"lon": 28.7405,
+"source": "osm:way/101848531",
+"match": "contains",
+"name": "Blumar Sidi Abd El Rahman",
+"district": "sidi-abdel-rahman"
+},
+"cairo-festival-city": {
+"lat": 30.02694,
+"lon": 31.41198,
+"source": "osm:way/26753320",
+"match": "name",
+"name": "Cairo Festival City",
+"district": "new-cairo"
+},
+"casa": {
+"lat": 30.06576,
+"lon": 30.95901,
+"source": "osm:way/544362517",
+"match": "search",
+"name": "Casa",
+"district": "6th-of-october-city"
+},
+"city-gate": {
+"lat": 30.01028,
+"lon": 31.57304,
+"source": "osm:way/687324879",
+"match": "name",
+"name": "City Gate",
+"district": "new-cairo"
+},
+"city-view": {
+"lat": 30.01564,
+"lon": 31.09147,
+"source": "osm:way/461521307",
+"match": "name",
+"name": "City View",
+"district": "6th-of-october-city"
+},
+"comex-gardens": {
+"lat": 29.90643,
+"lon": 31.06611,
+"source": "osm:way/540088033",
+"match": "name",
+"name": "Comex Gardens",
+"district": "october-gardens"
+},
+"creektown": {
+"lat": 30.0867,
+"lon": 31.51228,
+"source": "osm:way/1367251109",
+"match": "name",
+"name": "Creektown",
+"district": "new-cairo"
+},
+"cyan": {
+"lat": 27.40753,
+"lon": 33.6629,
+"source": "osm:way/1381264098",
+"match": "name",
+"name": "Cyan",
+"district": "el-gouna"
+},
+"dara-gardens": {
+"lat": 30.00285,
+"lon": 30.95565,
+"source": "osm:way/690492311",
+"match": "name",
+"name": "Dara Gardens",
+"district": "6th-of-october-city"
+},
+"degla-palms": {
+"lat": 29.8854,
+"lon": 30.9171,
+"source": "osm:way/533259412",
+"match": "name",
+"name": "Degla Palms",
+"district": "6th-of-october-city"
+},
+"dijar": {
+"lat": 29.94869,
+"lon": 31.524,
+"source": "osm:way/1367253868",
+"match": "name",
+"name": "Dijar",
+"district": "new-cairo"
+},
+"diplo-east": {
+"lat": 29.97646,
+"lon": 31.76573,
+"source": "osm:way/1366681574",
+"match": "contains",
+"name": "Diplo East",
+"district": "new-capital-city"
+},
+"district-5": {
+"lat": 29.99445,
+"lon": 31.31456,
+"source": "osm:way/310060878",
+"match": "name",
+"name": "District 5",
+"district": "new-cairo"
+},
+"dream-land": {
+"lat": 29.96949,
+"lon": 31.0507,
+"source": "osm:way/769368308",
+"match": "search",
+"name": "Dream Land",
+"district": "6th-of-october-city"
+},
+"dyar": {
+"lat": 30.01445,
+"lon": 31.46815,
+"source": "osm:way/251573210",
+"match": "search",
+"name": "Dyar",
+"district": "new-cairo"
+},
+"eastown": {
+"lat": 30.0123,
+"lon": 31.51504,
+"source": "osm:way/217300265",
+"match": "contains",
+"name": "Eastown",
+"district": "new-cairo"
+},
+"el-patio-1": {
+"lat": 30.05374,
+"lon": 31.47662,
+"source": "osm:way/252868611",
+"match": "name",
+"name": "El Patio 1",
+"district": "new-cairo"
+},
+"el-patio-2": {
+"lat": 30.0534,
+"lon": 31.48005,
+"source": "osm:way/252868610",
+"match": "name",
+"name": "El Patio 2",
+"district": "new-cairo"
+},
+"el-patio-5-east": {
+"lat": 30.13931,
+"lon": 31.611,
+"source": "osm:way/877550474",
+"match": "search",
+"name": "El Patio 5 East",
+"district": "el-shorouk"
+},
+"el-patio-oro": {
+"lat": 30.02588,
+"lon": 31.59336,
+"source": "osm:node/14321431813",
+"match": "name",
+"name": "El Patio Oro",
+"district": "new-cairo"
+},
+"el-patio-zahraa": {
+"lat": 30.07818,
+"lon": 30.9777,
+"source": "osm:way/696937748",
+"match": "name",
+"name": "El Patio Zahraa",
+"district": "6th-of-october-city"
+},
+"el-rehab": {
+"lat": 30.06307,
+"lon": 31.5102,
+"source": "osm:way/252472303",
+"match": "contains",
+"name": "El Rehab",
+"district": "new-cairo"
+},
+"el-safwa": {
+"lat": 30.01147,
+"lon": 31.0071,
+"source": "osm:way/98821507",
+"match": "name",
+"name": "El Safwa",
+"district": "6th-of-october-city"
+},
+"el-shorouk-springs": {
+"lat": 30.12337,
+"lon": 31.64397,
+"source": "osm:way/756960211",
+"match": "name",
+"name": "El Shorouk Springs",
+"district": "el-shorouk"
+},
+"etapa": {
+"lat": 30.05761,
+"lon": 30.9773,
+"source": "osm:way/1456049122",
+"match": "search",
+"name": "Etapa",
+"district": "el-sheikh-zayed"
+},
+"fcc": {
+"lat": 30.05903,
+"lon": 31.48824,
+"source": "osm:node/494406402",
+"match": "search",
+"name": "FCC",
+"district": "new-cairo"
+},
+"fifth-square": {
+"lat": 30.0511,
+"lon": 31.53851,
+"source": "osm:way/683705592",
+"match": "name",
+"name": "Fifth Square",
+"district": "new-cairo"
+},
+"flowers-park": {
+"lat": 30.05178,
+"lon": 31.49637,
+"source": "osm:way/252868620",
+"match": "name",
+"name": "Flowers Park",
+"district": "new-cairo"
+},
+"fustat-view": {
+"lat": 30.00319,
+"lon": 31.24922,
+"source": "osm:way/990530550",
+"match": "contains",
+"name": "Fustat View",
+"district": "central-cairo"
+},
+"fustat-view-urban-development-fund": {
+"lat": 30.00319,
+"lon": 31.24922,
+"source": "osm:way/990530550",
+"match": "contains",
+"name": "Fustat View (Urban Development Fund)",
+"district": "central-cairo"
+},
+"gardenia-park-2": {
+"lat": 29.9802,
+"lon": 31.00125,
+"source": "osm:way/691446531",
+"match": "name",
+"name": "Gardenia Park 2",
+"district": "6th-of-october-city"
+},
+"ghazala-bay": {
+"lat": 31.03042,
+"lon": 28.59163,
+"source": "osm:way/267187322",
+"match": "name",
+"name": "Ghazala Bay",
+"district": "north-coast"
+},
+"grand-residence": {
+"lat": 30.01317,
+"lon": 31.48386,
+"source": "osm:way/680720960",
+"match": "name",
+"name": "Grand Residence",
+"district": "new-cairo"
+},
+"green-3": {
+"lat": 30.02818,
+"lon": 31.01075,
+"source": "osm:way/697541606",
+"match": "name",
+"name": "Green 3",
+"district": "el-sheikh-zayed"
+},
+"green-5": {
+"lat": 29.9959,
+"lon": 30.90527,
+"source": "osm:way/544239291",
+"match": "name",
+"name": "Green 5",
+"district": "6th-of-october-city"
+},
+"green-6": {
+"lat": 29.99369,
+"lon": 30.90378,
+"source": "osm:way/1116582883",
+"match": "name",
+"name": "Green 6",
+"district": "6th-of-october-city"
+},
+"green-square": {
+"lat": 30.04694,
+"lon": 31.63352,
+"source": "osm:way/686878924",
+"match": "name",
+"name": "Green Square",
+"district": "mostakbal-city"
+},
+"greens": {
+"lat": 30.03501,
+"lon": 30.99465,
+"source": "osm:way/397895463",
+"match": "name",
+"name": "Greens",
+"district": "el-sheikh-zayed"
+},
+"hacienda-bay": {
+"lat": 30.94607,
+"lon": 28.7914,
+"source": "osm:way/290142873",
+"match": "contains",
+"name": "Hacienda Bay",
+"district": "sidi-abdel-rahman"
+},
+"hacienda-red": {
+"lat": 31.00079,
+"lon": 28.65315,
+"source": "osm:way/301413600",
+"match": "contains",
+"name": "Hacienda Red",
+"district": "sidi-abdel-rahman"
+},
+"hacienda-white": {
+"lat": 30.99896,
+"lon": 28.66201,
+"source": "osm:way/301413602",
+"match": "name",
+"name": "Hacienda White",
+"district": "sidi-abdel-rahman"
+},
+"hadaba": {
+"lat": 30.01046,
+"lon": 31.01563,
+"source": "osm:node/10114232918",
+"match": "search",
+"name": "Hadaba",
+"district": "6th-of-october-city"
+},
+"hadayek-el-mohandesin": {
+"lat": 30.02788,
+"lon": 30.99463,
+"source": "osm:way/397895466",
+"match": "name",
+"name": "Hadayek el Mohandesin",
+"district": "el-sheikh-zayed"
+},
+"haptown": {
+"lat": 30.0517,
+"lon": 31.65751,
+"source": "osm:way/687344738",
+"match": "name",
+"name": "HAPTown",
+"district": "mostakbal-city"
+},
+"hay-el-ashgar": {
+"lat": 29.95357,
+"lon": 31.06766,
+"source": "osm:way/94719733",
+"match": "search",
+"name": "Hay El Ashgar",
+"district": "6th-of-october-city"
+},
+"hyde-park": {
+"lat": 29.98864,
+"lon": 31.54159,
+"source": "osm:way/1366735852",
+"match": "contains",
+"name": "Hyde Park",
+"district": "new-cairo"
+},
+"hyde-park-new-cairo": {
+"lat": 29.98841,
+"lon": 31.54171,
+"source": "osm:way/1366735852",
+"match": "search",
+"name": "Hyde Park New Cairo",
+"district": "new-cairo"
+},
+"il-bosco-city": {
+"lat": 30.0661,
+"lon": 31.6643,
+"source": "osm:way/819260788",
+"match": "name",
+"name": "Il Bosco City",
+"district": "mostakbal-city"
+},
+"il-latini": {
+"lat": 30.85865,
+"lon": 28.90009,
+"source": "osm:way/1429670450",
+"match": "search",
+"name": "Il Latini",
+"district": "al-alamein"
+},
+"iris-swanlake-residences": {
+"lat": 30.07597,
+"lon": 31.46391,
+"source": "osm:way/1366745510",
+"match": "contains",
+"name": "IRIS SwanLake Residences",
+"district": "new-cairo"
+},
+"jayd": {
+"lat": 30.06505,
+"lon": 31.52095,
+"source": "osm:way/687379373",
+"match": "name",
+"name": "Jayd",
+"district": "new-cairo"
+},
+"jedar": {
+"lat": 30.00514,
+"lon": 30.99405,
+"source": "osm:way/642043226",
+"match": "name",
+"name": "JEDAR",
+"district": "6th-of-october-city"
+},
+"jeera": {
+"lat": 30.05739,
+"lon": 30.98555,
+"source": "osm:way/697782329",
+"match": "name",
+"name": "Jeera",
+"district": "el-sheikh-zayed"
+},
+"kamaran": {
+"lat": 27.37846,
+"lon": 33.65592,
+"source": "osm:way/1381236036",
+"match": "name",
+"name": "Kamaran",
+"district": "el-gouna"
+},
+"karmell": {
+"lat": 30.06197,
+"lon": 30.87637,
+"source": "osm:way/1395545992",
+"match": "contains",
+"name": "Karmell",
+"district": "new-zayed"
+},
+"katameya-gardens": {
+"lat": 29.99474,
+"lon": 31.51049,
+"source": "osm:way/252474637",
+"match": "name",
+"name": "Katameya Gardens",
+"district": "new-cairo"
+},
+"kattameya-plaza": {
+"lat": 30.03625,
+"lon": 31.49054,
+"source": "osm:way/682685303",
+"match": "name",
+"name": "Kattameya Plaza",
+"district": "new-cairo"
+},
+"keeva": {
+"lat": 29.99347,
+"lon": 31.00361,
+"source": "osm:node/13755027949",
+"match": "search",
+"name": "Keeva",
+"district": "6th-of-october-city"
+},
+"khan-arabesque": {
+"lat": 30.01839,
+"lon": 31.24004,
+"source": "osm:way/989399681",
+"match": "contains",
+"name": "Khan Arabesque",
+"district": "central-cairo"
+},
+"khan-arabesque-saudi-egyptian-developers-sed": {
+"lat": 30.01839,
+"lon": 31.24004,
+"source": "osm:way/989399681",
+"match": "contains",
+"name": "Khan Arabesque (Saudi Egyptian Developers (SED))",
+"district": "central-cairo"
+},
+"l-avenir": {
+"lat": 30.05565,
+"lon": 31.62117,
+"source": "osm:way/685385523",
+"match": "name",
+"name": "L’Avenir",
+"district": "mostakbal-city"
+},
+"la-fontaine-province": {
+"lat": 30.0381,
+"lon": 31.53521,
+"source": "osm:way/252472307",
+"match": "name",
+"name": "La Fontaine Province",
+"district": "new-cairo"
+},
+"la-mirada": {
+"lat": 29.99977,
+"lon": 31.50733,
+"source": "osm:way/685647227",
+"match": "name",
+"name": "La Mirada",
+"district": "mostakbal-city"
+},
+"la-mirada-new-cairo": {
+"lat": 30.06922,
+"lon": 31.65724,
+"source": "osm:way/687344734",
+"match": "name",
+"name": "La Mirada - New Cairo",
+"district": "new-cairo"
+},
+"la-nuova-vista": {
+"lat": 30.04682,
+"lon": 31.48229,
+"source": "osm:way/252868617",
+"match": "name",
+"name": "La Nuova Vista",
+"district": "new-cairo"
+},
+"la-terra": {
+"lat": 30.00935,
+"lon": 31.50025,
+"source": "osm:way/680724931",
+"match": "name",
+"name": "La Terra",
+"district": "new-cairo"
+},
+"la-vista-bay": {
+"lat": 31.07021,
+"lon": 28.3595,
+"source": "osm:way/267187329",
+"match": "contains",
+"name": "La Vista Bay",
+"district": "al-dabaa"
+},
+"la-vista-bay-east": {
+"lat": 31.07021,
+"lon": 28.3595,
+"source": "osm:way/267187329",
+"match": "contains",
+"name": "La Vista Bay East",
+"district": "al-dabaa"
+},
+"la-vista-cascada": {
+"lat": 30.98865,
+"lon": 28.71859,
+"source": "osm:way/296913849",
+"match": "contains",
+"name": "La Vista Cascada",
+"district": "sidi-abdel-rahman"
+},
+"la-vista-city": {
+"lat": 30.00379,
+"lon": 31.59579,
+"source": "osm:node/13575550994",
+"match": "name",
+"name": "La Vista City",
+"district": "new-capital-city"
+},
+"lagoons-al-alamin": {
+"lat": 30.87292,
+"lon": 28.87284,
+"source": "osm:way/646092994",
+"match": "contains",
+"name": "Lagoons Al Alamin",
+"district": "al-alamein"
+},
+"lagoons-al-alamin-modon-egypt": {
+"lat": 30.87292,
+"lon": 28.87284,
+"source": "osm:way/646092994",
+"match": "contains",
+"name": "Lagoons Al Alamin (Modon Egypt)",
+"district": "al-alamein"
+},
+"lake-residence-fifth-square": {
+"lat": 30.0511,
+"lon": 31.53851,
+"source": "osm:way/683705592",
+"match": "contains",
+"name": "Lake Residence Fifth Square",
+"district": "new-cairo"
+},
+"lake-view-boutique": {
+"lat": 30.02351,
+"lon": 31.44632,
+"source": "osm:way/94526273",
+"match": "contains",
+"name": "Lake View Boutique",
+"district": "new-cairo"
+},
+"lake-view-residence": {
+"lat": 30.02435,
+"lon": 31.53827,
+"source": "osm:way/683867727",
+"match": "name",
+"name": "Lake View Residence",
+"district": "new-cairo"
+},
+"lake-view-residence-2": {
+"lat": 30.02351,
+"lon": 31.44632,
+"source": "osm:way/94526273",
+"match": "contains",
+"name": "Lake View Residence 2",
+"district": "new-cairo"
+},
+"lakeyard-hacienda-bay": {
+"lat": 31.00079,
+"lon": 28.65315,
+"source": "osm:way/301413600",
+"match": "contains",
+"name": "Lakeyard Hacienda Bay",
+"district": "sidi-abdel-rahman"
+},
+"layan": {
+"lat": 30.02924,
+"lon": 31.54397,
+"source": "osm:way/1366742998",
+"match": "contains",
+"name": "Layan",
+"district": "new-cairo"
+},
+"leena-springs": {
+"lat": 30.03873,
+"lon": 31.5131,
+"source": "osm:way/352821086",
+"match": "name",
+"name": "Leena Springs",
+"district": "new-cairo"
+},
+"les-rois-new-cairo": {
+"lat": 30.00586,
+"lon": 31.50934,
+"source": "osm:way/217300263",
+"match": "name",
+"name": "Les Rois New Cairo",
+"district": "new-cairo"
+},
+"maadi-view": {
+"lat": 30.1226,
+"lon": 31.65192,
+"source": "osm:way/1086359031",
+"match": "name",
+"name": "Maadi View",
+"district": "el-shorouk"
+},
+"madinaty": {
+"lat": 30.08884,
+"lon": 31.64219,
+"source": "osm:way/1096324015",
+"match": "contains",
+"name": "Madinaty",
+"district": "madinaty"
+},
+"makadi-heights": {
+"lat": 26.96425,
+"lon": 33.88321,
+"source": "osm:node/7245384484",
+"match": "name",
+"name": "Makadi Heights",
+"district": "makadi"
+},
+"mangroovy": {
+"lat": 27.41575,
+"lon": 33.67438,
+"source": "osm:way/1381276783",
+"match": "name",
+"name": "Mangroovy",
+"district": "el-gouna"
+},
+"marassi": {
+"lat": 30.97024,
+"lon": 28.7486,
+"source": "osm:way/295545298",
+"match": "name",
+"name": "Marassi",
+"district": "sidi-abdel-rahman"
+},
+"marina-1": {
+"lat": 30.81826,
+"lon": 29.06106,
+"source": "osm:node/7823252826",
+"match": "search",
+"name": "Marina 1",
+"district": "al-alamein"
+},
+"marina-2": {
+"lat": 30.81861,
+"lon": 29.06041,
+"source": "osm:node/7823231474",
+"match": "search",
+"name": "Marina 2",
+"district": "al-alamein"
+},
+"marina-4": {
+"lat": 30.81894,
+"lon": 29.05918,
+"source": "osm:node/7823252804",
+"match": "search",
+"name": "Marina 4",
+"district": "al-alamein"
+},
+"marina-5": {
+"lat": 30.81903,
+"lon": 29.05889,
+"source": "osm:node/7823252817",
+"match": "search",
+"name": "Marina 5",
+"district": "al-alamein"
+},
+"marina-6": {
+"lat": 30.81925,
+"lon": 29.05783,
+"source": "osm:node/7823252830",
+"match": "search",
+"name": "Marina 6",
+"district": "al-alamein"
+},
+"marina-el-alamein": {
+"lat": 30.84353,
+"lon": 28.98439,
+"source": "osm:way/838560614",
+"match": "contains",
+"name": "Marina El-Alamein",
+"district": "al-alamein"
+},
+"marriott-residences-heliopolis": {
+"lat": 30.0901,
+"lon": 31.32719,
+"source": "osm:way/1248798299",
+"match": "contains",
+"name": "Marriott Residences Heliopolis",
+"district": "heliopolis"
+},
+"marseilia-beach-4": {
+"lat": 30.95004,
+"lon": 28.80171,
+"source": "osm:way/300679276",
+"match": "name",
+"name": "Marseilia Beach 4",
+"district": "sidi-abdel-rahman"
+},
+"meditown": {
+"lat": 29.99285,
+"lon": 31.05689,
+"source": "osm:way/691680297",
+"match": "name",
+"name": "Meditown",
+"district": "6th-of-october-city"
+},
+"mena-garden-city": {
+"lat": 29.99288,
+"lon": 30.97323,
+"source": "osm:way/907311821",
+"match": "name",
+"name": "Mena Garden City",
+"district": "6th-of-october-city"
+},
+"midtown-new-cairo": {
+"lat": 30.01251,
+"lon": 31.50096,
+"source": "osm:way/680724929",
+"match": "contains",
+"name": "Midtown New Cairo",
+"district": "new-cairo"
+},
+"mivida": {
+"lat": 30.00788,
+"lon": 31.52862,
+"source": "osm:way/1296400043",
+"match": "contains",
+"name": "Mivida",
+"district": "new-cairo"
+},
+"moon-valley-2": {
+"lat": 30.03835,
+"lon": 31.5104,
+"source": "osm:way/352821091",
+"match": "name",
+"name": "Moon Valley 2",
+"district": "new-cairo"
+},
+"moon-valley-i": {
+"lat": 30.02297,
+"lon": 31.48834,
+"source": "osm:way/252464057",
+"match": "contains",
+"name": "Moon Valley I",
+"district": "new-cairo"
+},
+"mountain-view-1-1": {
+"lat": 30.0503,
+"lon": 31.50744,
+"source": "osm:way/252868622",
+"match": "contains",
+"name": "Mountain View 1.1",
+"district": "new-cairo"
+},
+"mountain-view-3": {
+"lat": 29.99032,
+"lon": 31.51076,
+"source": "osm:way/527370454",
+"match": "name",
+"name": "Mountain View 3",
+"district": "new-cairo"
+},
+"mountain-view-chillout-park": {
+"lat": 29.99137,
+"lon": 30.88856,
+"source": "osm:way/1096718358",
+"match": "name",
+"name": "Mountain View Chillout Park",
+"district": "northern-expansion"
+},
+"mountain-view-hyde-park": {
+"lat": 29.98718,
+"lon": 31.55541,
+"source": "osm:way/687912420",
+"match": "name",
+"name": "Mountain View Hyde Park",
+"district": "new-cairo"
+},
+"mountain-view-icity-new-cairo": {
+"lat": 30.06884,
+"lon": 31.59303,
+"source": "osm:way/1367258694",
+"match": "contains",
+"name": "Mountain View iCity New Cairo",
+"district": "new-cairo"
+},
+"mountain-view-icity-new-cairo-mountain-view": {
+"lat": 30.06884,
+"lon": 31.59303,
+"source": "osm:way/1367258694",
+"match": "contains",
+"name": "Mountain View ICity New Cairo (Mountain View)",
+"district": "new-cairo"
+},
+"mountain-view-october-park": {
+"lat": 29.98597,
+"lon": 31.07851,
+"source": "osm:way/690196400",
+"match": "name",
+"name": "Mountain View October Park",
+"district": "6th-of-october-city"
+},
+"mountain-view-ras-el-hekma": {
+"lat": 31.08296,
+"lon": 28.02898,
+"source": "osm:way/267187319",
+"match": "name",
+"name": "Mountain View Ras El Hekma",
+"district": "ras-el-hekma"
+},
+"mountain-view-ras-el-hekma-mountain-view": {
+"lat": 31.08296,
+"lon": 28.02898,
+"source": "osm:way/267187319",
+"match": "name",
+"name": "Mountain View Ras El Hekma (Mountain View)",
+"district": "ras-el-hekma"
+},
+"neo-gardens": {
+"lat": 30.06162,
+"lon": 31.62685,
+"source": "osm:way/685629236",
+"match": "name",
+"name": "Neo Gardens",
+"district": "mostakbal-city"
+},
+"neo-lakes": {
+"lat": 30.0646,
+"lon": 31.62412,
+"source": "osm:way/685654825",
+"match": "name",
+"name": "Neo Lakes",
+"district": "mostakbal-city"
+},
+"nest": {
+"lat": 29.99432,
+"lon": 31.50669,
+"source": "osm:way/685647224",
+"match": "search",
+"name": "Nest",
+"district": "new-cairo"
+},
+"new-giza": {
+"lat": 30.00724,
+"lon": 31.05851,
+"source": "osm:way/691680286",
+"match": "name",
+"name": "New Giza",
+"district": "6th-of-october-city"
+},
+"nyom-new-cairo": {
+"lat": 30.06648,
+"lon": 31.68078,
+"source": "osm:way/1073860849",
+"match": "search",
+"name": "Nyom New Cairo",
+"district": "new-cairo"
+},
+"october-hills-2": {
+"lat": 29.9963,
+"lon": 30.94807,
+"source": "osm:way/692583282",
+"match": "name",
+"name": "October Hills 2",
+"district": "6th-of-october-city"
+},
+"october-plaza": {
+"lat": 29.99784,
+"lon": 30.92356,
+"source": "osm:way/691966647",
+"match": "name",
+"name": "October Plaza",
+"district": "northern-expansion"
+},
+"one-ninety": {
+"lat": 30.01625,
+"lon": 31.40899,
+"source": "osm:way/1232415413",
+"match": "search",
+"name": "One Ninety",
+"district": "new-cairo"
+},
+"palm-hills-golf-extension": {
+"lat": 29.99511,
+"lon": 31.03556,
+"source": "osm:way/690479639",
+"match": "name",
+"name": "Palm Hills Golf Extension",
+"district": "6th-of-october-city"
+},
+"palm-hills-katameya": {
+"lat": 30.03302,
+"lon": 31.53819,
+"source": "osm:way/684604815",
+"match": "name",
+"name": "Palm Hills Katameya",
+"district": "new-cairo"
+},
+"palm-hills-katameya-extension": {
+"lat": 30.01973,
+"lon": 31.49315,
+"source": "osm:way/680873442",
+"match": "contains",
+"name": "Palm Hills Katameya Extension",
+"district": "new-cairo"
+},
+"palm-hills-new-cairo": {
+"lat": 30.05998,
+"lon": 31.59756,
+"source": "osm:way/1367258693",
+"match": "name",
+"name": "Palm Hills New Cairo",
+"district": "new-cairo"
+},
+"palm-hills-new-cairo-palm-hills-developments": {
+"lat": 30.01973,
+"lon": 31.49315,
+"source": "osm:way/680873442",
+"match": "contains",
+"name": "Palm Hills New Cairo (Palm Hills Developments)",
+"district": "new-cairo"
+},
+"palm-parks": {
+"lat": 29.98959,
+"lon": 31.00372,
+"source": "osm:way/642043179",
+"match": "name",
+"name": "Palm Parks",
+"district": "6th-of-october-city"
+},
+"park-view": {
+"lat": 30.04744,
+"lon": 31.48933,
+"source": "osm:way/356939503",
+"match": "name",
+"name": "Park View",
+"district": "new-cairo"
+},
+"porto-marina": {
+"lat": 30.82669,
+"lon": 29.00442,
+"source": "osm:node/6072807446",
+"match": "search",
+"name": "Porto Marina",
+"district": "al-alamein"
+},
+"privado": {
+"lat": 30.09288,
+"lon": 31.66707,
+"source": "osm:way/685399403",
+"match": "name",
+"name": "Privado",
+"district": "madinaty"
+},
+"prk-vie": {
+"lat": 30.03619,
+"lon": 31.49743,
+"source": "osm:way/352821142",
+"match": "contains",
+"name": "Prk Vie",
+"district": "new-cairo"
+},
+"promenade-new-cairo": {
+"lat": 29.98407,
+"lon": 31.5301,
+"source": "osm:way/685677145",
+"match": "name",
+"name": "Promenade New Cairo",
+"district": "new-cairo"
+},
+"pyramids-heights": {
+"lat": 30.01468,
+"lon": 31.07103,
+"source": "osm:way/691638014",
+"match": "name",
+"name": "Pyramids Heights",
+"district": "el-sheikh-zayed"
+},
+"pyramids-walk": {
+"lat": 30.00297,
+"lon": 31.01602,
+"source": "osm:way/642030000",
+"match": "name",
+"name": "Pyramids Walk",
+"district": "6th-of-october-city"
+},
+"ras-soma": {
+"lat": 26.86351,
+"lon": 33.9613,
+"source": "osm:way/999074512",
+"match": "contains",
+"name": "Ras Soma",
+"district": "soma-bay"
+},
+"regents-park": {
+"lat": 30.0003,
+"lon": 31.50948,
+"source": "osm:way/685647226",
+"match": "name",
+"name": "Regents Park",
+"district": "new-cairo"
+},
+"rock-eden": {
+"lat": 29.93821,
+"lon": 31.05378,
+"source": "osm:way/540106643",
+"match": "name",
+"name": "Rock Eden",
+"district": "october-gardens"
+},
+"royal-city": {
+"lat": 30.03831,
+"lon": 31.0277,
+"source": "osm:way/696671261",
+"match": "name",
+"name": "Royal City",
+"district": "el-sheikh-zayed"
+},
+"royal-hills": {
+"lat": 29.97943,
+"lon": 30.98836,
+"source": "osm:way/99564066",
+"match": "contains",
+"name": "Royal Hills",
+"district": "6th-of-october-city"
+},
+"royal-meadows-sheikh-zayed": {
+"lat": 30.07962,
+"lon": 30.96971,
+"source": "osm:way/217305620",
+"match": "name",
+"name": "Royal Meadows Sheikh Zayed",
+"district": "el-sheikh-zayed"
+},
+"saada": {
+"lat": 30.08948,
+"lon": 31.49328,
+"source": "osm:way/1367251110",
+"match": "name",
+"name": "Saada",
+"district": "new-cairo"
+},
+"saba-residence": {
+"lat": 29.97151,
+"lon": 30.88187,
+"source": "osm:node/12864271570",
+"match": "search",
+"name": "Saba Residence",
+"district": "6th-of-october-city"
+},
+"sawary": {
+"lat": 31.18498,
+"lon": 29.89464,
+"source": "osm:way/28816989",
+"match": "search",
+"name": "Sawary",
+"district": "alexandria"
+},
+"scene-7": {
+"lat": 29.9597,
+"lon": 31.70591,
+"source": "osm:way/819189823",
+"match": "search",
+"name": "Scene 7",
+"district": "new-capital-city"
+},
+"seashell-sidi-abdel-rahman": {
+"lat": 30.96584,
+"lon": 28.7405,
+"source": "osm:way/101848531",
+"match": "contains",
+"name": "Seashell Sidi Abdel Rahman",
+"district": "sidi-abdel-rahman"
+},
+"sharm-bay": {
+"lat": 27.8592,
+"lon": 34.29505,
+"source": "osm:node/768581937",
+"match": "search",
+"name": "Sharm Bay",
+"district": "sharm-el-sheikh"
+},
+"sia-lagoon": {
+"lat": 30.87292,
+"lon": 28.87284,
+"source": "osm:way/646092994",
+"match": "contains",
+"name": "Sia Lagoon",
+"district": "north-coast"
+},
+"solana-east": {
+"lat": 29.97844,
+"lon": 31.5374,
+"source": "osm:way/1367252776",
+"match": "name",
+"name": "Solana East",
+"district": "new-cairo"
+},
+"stei8ht": {
+"lat": 30.08003,
+"lon": 31.48711,
+"source": "osm:way/1366745511",
+"match": "contains",
+"name": "Stei8ht",
+"district": "new-cairo"
+},
+"stella-heights": {
+"lat": 30.96919,
+"lon": 28.72275,
+"source": "osm:node/768026921",
+"match": "search",
+"name": "Stella Heights",
+"district": "sidi-abdel-rahman"
+},
+"stella-sidi-abdelrahman": {
+"lat": 30.9584,
+"lon": 28.77226,
+"source": "osm:way/267187312",
+"match": "name",
+"name": "Stella Sidi Abdelrahman",
+"district": "sidi-abdel-rahman"
+},
+"stoda": {
+"lat": 30.0887,
+"lon": 31.37978,
+"source": "osm:way/1563229092",
+"match": "name",
+"name": "Stoda",
+"district": "heliopolis"
+},
+"stone-park": {
+"lat": 29.98969,
+"lon": 31.37895,
+"source": "osm:node/2228844312",
+"match": "name",
+"name": "Stone Park",
+"district": "new-cairo"
+},
+"stone-park-pre-group": {
+"lat": 29.98401,
+"lon": 31.3839,
+"source": "osm:way/309084776",
+"match": "contains",
+"name": "Stone Park (PRE Group)",
+"district": "new-cairo"
+},
+"stone-residence": {
+"lat": 29.97928,
+"lon": 31.38581,
+"source": "osm:way/970113925",
+"match": "name",
+"name": "Stone Residence",
+"district": "new-cairo"
+},
+"swan-lake-west": {
+"lat": 30.00206,
+"lon": 30.99641,
+"source": "osm:way/690171020",
+"match": "contains",
+"name": "Swan Lake West",
+"district": "6th-of-october-city"
+},
+"swanlake-el-gouna": {
+"lat": 27.4054,
+"lon": 33.65875,
+"source": "osm:way/1381264099",
+"match": "contains",
+"name": "Swanlake El Gouna",
+"district": "el-gouna"
+},
+"swanlake-residences": {
+"lat": 30.07597,
+"lon": 31.46391,
+"source": "osm:way/1366745510",
+"match": "name",
+"name": "Swanlake Residences",
+"district": "new-cairo"
+},
+"taj-city": {
+"lat": 30.06889,
+"lon": 31.41806,
+"source": "osm:way/455763824",
+"match": "name",
+"name": "Taj City",
+"district": "new-cairo"
+},
+"tala": {
+"lat": 29.98265,
+"lon": 30.91931,
+"source": "osm:way/695939495",
+"match": "name",
+"name": "Tala",
+"district": "6th-of-october-city"
+},
+"telal-al-guezira": {
+"lat": 30.07575,
+"lon": 30.97313,
+"source": "osm:way/545542488",
+"match": "name",
+"name": "Telal Al Guezira",
+"district": "el-sheikh-zayed"
+},
+"telal-east": {
+"lat": 30.07787,
+"lon": 31.59354,
+"source": "osm:way/1367258695",
+"match": "name",
+"name": "Telal East",
+"district": "new-cairo"
+},
+"the-101": {
+"lat": 30.00936,
+"lon": 31.48447,
+"source": "osm:node/8208764769",
+"match": "search",
+"name": "The 101",
+"district": "mostakbal-city"
+},
+"the-city": {
+"lat": 29.95228,
+"lon": 31.71281,
+"source": "osm:way/819189829",
+"match": "contains",
+"name": "The City",
+"district": "new-capital-city"
+},
+"the-city-of-odyssia": {
+"lat": 30.05173,
+"lon": 31.64207,
+"source": "osm:way/687344732",
+"match": "contains",
+"name": "The City of Odyssia",
+"district": "mostakbal-city"
+},
+"the-crown": {
+"lat": 29.98871,
+"lon": 31.04652,
+"source": "osm:way/970684272",
+"match": "name",
+"name": "The Crown",
+"district": "6th-of-october-city"
+},
+"the-one": {
+"lat": 31.19575,
+"lon": 29.913,
+"source": "osm:node/14071463827",
+"match": "search",
+"name": "The one",
+"district": "alexandria"
+},
+"the-spine": {
+"lat": 30.10054,
+"lon": 31.66361,
+"source": "osm:way/685399399",
+"match": "contains",
+"name": "The Spine",
+"district": "madinaty"
+},
+"the-square": {
+"lat": 29.99822,
+"lon": 31.55186,
+"source": "osm:way/687324878",
+"match": "name",
+"name": "The Square",
+"district": "new-cairo"
+},
+"the-village": {
+"lat": 30.00915,
+"lon": 31.48511,
+"source": "osm:way/680903180",
+"match": "contains",
+"name": "The Village",
+"district": "new-cairo"
+},
+"the-village-gate": {
+"lat": 30.00915,
+"lon": 31.48511,
+"source": "osm:way/680903180",
+"match": "contains",
+"name": "The Village Gate",
+"district": "new-cairo"
+},
+"the-waterway": {
+"lat": 30.04145,
+"lon": 31.4771,
+"source": "osm:way/252868625",
+"match": "name",
+"name": "The Waterway",
+"district": "new-cairo"
+},
+"three-sixty": {
+"lat": 30.02828,
+"lon": 31.55089,
+"source": "osm:way/1365849365",
+"match": "search",
+"name": "Three Sixty",
+"district": "new-cairo"
+},
+"trio": {
+"lat": 30.05639,
+"lon": 31.60447,
+"source": "osm:way/1367258696",
+"match": "search",
+"name": "Trio",
+"district": "new-cairo"
+},
+"uptown-cairo": {
+"lat": 30.02365,
+"lon": 31.30375,
+"source": "osm:way/309245588",
+"match": "name",
+"name": "Uptown Cairo",
+"district": "mokattam"
+},
+"veranda-sahl-hasheesh": {
+"lat": 27.04844,
+"lon": 33.88684,
+"source": "osm:node/7228215290",
+"match": "contains",
+"name": "Veranda Sahl Hasheesh",
+"district": "sahl-hasheesh"
+},
+"vida": {
+"lat": 30.00162,
+"lon": 31.00717,
+"source": "osm:way/642043203",
+"match": "search",
+"name": "Vida",
+"district": "october-gardens"
+},
+"village-avenue": {
+"lat": 30.04968,
+"lon": 31.47713,
+"source": "osm:way/252868614",
+"match": "name",
+"name": "Village Avenue",
+"district": "new-cairo"
+},
+"village-west": {
+"lat": 30.04613,
+"lon": 31.0216,
+"source": "osm:way/1268841372",
+"match": "contains",
+"name": "Village West",
+"district": "el-sheikh-zayed"
+},
+"villette": {
+"lat": 30.02152,
+"lon": 31.54496,
+"source": "osm:way/1366735845",
+"match": "contains",
+"name": "Villette",
+"district": "new-cairo"
+},
+"vye": {
+"lat": 30.06134,
+"lon": 30.88006,
+"source": "osm:way/1395545992",
+"match": "search",
+"name": "VYE",
+"district": "new-zayed"
+},
+"westown-residences": {
+"lat": 30.06768,
+"lon": 30.93966,
+"source": "osm:way/217305019",
+"match": "contains",
+"name": "Westown Residences",
+"district": "el-sheikh-zayed"
+},
+"zayed-2000": {
+"lat": 30.0222,
+"lon": 30.99906,
+"source": "osm:way/99269682",
+"match": "name",
+"name": "Zayed 2000",
+"district": "el-sheikh-zayed"
+},
+"zayed-dunes": {
+"lat": 30.03626,
+"lon": 30.98646,
+"source": "osm:way/774680494",
+"match": "name",
+"name": "Zayed Dunes",
+"district": "6th-of-october-city"
+},
+"zayed-regency": {
+"lat": 30.07824,
+"lon": 30.97156,
+"source": "osm:way/545569015",
+"match": "name",
+"name": "Zayed Regency",
+"district": "el-sheikh-zayed"
+},
+"zed": {
+"lat": 30.04637,
+"lon": 30.99978,
+"source": "osm:node/14188862364",
+"match": "search",
+"name": "ZED",
+"district": "el-sheikh-zayed"
+},
+"zed-tower": {
+"lat": 30.04637,
+"lon": 30.99978,
+"source": "osm:node/14188862364",
+"match": "search",
+"name": "Zed Tower",
+"district": "el-sheikh-zayed"
+},
+"zizinia-el-mostakbal": {
+"lat": 30.04996,
+"lon": 31.62396,
+"source": "osm:way/685433367",
+"match": "name",
+"name": "Zizinia El Mostakbal",
+"district": "mostakbal-city"
+}
+}
