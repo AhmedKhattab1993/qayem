@@ -104,6 +104,6 @@ async def serve_tiles(request, env):
     body = await bucket.get(name, options)
     if body is None:
         return Response("Not found.", status=404)
-    data = await body.arrayBuffer()
+    data = bytes(await body.arrayBuffer())  # a memoryview in Python Workers; Response takes bytes
     await caches.default.put(key, Response(data, status=200, headers=headers).js_object)
     return Response(data, status=status, headers=headers)

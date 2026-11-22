@@ -89,7 +89,8 @@
       "routes": [],
       "vars": {
         "QAYEM_ENVIRONMENT": "staging",
-        "INDEXNOW_KEY": "cddefcbf956baeb89bcb951980d8630e"
+        "INDEXNOW_KEY": "cddefcbf956baeb89bcb951980d8630e",
+        "QAYEM_SITE": "https://qayem-staging.qayem-ai.workers.dev"
       },
       "assets": {
         "directory": "../web/dist-staging",

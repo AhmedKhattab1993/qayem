@@ -19,6 +19,7 @@ import sqlite3
 import subprocess
 import sys
 import tempfile
+import time
 
 import httpx
 
@@ -51,8 +52,13 @@ def keys() -> list[str]:
 
 def r2(action: str, key: str, path: Path) -> None:
     flag = "--file" if action == "put" else "--file"
-    subprocess.run([*WRANGLER, "r2", "object", action, f"{BUCKET}/{key}", flag, str(path), "--remote"],
-                   cwd=ROOT / "cloudflare", capture_output=True, check=True)
+    for attempt in range(4):  # R2 uploads of ~40 MB fail now and then
+        result = subprocess.run([*WRANGLER, "r2", "object", action, f"{BUCKET}/{key}", flag, str(path), "--remote"],
+                                cwd=ROOT / "cloudflare", capture_output=True)
+        if result.returncode == 0:
+            return
+        time.sleep(15 * (attempt + 1))
+    raise RuntimeError(f"r2 {action} {key} failed: {result.stderr.decode()[-300:]}")
 
 
 def phones(database: Path) -> int:
