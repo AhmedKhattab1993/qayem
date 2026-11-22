@@ -14,6 +14,14 @@ const SECTIONS: [string, string][] = [
     "We do not sell or pass on your details. If you ask to be put in touch with a developer or an adviser, we ask you first, every time.",
   ],
   [
+    "Listings carry no one’s details",
+    "Qayem reads public listings for their facts only: price, area, type, payment plan, place and date. It never keeps a seller’s or broker’s name, phone number or photos, and shows no source’s photos.",
+  ],
+  [
+    "Comparisons, not advice",
+    "Qayem’s figures are asking and contract prices compared by published rules (see the methodology). They are not valuations, offers or investment advice: check every unit and its papers before you pay anything.",
+  ],
+  [
     "Stopping",
     "Every alert message has a link to stop it. To have your details deleted, reply to any message from us or write to us on WhatsApp, and we delete them.",
   ],

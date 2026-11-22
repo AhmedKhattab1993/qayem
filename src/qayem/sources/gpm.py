@@ -71,13 +71,6 @@ def parse_list_card(card) -> NormalizedListing | None:
     if agent_a is not None:
         compound = agent_a.get_text(" ", strip=True)
 
-    phone = None
-    tel = card.select_one('a[href^="tel:"]')
-    if tel is not None:
-        phone = tel["href"].replace("tel:", "").strip()
-    if phone and not phone.startswith("+"):
-        phone = "+" + phone
-
     images = []
     img = card.find("img", src=True)
     if img is not None:
@@ -97,7 +90,6 @@ def parse_list_card(card) -> NormalizedListing | None:
         district=district or None,
         compound=compound,
         seller_type="broker",
-        phone=phone,
         images=images,
         raw={},
     )

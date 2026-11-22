@@ -441,6 +441,12 @@ def create_cloud_app(database=None, *, leads=_FROM_ENV, http=None, settings=None
     async def robots(request: Request):
         return PlainTextResponse(seo.robots_txt(staging(request)), headers={"Cache-Control": "public, max-age=3600"})
 
+    @app.get("/llms.txt", include_in_schema=False)
+    async def llms(request: Request):
+        if staging(request):
+            raise HTTPException(404, "Not found.")
+        return PlainTextResponse(seo.llms_txt(), headers={"Cache-Control": "public, max-age=3600"})
+
     @app.get("/sitemap.xml", include_in_schema=False)
     async def sitemap(data=Depends(store)):
         return Response(seo.sitemap_xml(await data.sitemap(), data.today), media_type="application/xml",

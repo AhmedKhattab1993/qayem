@@ -60,6 +60,9 @@ def active_plan() -> tuple[Scope, ...]:
 STALE_AFTER = timedelta(hours=36)
 ABANDONED_AFTER = timedelta(hours=6)
 DROP_RATIO = 0.5  # latest yield below half of the recent median → likely a parser or access break
+# A price benchmark may be published from its last good crawl for this long (the site shows its date);
+# listing sources are published only while healthy, so stale listings never look current.
+BENCHMARK_MAX_AGE = timedelta(days=7)
 
 
 def utc(value: datetime | None) -> datetime | None:
@@ -138,3 +141,17 @@ def source_health(session: Session, now: datetime, sources: list[str] | None = N
         report.append(SourceHealth(name, state, utc(last.started_at), last.status, last_success,
                                    latest_seen, typical, detail))
     return report
+
+
+def publishable(report: list[SourceHealth], now: datetime, benchmarks: frozenset[str] = frozenset()) -> list[str]:
+    """Sources fit to publish: healthy (ok or running) ones, and benchmarks whose last listings are under a week old.
+
+    One blocked or failing source is then left out of the catalogue instead of holding back every other source.
+    """
+    keep = []
+    for item in report:
+        if item.state in ("ok", "running"):
+            keep.append(item.source)
+        elif item.source in benchmarks and item.last_success and now - item.last_success <= BENCHMARK_MAX_AGE:
+            keep.append(item.source)
+    return keep

@@ -105,18 +105,6 @@ def boolean(value: Any) -> bool | None:
     return bool(value) if value in (0, 1) and value is not None else None
 
 
-def photo_urls(value: Any, limit: int = 12) -> list[str]:
-    """The listing's photos as the source published them: https links only, at most `limit`."""
-    try:
-        urls = json.loads(value) if isinstance(value, str) else value
-    except ValueError:
-        return []
-    if not isinstance(urls, list):
-        return []
-    safe = [safe_url(url) for url in urls]
-    return list(dict.fromkeys(url for url in safe if url and url.startswith("https://")))[:limit]
-
-
 def safe_url(value: Any) -> str | None:
     if not isinstance(value, str) or len(value) > 4096 or any(ord(c) < 32 for c in value):
         return None
@@ -203,7 +191,8 @@ def property_projection(row: sqlite3.Row, any_status: bool = False) -> dict | No
         "is_resale": boolean(row["is_resale"]), "resale_evidence": clean_text(row["resale_evidence"]),
         "contract_year": contract_year(row) if source in CONTRACT_PRICE_SOURCES else None,
         "last_seen_at": iso_date(row["last_seen_at"]), "first_seen_at": iso_date(row["first_seen_at"]),
-        "images": photo_urls(row["images"]),
+        # Sources' photos are their copyright: never served, linked or shared (docs/STRATEGY.md, 11).
+        "images": [],
     }
 
 
@@ -482,7 +471,7 @@ def public_unit(record: dict, full: bool = False) -> dict:
              "resale_evidence", "last_seen_at", "first_seen_at", "unknowns")
     unit = {key: record.get(key) for key in keys + (extra if full else ())}
     images = record.get("images") or []
-    unit["photo"] = images[0] if images else None  # lists show the first photo; a unit page shows them all
+    unit["photo"] = images[0] if images else None  # always None: sources' photos are not shown
     if full:
         unit["images"] = images
     return unit

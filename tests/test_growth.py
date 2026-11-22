@@ -98,6 +98,9 @@ def test_sitemap_robots_and_canonical_host(apps):
     assert "/units/22<" not in sitemap  # not identified as resale: not listed
     robots = cloud.get("/robots.txt").text
     assert "Sitemap: https://qayem.ai/sitemap.xml" in robots and "Disallow: /api" not in robots
+    llms = cloud.get("/llms.txt")
+    assert llms.status_code == 200 and llms.text.startswith("# Qayem") and "https://qayem.ai/methodology" in llms.text
+    assert local.get("/llms.txt").text == llms.text
     moved = cloud.get("http://www.qayem.ai/units/17?utm_source=x", follow_redirects=False)
     assert moved.status_code == 301 and moved.headers["location"] == "https://qayem.ai/units/17?utm_source=x"
     assert cloud.get("http://www.qayem.ai/api/health", follow_redirects=False).status_code == 301

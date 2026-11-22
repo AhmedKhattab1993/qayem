@@ -47,7 +47,6 @@ class NormalizedListing(BaseModel):
     lat: float | None = None
     lng: float | None = None
     seller_type: str | None = None
-    phone: str | None = None
     posted_at: datetime | None = None
     images: list[str] = field(default_factory=list)
     raw: dict = field(default_factory=dict)

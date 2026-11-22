@@ -24,7 +24,7 @@ from datetime import datetime, timezone
 import httpx
 
 from .cloud_export import export_sql
-from .config import crawled_sources, db_path
+from .config import crawled_sources, db_path, required_sources
 
 RUN_ID = re.compile(r"^[A-Za-z0-9_-]{1,100}$")
 MAX_BATCH_BYTES = 300_000
@@ -158,6 +158,19 @@ class Pipeline:
         self.checkpoint_metadata = None
         self.checkpoint_log_hash = None
 
+    def publish_sources(self):
+        """The sources in use that the health report found fit to publish (all of them without a report)."""
+        sources = crawled_sources()
+        try:
+            fit = json.loads((self.directory / "health.json").read_text()).get("publishable")
+        except (OSError, ValueError):
+            return sources
+        if fit is None:
+            return sources
+        chosen = frozenset(fit) if sources is None else sources & frozenset(fit)
+        self.status["published_sources"] = sorted(chosen)
+        return chosen
+
     def checkpoint(self):
         with self.checkpoint_lock:
             packed, metadata = make_checkpoint(self.database, self.directory, previous=self.checkpoint_metadata)
@@ -228,8 +241,12 @@ class Pipeline:
                 raise RuntimeError("Crawler failed")
             # AqarExit refetches only changed pages; parser fixes reach stored units here (no fetching).
             self.command("renormalize", ["renormalize", "aqarexit"], 10 * 60)
+            # Personal data never stays in the canonical database (idempotent; cleans older checkpoints' rows).
+            self.command("scrub", ["scrub-personal"], 15 * 60)
             self.command("entities", ["resolve-entities", "--workers", "4", "--max-minutes", "30"], 45 * 60)
-            if self.command("health", ["health", "--write", str(self.directory / "health.json")], 120):
+            required = sorted(required_sources() or [])
+            if self.command("health", ["health", "--write", str(self.directory / "health.json"),
+                                       *[arg for name in required for arg in ("--require", name)]], 120):
                 raise RuntimeError("Source health needs attention; previous catalogue retained")
             self.status["stage"] = "publish"
             # Freeze the canonical state in R2 before making any public version active.
@@ -241,7 +258,7 @@ class Pipeline:
             self.checkpoint()
             sql = self.directory / "catalog.sql"
             manifest = export_sql(self.database, sql,
-                                  sources=crawled_sources(), version=self.run_id)
+                                  sources=self.publish_sources(), version=self.run_id)
             if not manifest["units"]:
                 raise RuntimeError("Empty catalogue cannot be published")
             for index, batch in enumerate(stage_batches(sql, self.run_id)):

@@ -173,7 +173,7 @@ def test_health_failure_preserves_private_history_without_publishing(database, t
 
     monkeypatch.setattr(job, "command", command)
     job.run()
-    assert commands == ["crawl", "renormalize", "entities", "health"]
+    assert commands == ["crawl", "renormalize", "scrub", "entities", "health"]
     assert job.status["status"] == "failed"
     assert "previous catalogue retained" in job.status["error"]
     assert not any("/publish/" in path for _, path, _ in bridge.calls)
@@ -181,3 +181,13 @@ def test_health_failure_preserves_private_history_without_publishing(database, t
     assert any(path == "/run-status" for _, path, _ in bridge.calls)
     with sqlite3.connect(target) as cloud, sqlite3.connect(database) as local:
         assert cloud.execute("SELECT count(*) FROM properties").fetchone() == local.execute("SELECT count(*) FROM properties").fetchone()
+
+
+def test_publication_uses_only_the_sources_health_found_fit(database, tmp_path, monkeypatch):
+    monkeypatch.setenv("QAYEM_SOURCES", "aqarexit,nawy")
+    monkeypatch.setenv("QAYEM_BENCHMARK_SOURCES", "nawy_primary")
+    job = pipeline.Pipeline("run-2", bridge=object(), database=tmp_path / "cloud.db")
+    assert job.publish_sources() == frozenset({"aqarexit", "nawy", "nawy_primary"})  # no report yet
+    (job.directory / "health.json").write_text(json.dumps({"publishable": ["aqarexit", "nawy_primary"]}))
+    assert job.publish_sources() == frozenset({"aqarexit", "nawy_primary"})
+    assert job.status["published_sources"] == ["aqarexit", "nawy_primary"]

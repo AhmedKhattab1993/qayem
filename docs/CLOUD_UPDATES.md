@@ -28,6 +28,15 @@ in `updater/wrangler.jsonc`). Its last full crawl took about an hour (1,062 page
 inside its 100-minute scope budget and the crawl stage's four hours; new Nawy spellings go
 through the same bounded entity resolution.
 
+**One failing source no longer holds back the rest (2026-11-22).** On 22 November every Nawy request
+from the container timed out (resale and developer sales; the same pages answer normally from
+elsewhere), and the health check withheld the whole catalogue. Now `QAYEM_REQUIRED_SOURCES=aqarexit`
+(in `updater/wrangler.jsonc`) names the sources whose failure stops publication. Another failing source
+is left out of the catalogue: a listing source only while healthy, a benchmark (`nawy_primary`) from its
+last good crawl for up to seven days. `health.json` lists the `publishable` sources and the run status
+records `published_sources`. Nawy is not retried from another network: a block is respected.
+Each run also runs `qayem scrub-personal`, so no personal data stays in the canonical database.
+
 ## Schedule and operation
 
 The service starts at **02:30 Africa/Cairo every day**, including daylight-saving

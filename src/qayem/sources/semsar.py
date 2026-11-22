@@ -5,7 +5,7 @@ Endpoint: /3akarat?r=70&g=0&a=0&cid={category}&p={N}  (r=70 g=0: all Egypt). The
 so a page identical to the previous one is treated as broken paging, not more inventory.
 Pages are windows-1256 encoded; every listing card carries full schema.org
 microdata (Offer price/currency, businessFunction #Sell/#LeaseOut, rooms,
-floorSize, PostalAddress). Detail pages add JSON-LD with agent phone.
+floorSize, PostalAddress). Detail pages add JSON-LD with the offer price (and an agent phone, never kept).
 """
 
 from __future__ import annotations
@@ -172,7 +172,7 @@ def parse_card(card) -> NormalizedListing | None:
 
 
 def parse_detail_jsonld(html: str) -> dict | None:
-    """Detail pages embed one schema.org JSON-LD block with the agent phone."""
+    """Detail pages embed one schema.org JSON-LD block (offer price; its agent phone is never kept)."""
     m = re.search(
         r'<script type="application/ld\+json">\s*(\{.*?\})\s*</script>', html, re.S
     )
@@ -235,8 +235,8 @@ class SemsarSource(BaseSource):
                 page += 1
 
     def _enrich_from_detail(self, listing: NormalizedListing) -> None:
-        """Fetch the detail page for the agent phone (only data the list card
-        lacks). Failures are recorded but don't fail the listing."""
+        """Fetch the detail page for the offer price (the agent's phone there is never kept).
+        Failures are recorded but don't fail the listing."""
         try:
             html = self.fetcher.get_text(f"{BASE}/3akarat/{listing.source_listing_id}/x",
                                          encoding=ENCODING)
@@ -247,10 +247,6 @@ class SemsarSource(BaseSource):
         data = parse_detail_jsonld(html)
         if not data:
             return
-        provider = data.get("provider") or {}
-        phone = provider.get("telephone")
-        if phone:
-            listing.phone = phone
         offers = data.get("offers") or {}
         if offers.get("price"):
             listing.price = parse_number(str(offers.get("price"))) or listing.price

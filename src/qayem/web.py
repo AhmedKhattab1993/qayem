@@ -286,6 +286,10 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
     def robots() -> PlainTextResponse:
         return PlainTextResponse(seo.robots_txt())
 
+    @app.get("/llms.txt", include_in_schema=False)
+    def llms() -> PlainTextResponse:
+        return PlainTextResponse(seo.llms_txt())
+
     @app.get("/sitemap.xml", include_in_schema=False)
     def sitemap() -> Response:
         snapshot = catalog.snapshot()

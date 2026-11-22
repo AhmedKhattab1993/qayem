@@ -326,7 +326,7 @@ def test_gpm_list_card_and_detail_enrichment():
     assert first.price == 7_500_000
     assert first.title == "Sea View Chalet for sale in Dose North Coast"
     assert first.district == "North Coast"
-    assert first.phone == "+201070399500"
+    assert not hasattr(first, "phone")  # contacts are never kept
     assert first.property_type == "chalets"
 
     gpm_parse_detail(first, detail)

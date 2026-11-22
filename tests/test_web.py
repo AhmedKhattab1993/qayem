@@ -226,8 +226,9 @@ def test_detail_is_sanitized_and_explains_itself(client: TestClient):
     detail = client.get("/api/units/30").json()
     text = json.dumps(detail)
     assert "PRIVATE" not in text and "phone" not in text and '"raw"' not in text
-    # photos as the source published them: https links only, each once
-    assert detail["unit"]["images"] == ["https://example.test/b.jpg"] and detail["unit"]["photo"] == "https://example.test/b.jpg"
+    # sources' photos are never served, even when stored
+    assert detail["unit"]["images"] == [] and detail["unit"]["photo"] is None
+    assert "example.test/b.jpg" not in text
     assert detail["unit"]["source_url"] is None and detail["unit"]["bedrooms"] is None
     assert "+201012345678" not in detail["unit"]["description"] and "<script>" not in detail["unit"]["description"]
     # the similar units it is ranked against, nearest in size first

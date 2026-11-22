@@ -58,6 +58,22 @@ DESCRIPTION_BACKFILLS = {"semsar": "qayem.sources.semsar:parse_description"}
 RAW_BACKFILLS = {"aqarexit": "qayem.sources.aqarexit:terms_from_raw"}
 
 
+@app.command("scrub-personal")
+def scrub_personal(vacuum: bool = typer.Option(False, help="Also rewrite the file so removed values leave no trace.")) -> None:
+    """Remove personal data earlier crawls stored (phones, contacts, member names), rows and history alike."""
+    from .upsert import scrub_stored
+
+    engine = get_engine()
+    init_db(engine)
+    with session_scope(engine) as session:
+        counts = scrub_stored(session)
+    if vacuum:
+        with engine.connect() as connection:
+            connection.exec_driver_sql("VACUUM")
+    console.print(f"[green]Personal data removed:[/green] {counts['properties']} listings, "
+                  f"{counts['versions']} history versions")
+
+
 @app.command("renormalize")
 def renormalize_command(
     source: str = typer.Argument("nawy", help=f"Source to re-parse: {', '.join([*RENORMALIZERS, *DESCRIPTION_BACKFILLS, *RAW_BACKFILLS])}."),
@@ -381,15 +397,20 @@ def crawl(
 @app.command()
 def health(
     write: Path | None = typer.Option(None, help="Also write the report as JSON to this path."),
+    require: list[str] = typer.Option(None, help="Exit 1 only when one of these sources needs attention "
+                                      "(default: QAYEM_REQUIRED_SOURCES, else every source)."),
 ) -> None:
-    """Judge every scheduled source from its run history. Exits 1 if any source needs attention."""
-    from .crawl import source_health
+    """Judge every scheduled source from its run history. Exits 1 if a required source needs attention."""
+    from .config import benchmark_sources, required_sources
+    from .crawl import publishable, source_health
 
     engine = get_engine()
     init_db(engine)
     now = utcnow()
     with session_scope(engine) as session:
         report = source_health(session, now)
+    required = frozenset(require) if require else required_sources()
+    fit = publishable(report, now, benchmark_sources())
     table = Table(title="Source health", show_header=True, header_style="bold")
     for column in ("source", "state", "last run", "status", "last listings", "detail"):
         table.add_column(column)
@@ -402,9 +423,13 @@ def health(
     console.print(table)
     if write:
         write.parent.mkdir(parents=True, exist_ok=True)
-        write.write_text(json.dumps({"checked_at": now.isoformat(),
+        write.write_text(json.dumps({"checked_at": now.isoformat(), "publishable": fit,
                                      "sources": [item.as_dict() for item in report]}, indent=2))
-    if any(item.state not in ("ok", "running") for item in report):
+    unhealthy = [item.source for item in report if item.state not in ("ok", "running")]
+    if skipped := [name for name in unhealthy if name not in fit]:
+        console.print(f"[yellow]Left out of publication: {', '.join(skipped)}[/yellow]")
+    blocking = unhealthy if required is None else [name for name in unhealthy if name in required]
+    if blocking or not set(fit) - benchmark_sources():
         raise typer.Exit(1)
 
 
@@ -550,7 +575,7 @@ def _row_dict(r: Property) -> dict:
         "area_m2": r.area_m2, "bedrooms": r.bedrooms, "bathrooms": r.bathrooms,
         "finishing": r.finishing, "compound": r.compound, "developer": r.developer,
         "governorate": r.governorate, "city": r.city, "district": r.district,
-        "seller_type": r.seller_type, "phone": r.phone, "posted_at": r.posted_at,
+        "seller_type": r.seller_type, "posted_at": r.posted_at,
         "status": r.status, "first_seen_at": r.first_seen_at, "last_seen_at": r.last_seen_at,
         "removed_at": r.removed_at,
     }

@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from .models import Property, PropertyEnrichment, PropertyVersion, utcnow
 from .normalization import CANONICAL_PROPERTY_TYPES, detect_property_type
+from .privacy import scrub_listing
 from .sources.base import NormalizedListing
 
 # Stored description-enrichment fills (property_enrichments, no longer produced) are kept
@@ -65,7 +66,6 @@ CONTENT_FIELDS = [
     "lat",
     "lng",
     "seller_type",
-    "phone",
     "posted_at",
     "images",
 ]
@@ -157,6 +157,7 @@ def upsert_listing(
     """Insert or update one listing. Returns the action taken:
     'created' | 'updated' | 'unchanged' | 'relisted'."""
     now = utcnow()
+    scrub_listing(listing)  # no personal data is ever stored, in rows or their history
     prop = session.execute(
         select(Property).where(
             Property.source == source, Property.source_listing_id == listing.source_listing_id
@@ -232,6 +233,7 @@ def renormalize(session: Session, source: str, parse) -> tuple[int, int]:
         listing = parse(prop.raw) if prop.raw else None
         if listing is None or listing.source_listing_id != prop.source_listing_id:
             continue
+        scrub_listing(listing)
         rows += 1
         before = _snapshot(prop)
         _assign(listing, prop, _enriched(session, prop, listing))
@@ -324,3 +326,22 @@ def backfill_from_description(session: Session, source: str, extract, column: st
             touched = True
         changed += touched
     return rows, changed
+
+
+def scrub_stored(session: Session) -> dict[str, int]:
+    """Remove personal data earlier crawls stored: phone numbers, contacts in text, personal payload keys,
+    in every row and every history snapshot. Idempotent; not a market event (no version rows). → counts."""
+    from .privacy import scrub_raw, scrub_snapshot, scrub_text
+
+    counts = {"properties": 0, "versions": 0}
+    for prop in session.execute(select(Property)).scalars().yield_per(1000):
+        title, description, raw = scrub_text(prop.title), scrub_text(prop.description), scrub_raw(prop.raw)
+        if prop.phone is not None or (title, description, raw) != (prop.title, prop.description, prop.raw):
+            prop.phone, prop.title, prop.description, prop.raw = None, title, description, raw
+            counts["properties"] += 1
+    for version in session.execute(select(PropertyVersion)).scalars().yield_per(1000):
+        payload, changed = scrub_snapshot(version.payload), scrub_snapshot(version.changed_fields)
+        if (payload, changed) != (version.payload, version.changed_fields):
+            version.payload, version.changed_fields = payload, changed
+            counts["versions"] += 1
+    return counts

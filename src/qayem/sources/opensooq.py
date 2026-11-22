@@ -103,7 +103,6 @@ def parse_item(item: dict, now: datetime) -> NormalizedListing | None:
         city=(item.get("city_label") or "").lower() or None,
         district=item.get("nhood_label"),
         seller_type="unknown",
-        phone=item.get("phone_number"),  # masked by OpenSooq in SERP data
         posted_at=parse_posted_at(item.get("posted_at"), now),
         images=[f"https://opensooq-imagesv2.os-cdn.com/previews/640x480/{image_uri}.webp"]
         if image_uri

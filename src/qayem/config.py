@@ -54,6 +54,13 @@ def benchmark_sources() -> frozenset[str]:
     return frozenset(names)
 
 
+def required_sources() -> frozenset[str] | None:
+    """Sources whose failure must stop publication (QAYEM_REQUIRED_SOURCES=aqarexit); None: every scheduled source."""
+    value = os.environ.get("QAYEM_REQUIRED_SOURCES", "").strip().casefold()
+    names = [name.strip() for name in value.split(",") if name.strip()]
+    return frozenset(names) if names else None
+
+
 def crawled_sources() -> frozenset[str] | None:
     """Sources in use plus the benchmarks (None: every source)."""
     sources = active_sources()

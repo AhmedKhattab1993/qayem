@@ -184,3 +184,14 @@ def test_nightly_plan_covers_only_the_sources_in_use(monkeypatch):
     monkeypatch.delenv("QAYEM_BENCHMARK_SOURCES")
     monkeypatch.setenv("QAYEM_SOURCES", "all")
     assert active_plan() == PLAN
+
+
+def test_a_failing_source_is_left_out_instead_of_holding_back_the_rest():
+    from qayem.crawl import SourceHealth, publishable
+
+    def item(source, state, days):
+        return SourceHealth(source, state, NOW, "failed", NOW - timedelta(days=days), 10, None, "")
+
+    report = [item("aqarexit", "ok", 0), item("nawy", "stale", 57), item("nawy_primary", "stale", 2),
+              item("old_bench", "stale", 9)]
+    assert publishable(report, NOW, frozenset({"nawy_primary", "old_bench"})) == ["aqarexit", "nawy_primary"]

@@ -502,6 +502,32 @@ def robots_txt(staging: bool = False) -> str:
             f"Sitemap: {SITE}/sitemap.xml\n")
 
 
+def llms_txt() -> str:
+    """A short map of the site for AI assistants and answer engines (llmstxt.org)."""
+    return f"""# Qayem (قيّم)
+
+> Egypt's property price guide for regular buyers: what resale and new units cost by district, compound
+> and developer, in today's money, compared with the developer's current price for a similar unit.
+> Figures are asking and contract prices from public listings and developers' published prices; Egypt
+> publishes no resale sale prices. Arabic first, English available.
+
+## Guides
+
+- [Districts]({SITE}/districts): prices per m² by unit type, resale against new, history and buyer questions per district
+- [Compounds]({SITE}/compounds): each compound's resale prices against the developer's current price, delivery and payment terms
+- [Developers]({SITE}/developers): each developer's resale market against its own prices today, and its delivery record
+- [Price check]({SITE}/evaluate): is a specific unit's price a good one, against the developer and similar units
+
+## How the figures are made
+
+- [Methodology]({SITE}/methodology): the comparison rules, the cash-today conversion, sources, coverage and limits
+- [Privacy]({SITE}/privacy): what Qayem keeps, and that it keeps no personal data from listings
+- [Sitemap]({SITE}/sitemap.xml): every district, compound and developer page
+
+Please cite figures with their month and link the page they come from.
+"""
+
+
 # Thin pages are left out of the sitemap (they stay reachable and indexable through links).
 SITEMAP_MIN_UNITS = 3
 
