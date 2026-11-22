@@ -15,7 +15,7 @@
     "not_found_handling": "single-page-application",
     "run_worker_first": ["/api", "/api/*", "/media/*.mp4", "/", "/evaluate", "/units", "/units/*", "/compounds",
       "/compounds/*", "/developers", "/developers/*", "/districts", "/districts/*", "/methodology", "/privacy",
-      "/compare", "/watchlist", "/sheet/*", "/sitemap.xml", "/robots.txt"]
+      "/compare", "/watchlist", "/sheet/*", "/sitemap.xml", "/robots.txt", "/llms.txt"]
   },
   "d1_databases": [
     {"binding": "DB", "database_name": "qayem-public", "database_id": "3249fecc-5050-4913-afaa-329fa561e0ad"},
@@ -35,7 +35,7 @@
         "not_found_handling": "single-page-application",
         "run_worker_first": ["/api", "/api/*", "/media/*.mp4", "/", "/evaluate", "/units", "/units/*", "/compounds",
           "/compounds/*", "/developers", "/developers/*", "/districts", "/districts/*", "/methodology", "/privacy",
-          "/compare", "/watchlist", "/sheet/*", "/sitemap.xml", "/robots.txt"]
+          "/compare", "/watchlist", "/sheet/*", "/sitemap.xml", "/robots.txt", "/llms.txt"]
       },
       "d1_databases": [
         {"binding": "DB", "database_name": "qayem-staging", "database_id": "a5519958-fe4b-40d8-b9ae-7061b73adc3a"},

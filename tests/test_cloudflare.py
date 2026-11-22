@@ -137,3 +137,13 @@ def test_budget_sql_matches_the_local_rule_for_every_published_figure():
             clauses, params = budget_clauses(**limits)
             found = {row[0] for row in db.execute(f"SELECT id FROM units WHERE {' AND '.join(clauses)}", params)}
             assert found == {r["id"] for r in records if within(r, **limits)}, limits
+
+
+def test_photos_from_an_older_catalogue_are_never_served():
+    from qayem.cloud_web import public_json
+
+    stored = '{"unit": {"id": 1, "photo": "https://src.test/a.jpg", "images": ["https://src.test/a.jpg"]},' \
+             ' "comparables": [{"id": 2, "photo": "https://src.test/b.jpg"}]}'
+    served = public_json(stored)
+    assert served["unit"]["photo"] is None and served["unit"]["images"] == []
+    assert "src.test" not in json.dumps(served)

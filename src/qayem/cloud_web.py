@@ -16,6 +16,19 @@ from .website_data import Snapshot, evaluate, peer_groups, url_key
 
 Level = Literal["", "strong", "good", "in_line", "mixed", "pricier", "check", "unrated"]
 
+def _no_photos(item: dict) -> dict:
+    """Sources' photos are never served, even from a catalogue published before they were dropped."""
+    if "images" in item:
+        item["images"] = []
+    if "photo" in item:
+        item["photo"] = None
+    return item
+
+
+def public_json(text: str):
+    return json.loads(text, object_hook=_no_photos)
+
+
 
 class Unavailable(Exception):
     pass
@@ -139,7 +152,7 @@ class Store:
                                        (self.version, kind, key))
         if required and not rows:
             raise Unavailable()
-        return json.loads("".join(row["data"] for row in rows)) if rows else None
+        return public_json("".join(row["data"] for row in rows)) if rows else None
 
     async def documents(self, kind):
         rows = await self.database.all("SELECT key,data FROM documents WHERE version=? AND kind=? ORDER BY position,part",
@@ -147,7 +160,7 @@ class Store:
         documents = {}
         for row in rows:
             documents.setdefault(row["key"], []).append(row["data"])
-        return [json.loads("".join(parts)) for parts in documents.values()]
+        return [public_json("".join(parts)) for parts in documents.values()]
 
     async def entities(self, kind, q, sort, page, page_size, district="", developer=""):
         clauses, params = ["version=?", "kind=?"], [self.version, kind]
@@ -175,7 +188,7 @@ class Store:
         parts = {}
         for row in rows:
             parts.setdefault(row["key"], []).append(row["data"])
-        return {"items": [json.loads("".join(text)) for text in parts.values()], "total": total,
+        return {"items": [public_json("".join(text)) for text in parts.values()], "total": total,
                 "page": page, "page_size": page_size, "pages": (total + page_size - 1) // page_size}
 
     async def evaluation_snapshot(self, compound):
@@ -195,8 +208,8 @@ class Store:
                                                "ORDER BY id LIMIT 10001", (self.version, entry["key"]))
             if len(records) > 10000 or len(launches) > 10000:
                 raise Unavailable()  # guard Worker memory without silently reducing comparison evidence
-        records = [json.loads(row["record"]) for row in records]
-        launches = [json.loads(row["record"]) for row in launches]
+        records = [public_json(row["record"]) for row in records]
+        launches = [public_json(row["record"]) for row in launches]
         return Snapshot({r["id"]: r for r in records}, records, self.today,
                         {entry["key"]: entry} if entry else {}, {}, {}, {}, {}, {},
                         {entry["key"]: launches} if entry else {}, peer_groups(records))
@@ -223,7 +236,7 @@ class Store:
 
     async def unit(self, unit_id: int) -> dict | None:
         rows = await self.database.all("SELECT public FROM units WHERE version=? AND id=?", (self.version, unit_id))
-        return json.loads(rows[0]["public"]) if rows else None
+        return public_json(rows[0]["public"]) if rows else None
 
 
 class LazyPublic:
@@ -349,7 +362,7 @@ def create_cloud_app(database=None, *, leads=_FROM_ENV, http=None, settings=None
         total = (await data.database.all(f"SELECT count(*) AS n FROM units WHERE {where}", params))[0]["n"]
         rows = await data.database.all(f"SELECT public FROM units WHERE {where} ORDER BY {order} LIMIT ? OFFSET ?",
                                       (*params, page_size, (page - 1) * page_size))
-        return {"items": [json.loads(row["public"]) for row in rows], "total": total,
+        return {"items": [public_json(row["public"]) for row in rows], "total": total,
                 "page": page, "page_size": page_size, "pages": (total + page_size - 1) // page_size}
 
     @app.get("/api/units/{unit_id}")
@@ -361,7 +374,7 @@ def create_cloud_app(database=None, *, leads=_FROM_ENV, http=None, settings=None
             ids = [item["id"] for item in entry["comparables"]]
             rows = await data.database.all("SELECT id,public FROM units WHERE version=? AND id IN ("
                                           + ",".join("?" for _ in ids) + ")", (data.version, *ids))
-            public = {row["id"]: json.loads(row["public"]) for row in rows}
+            public = {row["id"]: public_json(row["public"]) for row in rows}
             if len(public) != len(ids):
                 raise Unavailable()
             entry["comparables"] = [{**public[item["id"]], "cash_ppm": item["cash_ppm"]}
