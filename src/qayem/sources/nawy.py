@@ -119,12 +119,15 @@ class NawySource(BaseSource):
         page = 1
         max_pages = self.param("max_pages")
         failures = 0
+        skipped = 0  # pages that failed after all retries: their units were not seen
         while True:
             url = f"{self.SEARCH_URL}?{urlencode({'sale_type': self.SALE_TYPE, 'page_number': page, 'category': 'property'})}"
             try:
                 html = self._get_page_verified(url)
             except HTTPStatusError as exc:
                 if exc.status == 404 and self.complete:
+                    if skipped:  # natural end, but a skipped page's units were not seen: no removals
+                        self.scopes_completed.discard("all")
                     return  # verified natural end — recorded, not an error
                 self.errors.append(f"page {page}: {exc}")
                 return
@@ -136,6 +139,7 @@ class NawySource(BaseSource):
                 # recorded partial (no removals) but the rest of the inventory is refreshed.
                 self.errors.append(f"page {page}: {exc}")
                 failures += 1
+                skipped += 1
                 if failures >= self.MAX_CONSECUTIVE_FAILURES:
                     return
                 page += 1
@@ -159,7 +163,8 @@ class NawySource(BaseSource):
             page_size = ssr.get("pageSize") or 12
             if not units or page * page_size >= total:
                 self.complete = True
-                self.scopes_completed.add("all")
+                if not skipped:  # a skipped page's units were not seen: no removals this run
+                    self.scopes_completed.add("all")
                 return
             if max_pages and page >= max_pages:
                 return  # truncated by caller: complete stays False

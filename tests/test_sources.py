@@ -95,6 +95,7 @@ def test_nawy_skips_a_failing_page_and_keeps_crawling():
     src = NawySource(fetcher)
     assert len(list(src.fetch())) == 24
     assert src.complete is True and len(src.errors) == 1  # recorded partial: no removals
+    assert src.scopes_completed == set()  # page 2's units were not seen, so none may be marked removed
 
 
 def test_nawy_source_pagination_and_truncation():
