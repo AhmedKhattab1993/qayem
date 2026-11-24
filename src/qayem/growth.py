@@ -68,6 +68,7 @@ class Settings:
     telegram_chat: str = ""
     resend_key: str = ""
     alert_from: str = "Qayem <alerts@qayem.ai>"
+    founder_email: str = ""
     admin_token: str = ""
     hash_salt: str = ""
     site: str = SITE
@@ -87,6 +88,7 @@ class Settings:
         return cls(turnstile_secret=text("TURNSTILE_SECRET"), turnstile_site_key=text("TURNSTILE_SITE_KEY"),
                    telegram_token=text("TELEGRAM_BOT_TOKEN"), telegram_chat=text("TELEGRAM_CHAT_ID"),
                    resend_key=text("RESEND_API_KEY"), alert_from=text("ALERT_FROM", cls.alert_from),
+                   founder_email=text("FOUNDER_EMAIL"),
                    admin_token=text("ADMIN_TOKEN"), hash_salt=text("HASH_SALT", "qayem-default-salt"),
                    site=text("QAYEM_SITE", SITE), environment=text("QAYEM_ENVIRONMENT", "production"),
                    whatsapp_verify_token=text("WHATSAPP_VERIFY_TOKEN"), whatsapp_app_secret=text("WHATSAPP_APP_SECRET"),
@@ -240,19 +242,38 @@ def unit_filters(query: str) -> dict:
 # --- outbound messages -----------------------------------------------------------------
 
 async def telegram(g: Growth, message: str) -> bool:
-    """A private message to the founder's Telegram (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID)."""
-    if not (g.http and g.settings.telegram_token and g.settings.telegram_chat):
+    """A private message to the founder: Telegram when configured, else email via Resend (FOUNDER_EMAIL)."""
+    if not g.http:
         return False
-    ok = True
-    for start in range(0, len(message), 3900):  # Telegram's limit is 4096 characters a message
+    if g.settings.telegram_token and g.settings.telegram_chat:
+        ok = True
+        for start in range(0, len(message), 3900):  # Telegram's limit is 4096 characters a message
+            try:
+                status, _ = await g.http.post(f"https://api.telegram.org/bot{g.settings.telegram_token}/sendMessage",
+                                              {"chat_id": g.settings.telegram_chat, "text": message[start:start + 3900],
+                                               "parse_mode": "HTML", "disable_web_page_preview": True})
+                ok = ok and status == 200
+            except Exception:
+                ok = False
+        return ok
+    if g.settings.resend_key and g.settings.founder_email:
+        first_line = re.sub(r"<[^>]+>", "", message.splitlines()[0] if message else "").strip()
+        subject = f"Qayem: {first_line}"[:120] if first_line else "Qayem notification"
+        html = ('<div style="font-family:system-ui,Segoe UI,Tahoma,sans-serif;font-size:15px;'
+                'line-height:1.65;max-width:600px;color:#14201b">'
+                + message.replace("\n", "<br>") + "</div>")
+        plain = re.sub(r"<[^>]+>", "", message)
         try:
-            status, _ = await g.http.post(f"https://api.telegram.org/bot{g.settings.telegram_token}/sendMessage",
-                                          {"chat_id": g.settings.telegram_chat, "text": message[start:start + 3900],
-                                           "parse_mode": "HTML", "disable_web_page_preview": True})
-            ok = ok and status == 200
+            status, _ = await g.http.post(
+                "https://api.resend.com/emails",
+                {"from": g.settings.alert_from, "to": [g.settings.founder_email],
+                 "subject": subject, "html": html, "text": plain},
+                {"Authorization": f"Bearer {g.settings.resend_key}"},
+            )
+            return 200 <= status < 300
         except Exception:
-            ok = False
-    return ok
+            return False
+    return False
 
 
 async def verified(g: Growth, token: Any) -> bool:

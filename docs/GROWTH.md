@@ -56,8 +56,9 @@ Set with `cd cloudflare && npx wrangler@4.147.0 secret put NAME` (add `--env sta
 
 | Name | Needed for |
 |---|---|
-| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | Instant lead pings and the WhatsApp alert digest. Create a bot with @BotFather, send it a message, read the chat ID from `https://api.telegram.org/bot<token>/getUpdates`. |
-| `RESEND_API_KEY` | E-mail alerts (the e-mail option appears only when this is set). Verify `qayem.ai` in Resend first. Optional `ALERT_FROM` (default `Qayem <alerts@qayem.ai>`). |
+| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | Optional instant lead pings, WhatsApp alert digests and post-publish article notes on Telegram. When unset, founder pings fall back to e-mail via `FOUNDER_EMAIL` + `RESEND_API_KEY`. |
+| `FOUNDER_EMAIL` | Founder e-mail address (in `vars`) for lead pings, takedown alerts, WhatsApp alert digests and published-article notices via Resend when Telegram is not used. |
+| `RESEND_API_KEY` | E-mail alerts and founder pings (the e-mail option appears only when this is set). Verify `qayem.ai` in Resend first. Optional `ALERT_FROM` (default `Qayem <alerts@qayem.ai>`). |
 | `TURNSTILE_SECRET` + var `TURNSTILE_SITE_KEY` | Bot protection on forms (Cloudflare dashboard → Turnstile → add `qayem.ai`, managed mode). The site key is public: put it in `vars`. |
 | `ADMIN_TOKEN` | The funnel report. Any long random string, e.g. `openssl rand -hex 32`. |
 | `HASH_SALT` | Optional: the salt for the daily visitor hash. |

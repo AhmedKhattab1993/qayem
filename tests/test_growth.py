@@ -136,6 +136,15 @@ def test_a_lead_is_stored_and_the_founder_gets_a_whatsapp_link(apps):
     url, message, _ = http.calls[-1]
     assert url == "https://api.telegram.org/bott0k/sendMessage" and message["chat_id"] == "42"
     assert "https://wa.me/201012345678?text=" in message["text"] and "/units/17" in message["text"]
+    # When Telegram is omitted and FOUNDER_EMAIL + RESEND_API_KEY are set, founder pings fall back to Resend email.
+    from qayem.growth import Growth, telegram
+    email_http = FakeHttp()
+    fallback = Growth(leads=None, public=None, http=email_http,
+                      settings=Settings(resend_key="re_x", founder_email="founder@example.com"))
+    assert asyncio.run(telegram(fallback, "<b>New lead</b>\nhttps://qayem.ai/units/17")) is True
+    assert email_http.calls[-1][0] == "https://api.resend.com/emails"
+    assert email_http.calls[-1][1]["to"] == ["founder@example.com"]
+    assert "Qayem: New lead" in email_http.calls[-1][1]["subject"]
     assert cloud.post("/api/leads", json={**body, "whatsapp": "12", "email": "nope"}).json()["detail"] == "invalid_contact"
     assert cloud.post("/api/leads", json={**body, "kind": "spam"}).status_code == 422
     assert cloud.post("/api/leads", json={**body, "website": "http://spam"}).json() == {"ok": True}  # honeypot

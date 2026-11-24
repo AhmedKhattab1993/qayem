@@ -78,7 +78,8 @@
   },
   "vars": {
     "TURNSTILE_SITE_KEY": "0x4AAAAAAGMCjcYNvvUR8a8A",
-    "INDEXNOW_KEY": "cddefcbf956baeb89bcb951980d8630e"
+    "INDEXNOW_KEY": "cddefcbf956baeb89bcb951980d8630e",
+    "FOUNDER_EMAIL": "ahmed.sobhy.khattab.93@gmail.com"
   },
   "observability": {
     "enabled": true

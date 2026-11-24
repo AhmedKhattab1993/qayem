@@ -608,6 +608,9 @@ def allowed_numbers(pack: Pack) -> set[float]:
             add(float(value))
     for key in ("start", "end"):
         stamp(pack.period.get(key) or "")
+    for figure in pack.figures:
+        if figure.period:
+            stamp(figure.period)
     return allowed
 
 
