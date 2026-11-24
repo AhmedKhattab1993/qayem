@@ -244,7 +244,7 @@ export function EntityActions({ kind, entityKey, name }: { kind: EntityKind; ent
   return (
     <div className="entity-actions">
       <button
-        className={`btn btn-sm ${watching ? "btn-ink" : ""}`}
+        className={`btn btn-sm ${watching ? "btn-primary" : ""}`}
         aria-pressed={watching}
         onClick={() => toggleWatch({ kind, key: entityKey, name })}
       >
@@ -252,7 +252,7 @@ export function EntityActions({ kind, entityKey, name }: { kind: EntityKind; ent
         {t(watching ? "Watching" : "Watch")}
       </button>
       <button
-        className={`btn btn-sm ${comparing ? "btn-ink" : ""}`}
+        className={`btn btn-sm ${comparing ? "btn-primary" : ""}`}
         aria-pressed={comparing}
         onClick={() => toggleCompare({ kind, key: entityKey, name })}
       >

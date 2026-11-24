@@ -73,7 +73,7 @@ export function setLanguage(next: Language) {
       .querySelector('meta[name="description"]')
     ?.setAttribute(
       "content",
-      t("Qayem weighs Egypt's resale property market: every listing scored, sourced, and priced against its peers."),
+      t("Egypt’s property price guide: asking prices per m² by district and compound, and resale against the developer."),
     );
   try {
     localStorage.setItem("qayem:language", next);

@@ -361,7 +361,6 @@ def scope(items: list[dict]) -> dict:
 
 PEER_MIN = 4  # other similar units needed before a unit is ranked against them
 PEER_AREA_RATIO = 1.5
-PEER_LIMIT = 60  # similar units listed on a unit page (the page shows the nearest six until asked)
 # A level needs every available comparison to agree: strong means all at least 15% cheaper and
 # one at least 25%; good means all at least 5% cheaper and one at least 10%.
 STRONG_ALL, STRONG_ONE = -0.15, -0.25
@@ -1227,20 +1226,30 @@ def attach_history(default: list[dict], delisted: list[dict], matched: dict[str,
             entry["history"] = history_of(active.get(name, []), left.get(name, []), pool, today, cohort_start)
 
 
-def comparables(snapshot: Snapshot, record: dict) -> list[dict]:
-    """The similar resale units the unit is ranked against, nearest in size first; otherwise the
-    nearest units of its class in the same compound."""
-    pool = similar_units(record, snapshot.peers)
-    if not pool and record.get("compound_key"):
-        pool = sorted((r for r in snapshot.default if r["compound_key"] == record["compound_key"]
-                       and r["class"] == record["class"] and r["id"] != record.get("id") and _cash_ppm(r)),
-                      key=lambda r: (abs(math.log(r["area_m2"] / record["area_m2"])), r["id"]))
-    return [{**public_unit(r), "cash_ppm": round(_cash_ppm(r))} for r in pool[:PEER_LIMIT]]
+FINISHINGS = ("core_shell", "semi_finished", "finished", "furnished")
 
 
-def detail(snapshot: Snapshot, record: dict, description: str | None = None) -> dict:
-    """Unit detail without third-party listing descriptions or photos (docs/STRATEGY.md 5.1, 11)."""
-    return {"unit": public_unit(record, full=True), "comparables": comparables(snapshot, record)}
+def evaluate_query(unit: dict) -> dict[str, str]:
+    """A listing found by its link, as the price check's own fields: the check runs on /evaluate
+    like any unit the buyer describes, and no listing page is shown (docs/STRATEGY.md 5.1, 14)."""
+    query = {"property_type": unit["property_type"], "area": f"{unit['area_m2']:g}", "price": f"{unit['price']:.0f}"}
+    compound = unit.get("compound")
+    if compound:
+        query["compound"] = compound["name"]
+    elif unit.get("district"):
+        query["district"] = unit["district"]
+    payment = unit.get("payment") or {}
+    if payment.get("terms") == "plan" and payment.get("years") and payment.get("remaining") is not None:
+        query["down_payment"] = f"{max(0.0, unit['price'] - payment['remaining']):.0f}"
+        query["installment_years"] = f"{payment['years']:g}"
+    delivery = unit.get("delivery") or {}
+    if delivery.get("bucket") == "ready":
+        query["delivery"] = "ready"
+    elif re.fullmatch(r"\d{4}-\d{2}.*", delivery.get("date") or ""):
+        query["delivery"] = delivery["date"][:7]
+    if unit.get("finishing_class") in FINISHINGS:
+        query["finishing"] = unit["finishing_class"]
+    return query
 
 
 def evaluate(snapshot: Snapshot, *, property_type: str, area: float, price: float, compound: str = "",
@@ -1290,11 +1299,11 @@ def evaluate(snapshot: Snapshot, *, property_type: str, area: float, price: floa
                         "period": (dist.get("guide") or {}).get("period"),
                         "segment": seg, "gap": gap, "cash_gap": cash_gap,
                     },
-                    "opportunity": {"level": "unrated", "score": None, "signals": []}, "comparables": [],
+                    "opportunity": {"level": "unrated", "score": None, "signals": []},
                     "unknowns": ["compound", "floor_and_view", "legal_status", "transfer_fee", "maintenance_deposit"],
                 }
         return {"status": "compound_not_found", "inputs": inputs, "payment": payment, "launch": None, "peers": None,
-                "opportunity": {"level": "unrated", "score": None, "signals": []}, "comparables": [], "unknowns": []}
+                "opportunity": {"level": "unrated", "score": None, "signals": []}, "unknowns": []}
     delivery_date = f"{delivery}-01"[:10] if re.fullmatch(r"\d{4}(-\d{2})?", delivery or "") else None
     if delivery_date and len(delivery) == 4:
         delivery_date = f"{delivery}-06-30"
@@ -1313,5 +1322,4 @@ def evaluate(snapshot: Snapshot, *, property_type: str, area: float, price: floa
     record["opportunity"] = opportunity(record)
     return {"status": "compared", "inputs": inputs, "payment": payment, "launch": record["launch"],
             "peers": record["peers"], "opportunity": record["opportunity"],
-            "comparables": comparables(snapshot, record),
             "unknowns": [u for u in unknowns(record) if u not in ("payment_terms", "installment_term")]}

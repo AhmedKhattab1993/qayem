@@ -96,7 +96,7 @@ export function ObservationAsk({
             {problem}
           </p>
         )}
-        <button type="submit" className="btn btn-sm btn-ink" disabled={state === "busy"}>
+        <button type="submit" className="btn btn-sm btn-primary" disabled={state === "busy"}>
           {t("Send it anonymously")}
         </button>
       </form>

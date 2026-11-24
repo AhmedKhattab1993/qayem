@@ -23,17 +23,11 @@ const api = async (path) => {
   return response.json();
 };
 const overview = await api("/overview");
-const unit = (await api("/units?level=strong&page_size=1")).items[0];
-const plan = (await api("/units?terms=plan&level=in_line&page_size=1")).items[0];
-const unrated = (await api("/units?level=unrated&page_size=1")).items[0];
 const compound = (await api("/compounds?page_size=1")).items[0];
 const developer = (await api("/developers?sort=gap_asc&page_size=1")).items[0];
 const second = (await api("/compounds?page_size=2&page=1")).items[1];
 const catalog = await api("/catalog");
 const launched = (await api("/compounds?page_size=100")).items.find((c) => c.launch);
-const verified = (await api("/units?source=aqarexit&terms=plan&page_size=1")).items[0];
-const belowDeveloper = (await api("/units?sort=launch_gap&page_size=1")).items[0];
-const belowPeers = (await api("/units?sort=peer_gap&page_size=1")).items[0];
 // The price guide, the map and the Qayem Index.
 const guide = await api("/guide");
 const qayemIndex = await api("/index");
@@ -51,7 +45,7 @@ const dataNames = [
 ]
   .filter((name) => /[A-Za-z]/.test(name))
   .sort((a, b) => b.length - a.length);
-assert.ok(overview.rated_count > 0 && unit && plan && compound && developer, "catalog has compared units");
+assert.ok(overview.rated_count > 0 && compound && developer, "catalog has compared units");
 
 const evaluate = new URLSearchParams({
   compound: compound.name,
@@ -67,22 +61,9 @@ const pages = [
   ["home", "/"],
   ["evaluate", `/evaluate?${evaluate}`],
   ["evaluate-empty", "/evaluate"],
-  ["units", "/units"],
-  ["units-budget", "/units?cash_max=7500000&bedrooms_min=2&delivery=ready"],
-  ["unit", `/units/${plan.id}`],
-  ["unit-strong", `/units/${unit.id}`],
-  ...(unrated ? [["unit-unrated", `/units/${unrated.id}`]] : []),
-  ...(belowPeers ? [["unit-peers", `/units/${belowPeers.id}`]] : []),
   ["compounds", "/compounds?district=new-cairo"],
   ["compound", `/compounds/${encodeURIComponent(compound.key)}`],
   ...(launched ? [["compound-launch", `/compounds/${encodeURIComponent(launched.key)}`]] : []),
-  ...(verified ? [["unit-aqarexit", `/units/${verified.id}`]] : []),
-  ...(belowDeveloper
-    ? [
-        ["unit-developer", `/units/${belowDeveloper.id}`],
-        ["units-developer", "/units?sort=launch_gap"],
-      ]
-    : []),
   ["developers", "/developers?sort=gap_asc"],
   ["developer", `/developers/${encodeURIComponent(developer.key)}`],
   ["compare", "/compare"],
@@ -90,10 +71,8 @@ const pages = [
   ["methodology", "/methodology"],
   ["districts", "/districts"],
   ["district", `/districts/${encodeURIComponent(catalog.districts[0].key)}`],
-  ["sheet", `/sheet/${plan.id}`],
   ["privacy", "/privacy"],
   ["evaluate-sell", `/evaluate?mode=sell&${evaluate}`],
-  ["units-price-cut", "/units?price_dropped=true"],
   ["map", "/map"],
   ["map-gap", "/map?show=gap&type=house"],
   ["index", "/index"],
@@ -126,7 +105,7 @@ for (const [device, options] of Object.entries(viewports)) {
         localStorage.setItem("qayem:compare-entities", JSON.stringify(items));
         localStorage.setItem("qayem:watch", JSON.stringify(saved));
       },
-      [language, pinned, [...pinned, { kind: "unit", key: String(unit.id), name: "Saved unit" }]],
+      [language, pinned, pinned],
     );
     const page = await context.newPage();
     const errors = [];
@@ -201,7 +180,8 @@ for (const [device, options] of Object.entries(viewports)) {
   const page = await context.newPage();
   await page.goto(`${baseURL}/map`, { waitUntil: "networkidle" });
   const rows = await page.locator("#map-table tbody tr").count();
-  assert.ok(rows >= guide.districts.filter((d) => d.headline).length, `the map's table lists every district (${rows})`);
+  // Listings no district could be matched to ("other", no region) have no place on a map.
+  assert.ok(rows >= guide.districts.filter((d) => d.headline && d.region).length, `the map's table lists every district (${rows})`);
   await page.getByRole("button", { name: "اعرض القائمة" }).click();
   assert.equal(await page.locator(".map-shell").isVisible(), false, "the list toggle hides the map on a phone");
   await page.goto(`${baseURL}/districts/new-cairo`, { waitUntil: "networkidle" });
@@ -242,73 +222,19 @@ assert.match(page.url(), /installment_years=5/);
 await page.getByText("Total cost of buying").waitFor();
 await page.screenshot({ path: `${artifacts}flow-evaluate-mobile.png`, fullPage: true });
 
-// Interaction: on a phone the unit filters fold behind a button, the sort stays reachable, and a whole card opens its unit.
-await page.goto(`${baseURL}/units`, { waitUntil: "networkidle" });
-assert.equal(await page.locator("#unit-filters").isVisible(), false, "filters start folded on a phone");
-await page.getByRole("button", { name: /Filters/ }).click();
-await page.getByLabel("Unit type").selectOption("apartment");
-await page.getByLabel("Sort by").selectOption("price_asc");
-await page.waitForURL(/property_type=apartment.*sort=price_asc|sort=price_asc.*property_type=apartment/);
-const card = page.locator(".unit-ledger tbody tr").first();
-// clear of the fixed tab bar: tap the middle of the card
-await card.evaluate((row) => row.scrollIntoView({ block: "center" }));
-await card.click({ position: { x: 300, y: 110 } });
-await page.waitForURL(/\/units\/\d+$/);
-
-// The unit's main figures come first, one tile each: an installment unit shows its value in today's money.
-await page.goto(`${baseURL}/units/${plan.id}`, { waitUntil: "networkidle" });
-const glance = page.getByRole("region", { name: "At a glance" });
-for (const label of ["Total price", "Worth in today’s money", "Paid at signing", "Area", "Price per m²"])
-  await glance.getByText(label, { exact: true }).waitFor();
-assert.equal(await glance.locator(".glance-tile.is-feature").count(), 1, "one highlighted tile");
-// The verdict opens the page: on a phone it starts on the first screen, before the figures and photos.
-const verdict = await page.locator(".unit-verdict").boundingBox();
-assert.ok(verdict && verdict.y < 844, `the verdict starts on the first screen (${verdict?.y})`);
-assert.ok(verdict.y < (await glance.boundingBox()).y, "the verdict comes before the figures");
 await context.close();
 
-// Interaction: a buyer's budget narrows the list, the search is saved, and the watchlist shows it.
+// Individual listings are retired: their old addresses move, permanently, to the guide that covers them.
 {
-  const context = await browser.newContext({ ...viewports.desktop });
-  await context.addInitScript(() => localStorage.setItem("qayem:language", "en"));
-  const page = await context.newPage();
-  await page.goto(`${baseURL}/units`, { waitUntil: "networkidle" });
-  await page.getByLabel("Cash today").selectOption("5000000");
-  await page.getByLabel("Bedrooms").selectOption("2");
-  await page.waitForURL(/cash_max=5000000/);
-  await page.waitForURL(/bedrooms_min=2/);
-  await page.waitForLoadState("networkidle");
-  const listed = await page.locator(".unit-ledger tbody tr").count();
-  assert.ok(listed > 0, "units fit a 5M cash budget with 2+ bedrooms");
-  const budget = await api("/units?cash_max=5000000&bedrooms_min=2&page_size=100");
-  assert.ok(budget.items.every((u) => u.payment.cash_equivalent <= 5_000_000 && u.bedrooms >= 2), "the API keeps to the budget");
-  await page.getByRole("button", { name: "Save this search" }).click();
-  await page.getByRole("button", { name: "Search saved" }).waitFor();
-  await page.goto(`${baseURL}/watchlist`, { waitUntil: "networkidle" });
-  await page.getByRole("heading", { name: "Saved searches" }).waitFor();
-  await page.getByRole("link", { name: /Cash today up to/ }).waitFor();
-  await page.screenshot({ path: `${artifacts}flow-saved-search.png`, fullPage: true });
-  await context.close();
-}
-
-// Interaction: saved units side by side, each figure's lowest marked; on a phone too.
-{
-  const two = (await api("/units?terms=plan&page_size=2&sort=peer_gap")).items;
-  for (const [device, options] of Object.entries(viewports)) {
-    const context = await browser.newContext(options);
-    await context.addInitScript((items) => {
-      localStorage.setItem("qayem:language", "en");
-      localStorage.setItem("qayem:compare-entities", JSON.stringify(items));
-    }, two.map((u) => ({ kind: "unit", key: String(u.id), name: "Unit" })));
-    const page = await context.newPage();
-    await page.goto(`${baseURL}/compare`, { waitUntil: "networkidle" });
-    await page.getByRole("rowheader", { name: "Cash today" }).waitFor();
-    assert.ok((await page.locator(".compare-table td.is-best").count()) > 0, "the lowest figures are marked");
-    const width = await page.evaluate(() => [document.documentElement.scrollWidth, innerWidth]);
-    assert.ok(width[0] <= width[1] + 1, `${device} compare has no sideways scroll: ${width}`);
-    await page.screenshot({ path: `${artifacts}flow-compare-units-${device}.png`, fullPage: true });
-    await context.close();
+  const listed = await fetch(`${baseURL}/units?compound=${encodeURIComponent(compound.key)}`, { redirect: "manual" });
+  assert.equal(listed.status, 301, "/units redirects");
+  assert.ok((listed.headers.get("location") ?? "").endsWith(`/compounds/${encodeURIComponent(compound.key)}`), listed.headers.get("location"));
+  for (const path of ["/units", "/units/1", "/sheet/1"]) {
+    const moved = await fetch(`${baseURL}${path}`, { redirect: "manual" });
+    assert.equal(moved.status, 301, `${path} redirects (${moved.status})`);
   }
+  const retired = await fetch(`${baseURL}/api/units`);
+  assert.equal(retired.status, 404, "/api/units is retired");
 }
 
 // Capture: the verdict's card opens a two-field form, and a lead is accepted (needs QAYEM_LEADS_DB locally;
@@ -319,7 +245,7 @@ if (growth.leads && !growth.turnstile_site_key) {
     const context = await browser.newContext(options);
     await context.addInitScript(() => localStorage.setItem("qayem:language", "en"));
     const page = await context.newPage();
-    await page.goto(`${baseURL}/units/${plan.id}`, { waitUntil: "networkidle" });
+    await page.goto(`${baseURL}/evaluate?${evaluate}`, { waitUntil: "networkidle" });
     const capture = page.locator(".capture").first();
     await capture.getByRole("button").first().click();
     await capture.getByRole("button", { name: "Buying to live" }).click();
@@ -329,9 +255,9 @@ if (growth.leads && !growth.turnstile_site_key) {
     const width = await page.evaluate(() => [document.documentElement.scrollWidth, innerWidth]);
     assert.ok(width[0] <= width[1] + 1, `${device} capture has no sideways scroll: ${width}`);
     await page.screenshot({ path: `${artifacts}flow-lead-${device}.png`, fullPage: true });
-    // A saved search can become an alert.
-    await page.goto(`${baseURL}/units?bedrooms_min=3`, { waitUntil: "networkidle" });
-    await page.getByRole("button", { name: "Get alerts" }).click();
+    // A compound can become a price alert.
+    await page.goto(`${baseURL}/compounds/${encodeURIComponent(compound.key)}`, { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: "Alert me about deals here" }).click();
     const alert = page.locator(".capture-alert");
     await alert.getByLabel("WhatsApp number").fill("501234567");
     await alert.getByLabel("Country").selectOption("+971");
@@ -374,4 +300,4 @@ if (failures.length) {
   console.error(JSON.stringify(failures, null, 2));
   process.exit(1);
 }
-console.log(`✓ ${report.length} page checks (${pages.length} pages × desktop/mobile × ar/en) and the evaluate, units, budget, saved-search, unit-compare, capture, page-head and explainer flows passed`);
+console.log(`✓ ${report.length} page checks (${pages.length} pages × desktop/mobile × ar/en) and the evaluate, retired-listing redirect, capture, page-head and explainer flows passed`);

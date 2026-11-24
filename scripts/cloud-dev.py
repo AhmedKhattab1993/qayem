@@ -47,7 +47,7 @@ def verify():
             or dataset["launch_count"] != manifest["launches"] \
             or dataset["entity_count"] != manifest["document_parts"] + manifest["entities"]:
         raise RuntimeError("Staging is not using the expected exported dataset")
-    for path in ("/", "/api/health", "/api/units?resale=all&page_size=1"):
+    for path in ("/", "/api/health", "/api/overview"):
         request = urllib.request.Request(URL + path, headers={"User-Agent": USER_AGENT})
         # A newly registered workers.dev route can return 404 briefly after deployment.
         for attempt in range(6):
@@ -69,7 +69,8 @@ def verify():
         elif path == "/api/health":
             if json.loads(body).get("status") != "ok":
                 raise RuntimeError("Staging health check failed")
-        elif json.loads(body).get("total") != dataset["unit_count"] or not json.loads(body).get("items"):
+        # Every published listing is counted in the overview, never listed.
+        elif json.loads(body).get("total_eligible") != dataset["unit_count"]:
             raise RuntimeError("Staging API does not match its full catalogue")
     proof = {"verified_at": datetime.now(timezone.utc).isoformat(), "url": URL,
              "dataset": dataset, "public_api": "verified", "noindex": True}

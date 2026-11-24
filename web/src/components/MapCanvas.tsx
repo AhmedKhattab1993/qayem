@@ -40,15 +40,17 @@ function setup() {
   if (maplibregl.getRTLTextPluginStatus() === "unavailable") maplibregl.setRTLTextPlugin(RTL_PLUGIN, true).catch(() => {});
 }
 
-/** The light basemap, trimmed to what needs no sprite sheet and only the two self-hosted fonts. */
+/** The white basemap (the price colours are the only colour on the map), trimmed to what needs no sprite sheet and only the two self-hosted fonts. */
 function baseStyle(language: "ar" | "en"): StyleSpecification {
   const origin = window.location.origin;
   const skip = new Set(["pois", "roads_shields", "roads_oneway", "address_label"]);
-  const layers = basemapLayers("protomaps", namedFlavor("light"), { lang: language })
+  const layers = basemapLayers("protomaps", namedFlavor("white"), { lang: language })
     .filter((layer) => !skip.has(layer.id))
     .map((layer) => {
       const copy = JSON.parse(JSON.stringify(layer).split('"Noto Sans Italic"').join('"Noto Sans Regular"')) as LayerSpecification;
       if (copy.type === "symbol" && copy.layout && "icon-image" in copy.layout) delete copy.layout["icon-image"];
+      // The sea is the palest lapis, so the coast reads at a glance.
+      if (copy.id === "water" && copy.type === "fill") copy.paint = { ...copy.paint, "fill-color": "#dde4f3" };
       return copy;
     });
   return {
@@ -184,8 +186,8 @@ export default function MapCanvas({
       const message = String((event as { error?: Error }).error?.message ?? "");
       if (/pmtiles|tiles|magic|fetch|404|glyph|range/i.test(message) || (event as { sourceId?: string }).sourceId === "protomaps") {
         latest.current.onError("tiles");
-        // Without the basemap, a plain sand ground reads better than the basemap's grey.
-        if (instance.getLayer("background")) instance.setPaintProperty("background", "background-color", "#ece5d6");
+        // Without the basemap, a plain stone ground reads better than the basemap's grey.
+        if (instance.getLayer("background")) instance.setPaintProperty("background", "background-color", "#eceef3");
       }
     });
     instance.on("load", () => {
@@ -212,20 +214,20 @@ export default function MapCanvas({
         type: "line",
         source: "hexes",
         minzoom: 9,
-        paint: { "line-color": "#fbf8f1", "line-opacity": 0.65, "line-width": 1 },
+        paint: { "line-color": "#ffffff", "line-opacity": 0.65, "line-width": 1 },
       });
       instance.addLayer({
         id: "district-line",
         type: "line",
         source: "districts",
-        paint: { "line-color": "#6f3320", "line-opacity": 0.45, "line-width": 1 },
+        paint: { "line-color": "#132a8f", "line-opacity": 0.45, "line-width": 1 },
       });
       instance.addLayer({
         id: "district-selected",
         type: "line",
         source: "districts",
         filter: ["==", ["get", "key"], ""],
-        paint: { "line-color": "#111c19", "line-width": 2.5 },
+        paint: { "line-color": "#0b1020", "line-width": 2.5 },
       });
       // At country zoom an outline is a speck, so every district is also a dot; closer in, only those without one.
       const dotOpacity = (full: number) =>
@@ -238,7 +240,7 @@ export default function MapCanvas({
         paint: {
           "circle-color": ["get", "colour"],
           "circle-radius": ["interpolate", ["linear"], ["zoom"], 5, 5, 9, 8],
-          "circle-stroke-color": "#111c19",
+          "circle-stroke-color": "#0b1020",
           "circle-stroke-width": 1,
           "circle-opacity": dotOpacity(0.95),
           "circle-stroke-opacity": dotOpacity(0.7),
@@ -252,7 +254,7 @@ export default function MapCanvas({
         paint: {
           "circle-color": ["get", "colour"],
           "circle-radius": ["interpolate", ["linear"], ["sqrt", ["get", "size"]], 0, 4, 10, 8, 30, 16],
-          "circle-stroke-color": "#fbf8f1",
+          "circle-stroke-color": "#ffffff",
           "circle-stroke-width": 1.5,
         },
       });
@@ -268,7 +270,7 @@ export default function MapCanvas({
           "text-max-width": 9,
           "text-allow-overlap": false,
         },
-        paint: { "text-color": "#111c19", "text-halo-color": "#fbf8f1", "text-halo-width": 1.6 },
+        paint: { "text-color": "#0b1020", "text-halo-color": "#ffffff", "text-halo-width": 1.6 },
       });
       instance.addLayer({
         id: "compound-label",
@@ -276,7 +278,7 @@ export default function MapCanvas({
         source: "compounds",
         minzoom: 11,
         layout: { "text-field": ["get", "label"], "text-font": ["Noto Sans Regular"], "text-size": 12, "text-offset": [0, 1.3] },
-        paint: { "text-color": "#2f3d38", "text-halo-color": "#fbf8f1", "text-halo-width": 1.4 },
+        paint: { "text-color": "#2a3149", "text-halo-color": "#ffffff", "text-halo-width": 1.4 },
       });
       for (const layer of ["district-fill", "district-dot", "compound-dot"]) {
         instance.on("mouseenter", layer, () => (instance.getCanvas().style.cursor = "pointer"));

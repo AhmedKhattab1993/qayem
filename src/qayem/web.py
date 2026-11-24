@@ -15,12 +15,11 @@ from fastapi.staticfiles import StaticFiles
 from . import editorial, guide_api, seo
 from .config import crawled_sources, db_path as configured_db_path, market_sources
 from .growth import Growth, LocalDatabase, LocalHttp, Settings, client_details, growth_router
-from .valuation import developer_key, slug
-from .website_data import Catalog, CatalogUnavailable, detail, evaluate, opportunity_key, public_unit, url_key
+from .valuation import slug
+from .website_data import Catalog, CatalogUnavailable, evaluate, evaluate_query, public_unit, url_key
 
-from .web_common import DELIVERY_PATTERN, RANK_MIN_COMPOUND, RANK_MIN_DEVELOPER, Sort, matches, page_of, sort_entities, within
+from .web_common import RANK_MIN_COMPOUND, RANK_MIN_DEVELOPER, matches, page_of, sort_entities
 
-Level = Literal["", "strong", "good", "in_line", "mixed", "pricier", "check", "unrated"]
 
 
 _CONFIGURED = object()
@@ -72,9 +71,6 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
         snapshot = catalog.snapshot()
         if kind == "overview":
             return snapshot.overview
-        if kind == "unit_detail":
-            record = snapshot.records.get(int(key))
-            return {"unit": public_unit(record, full=True)} if record else None
         if kind == "article":
             return await editorial.article(Growth(leads, public, config, None), key)
         if kind in ("index", "map", "guide"):
@@ -110,90 +106,6 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
     @app.get("/api/catalog")
     def entities() -> dict:
         return catalog.snapshot().catalog
-
-    @app.get("/api/units")
-    def units(
-        q: str = Query("", max_length=200),
-        district: str = Query("", max_length=200),
-        compound: str = Query("", max_length=200),
-        developer: str = Query("", max_length=200),
-        property_type: str = Query("", max_length=64),
-        level: Level = "",
-        terms: Literal["", "cash", "plan", "partial", "unknown"] = "",
-        source: str = Query("", max_length=32),
-        resale: Literal["true", "all"] = "true",
-        launch: Literal["", "true"] = "",
-        sort: Sort = "opportunity",
-        price_max: float | None = Query(None, ge=0, le=1_000_000_000, allow_inf_nan=False),
-        cash_max: float | None = Query(None, ge=0, le=1_000_000_000, allow_inf_nan=False),
-        signing_max: float | None = Query(None, ge=0, le=1_000_000_000, allow_inf_nan=False),
-        area_min: float | None = Query(None, ge=0, le=100_000, allow_inf_nan=False),
-        area_max: float | None = Query(None, ge=0, le=100_000, allow_inf_nan=False),
-        bedrooms_min: int | None = Query(None, ge=0, le=12),
-        delivery: str = Query("", pattern=DELIVERY_PATTERN),
-        newer_than: int | None = Query(None, ge=0),
-        price_dropped: Literal["", "true"] = "",
-        page: int = Query(1, ge=1, le=100_000),
-        page_size: int = Query(25, ge=1, le=100),
-    ) -> dict:
-        snapshot = catalog.snapshot()
-        items = list(snapshot.default if resale == "true" else snapshot.records.values())
-        if q.strip():
-            items = [r for r in items if matches(q, r["title"], r["district"], r["compound_name"], r["developer_name"],
-                                                 r["compound"] and r["compound"]["name"],
-                                                 r["compound"] and r["compound"]["name_ar"],
-                                                 r["developer"] and r["developer"]["name"],
-                                                 r["developer"] and r["developer"]["name_ar"])]
-        if district.strip():
-            items = [r for r in items if slug(r["district"]) == slug(district)]
-        if compound.strip():
-            items = [r for r in items if r["compound_key"] == slug(compound)]
-        if developer.strip():
-            key = developer.strip() if developer.strip() in snapshot.developers else developer_key(developer)
-            items = [r for r in items if r["developer_key"] == key]
-        if property_type.strip():
-            items = [r for r in items if r["property_type"] == property_type.strip().casefold()]
-        if level:
-            items = [r for r in items if r["opportunity"]["level"] == level]
-        if terms:
-            items = [r for r in items if r["payment"]["terms"] == terms]
-        if source.strip():
-            items = [r for r in items if r["source"] == source.strip().casefold()]
-        if launch or sort == "launch_gap":  # only units with a current developer price for a similar unit
-            items = [r for r in items if r.get("launch")]
-        budget = {"price_max": price_max, "cash_max": cash_max, "signing_max": signing_max, "area_min": area_min,
-                  "area_max": area_max, "bedrooms_min": bedrooms_min, "delivery": delivery, "newer_than": newer_than,
-                  "price_dropped": True if price_dropped == "true" else None}
-        if any(value not in (None, "") for value in budget.values()):
-            items = [r for r in items if within(r, **budget)]
-        if sort == "opportunity":
-            items.sort(key=opportunity_key)
-        elif sort == "launch_gap":  # like for like only: a listing error or an unfinished unit is not a deal
-            items = [r for r in items if r["opportunity"]["level"] != "check" and r["launch"]["same_finishing"]]
-            items.sort(key=lambda r: (r["launch"]["gap"], r["id"]))
-        elif sort == "peer_gap":
-            items = [r for r in items if r["peers"] and r["opportunity"]["level"] != "check"]
-            items.sort(key=lambda r: (r["peers"]["gap"], r["id"]))
-        elif sort == "cash_ppm_asc":
-            items = [r for r in items if r["payment"]["cash_equivalent"]]
-            items.sort(key=lambda r: (r["payment"]["cash_equivalent"] / r["area_m2"], r["id"]))
-        elif sort == "newest":
-            items.sort(key=lambda r: -r["id"])
-        else:
-            key = {"price_asc": "price", "price_desc": "price", "area_desc": "area_m2"}[sort]
-            direction = -1 if sort in {"price_desc", "area_desc"} else 1
-            items.sort(key=lambda r: (direction * r[key], r["id"]))
-        result = page_of(items, page, page_size)
-        result["items"] = [public_unit(r) for r in result["items"]]
-        return result
-
-    @app.get("/api/units/{unit_id}")
-    def unit_detail(unit_id: int) -> dict:
-        snapshot = catalog.snapshot()
-        record = snapshot.records.get(unit_id)
-        if record is None:
-            raise HTTPException(404, "This unit is unavailable or does not meet the published inclusion rules.")
-        return detail(snapshot, record)
 
     @app.get("/api/compounds")
     def compounds(
@@ -319,10 +231,11 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
     @app.get("/api/lookup")
     def lookup(url: str = Query(..., min_length=8, max_length=2048)) -> dict:
         key = url_key(url)
-        unit_id = catalog.snapshot().urls.get(key) if key else None
-        if unit_id is None:
+        snapshot = catalog.snapshot()
+        record = snapshot.records.get(snapshot.urls.get(key)) if key else None
+        if record is None:
             raise HTTPException(404, "We have not indexed that listing link. Enter its details instead.")
-        return {"id": unit_id}
+        return {"query": evaluate_query(public_unit(record))}
 
     app.include_router(growth_router(growth))
     app.include_router(editorial.editorial_router(growth))
@@ -367,6 +280,12 @@ def create_app(db_path: str | Path | None = None, static_dir: str | Path | None 
 
     @app.get("/{path:path}", include_in_schema=False)
     async def website(request: Request, path: str) -> Response:
+        try:
+            moved = await seo.retired_redirect("/" + path, dict(request.query_params), public.unit)
+        except CatalogUnavailable:  # the listing's guide is unknown for now: send it to the map, not for good
+            return RedirectResponse("/map", status_code=302)
+        if moved:
+            return RedirectResponse(moved, status_code=301)
         requested = (static_root / path).resolve()
         if not requested.is_relative_to(static_root):
             raise HTTPException(404, "Page not found.")

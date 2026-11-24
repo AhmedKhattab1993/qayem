@@ -385,6 +385,12 @@ To review with an Egyptian lawyer before anything is charged.
 
 Status 2026-11-22: **Phases 0–4 are built, tested and live on production (`qayem.ai`)** (see [PRICE_GUIDE.md](PRICE_GUIDE.md) for how each part is implemented).
 
+**Individual listings removed (2026-11-24)**, the decision in section 14: the Units search, unit pages,
+deal sheets, the listing tables on compound and district pages, saved searches, unit compare and `/api/units`
+are gone. `/units`, `/units/:id` and `/sheet/:id` redirect permanently to the guide that covers the listing.
+A pasted listing link fills in the price check instead of opening a listing; alerts count what changed in a
+compound or district and link to its guide. Listings remain the input to every published figure.
+
 **Phase 0: clean-up and foundations (weeks 1–2)** — **live on production**:
 - Done:
   - No phone numbers or contact fields are stored. `qayem scrub-personal` ran on every local copy, on
@@ -446,7 +452,7 @@ Settled 2026-11-22. The owner asked for no approval steps, and for everything to
 | Question | Decision |
 |---|---|
 | "Global" | All of Egypt, for buyers inside and outside Egypt (Arabic, English, prices in EGP / USD / SAR / AED) |
-| Unit pages | Fade them out; no third-party photos meanwhile |
+| Unit pages | Removed 2026-11-24: no listing pages, search, deal sheets or listing tables; old addresses redirect to the compound or district guide (see section 12) |
 | AI crawlers | Allow all major ones (search and assistant crawlers) |
 | Article model | The current Pi / GLM setup: no added cost |
 | Approval | None. Articles that pass the automatic gates publish directly |

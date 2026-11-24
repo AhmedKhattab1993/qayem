@@ -54,15 +54,35 @@ def apps(database, tmp_path):  # noqa: F811
 
 @pytest.mark.parametrize("path", [
     "/", "/evaluate", "/evaluate?compound=Garden&property_type=apartment&area=120&price=4200000", "/evaluate?mode=sell",
-    "/units", "/units?price_dropped=true", "/units/17", "/units/18", "/units/999999", "/units/abc",
     "/compounds", "/compounds/garden", "/compounds/nowhere", "/developers/nile", "/districts", "/districts/new-cairo",
-    "/methodology", "/privacy", "/compare", "/watchlist", "/sheet/17", "/nothing-here",
+    "/methodology", "/privacy", "/compare", "/watchlist", "/nothing-here",
 ])
 def test_every_page_head_matches_between_local_and_cloud(apps, path):
     local, cloud, *_ = apps
     old, new = local.get(path), cloud.get(path)
     assert (old.status_code, old.text) == (new.status_code, new.text)
     assert new.headers["content-type"].startswith("text/html")
+
+
+@pytest.mark.parametrize("path, target", [
+    ("/units", "/map"), ("/units?price_dropped=true", "/map"), ("/units?compound=garden&sort=newest", "/compounds/garden"),
+    ("/units?district=new-cairo", "/districts/new-cairo"), ("/units/17", "/compounds/garden"),
+    ("/units/18", "/compounds/garden"), ("/units/12", "/compounds/lake"), ("/sheet/17", "/compounds/garden"),
+    ("/units/999999", "/map"), ("/units/abc", "/map"), ("/sheet", "/map"),
+])
+def test_retired_listing_pages_move_to_their_guide_alike_locally_and_in_the_cloud(apps, path, target):
+    """Qayem publishes prices, not listings (docs/STRATEGY.md 14): the old addresses keep their visitors."""
+    local, cloud, *_ = apps
+    for client in (local, cloud):
+        moved = client.get(path, follow_redirects=False)
+        assert (moved.status_code, moved.headers["location"]) == (301, target), path
+
+
+def test_a_listing_outside_any_compound_moves_to_its_district():
+    async def listing(unit_id):
+        return {"id": unit_id, "compound": None, "district": "New Cairo"}
+    assert asyncio.run(seo.retired_redirect("/units/5", {}, listing)) == "/districts/new-cairo"
+    assert asyncio.run(seo.retired_redirect("/compounds/garden", {}, listing)) is None
 
 
 def test_a_compound_page_carries_its_own_head_summary_and_faq(apps):
@@ -74,8 +94,6 @@ def test_a_compound_page_carries_its_own_head_summary_and_faq(apps):
     assert '"@type":"FAQPage"' in html and '"@type":"BreadcrumbList"' in html
     assert '<div id="root"><div class="seo-summary"><h1>' in html  # crawlers read it; React replaces it
     assert html.count('name="description"') == 1
-    unit = cloud.get("/units/17").text
-    assert "أرخص" in unit.split("<title>")[1] and "RealEstateListing" in unit
     assert 'content="noindex,follow"' in cloud.get("/compare").text
     missing = cloud.get("/compounds/nowhere")
     assert missing.status_code == 404 and 'content="noindex,follow"' in missing.text
@@ -95,8 +113,7 @@ def test_sitemap_robots_and_canonical_host(apps):
     sitemap = cloud.get("/sitemap.xml").text
     for path in ("/</loc>", "/map<", "/index<", "/compounds/garden<", "/districts/new-cairo<", "/developers/nile<"):
         assert f"https://qayem.ai{path}" in sitemap
-    assert "/units/17<" not in sitemap and "/units/22<" not in sitemap  # unit pages fade out of search
-    assert 'content="noindex,follow"' in cloud.get("/units/17").text
+    assert "/units" not in sitemap  # listings are not pages
     robots = cloud.get("/robots.txt").text
     assert "Sitemap: https://qayem.ai/sitemap.xml" in robots and "Disallow: /api" not in robots
     for bot in ("OAI-SearchBot", "GPTBot", "ClaudeBot", "PerplexityBot", "Google-Extended"):
@@ -104,8 +121,8 @@ def test_sitemap_robots_and_canonical_host(apps):
     llms = cloud.get("/llms.txt")
     assert llms.status_code == 200 and llms.text.startswith("# Qayem") and "https://qayem.ai/methodology" in llms.text
     assert local.get("/llms.txt").text == llms.text
-    moved = cloud.get("http://www.qayem.ai/units/17?utm_source=x", follow_redirects=False)
-    assert moved.status_code == 301 and moved.headers["location"] == "https://qayem.ai/units/17?utm_source=x"
+    moved = cloud.get("http://www.qayem.ai/compounds/garden?utm_source=x", follow_redirects=False)
+    assert moved.status_code == 301 and moved.headers["location"] == "https://qayem.ai/compounds/garden?utm_source=x"
     assert cloud.get("http://www.qayem.ai/api/health", follow_redirects=False).status_code == 301
     assert cloud.get("/api/overview").headers["x-robots-tag"] == "noindex"
 
@@ -221,7 +238,10 @@ def test_dispatch_sends_new_matches_once_per_publication(apps):
     assert summary | {"alerts": 3} == {"status": "sent", "version": "first", "alerts": 3, "matched": 2, "emailed": 1,
                                        "email_failed": 0, "whatsapp": 1}
     email = next(body for url, body, _ in http.calls if url == "https://api.resend.com/emails")
-    assert email["to"] == ["a@b.co"] and "/units/17?utm_source=alert" in email["html"]
+    # how many moved, and the guide's prices today: no listing is sent one by one
+    assert email["to"] == ["a@b.co"] and "/compounds/garden?utm_source=alert" in email["html"]
+    assert "/units" not in email["html"] + email["text"]
+    assert "إعلان جديد أو نزل سعره في «Garden»" in email["html"]
     assert email["headers"]["List-Unsubscribe"].startswith("<https://qayem.ai/api/alerts/unsubscribe?token=")
     digest = next(body for url, body, _ in http.calls if "telegram" in url)["text"]
     assert "https://wa.me/201000000001?text=" in digest
@@ -293,9 +313,10 @@ def test_history_reports_delistings_price_cuts_and_developer_moves(tmp_path):
     assert history["developer_change_60d"] == pytest.approx(0.1 / 3, abs=1e-3) and history["developer_rising"] == 1
     assert snapshot.overview["history"]["delisted_30d"] == 4
     with TestClient(create_app(path, tmp_path / "none", sources=None, leads_db=None)) as client:
-        dropped = client.get("/api/units", params={"price_dropped": "true"}).json()
-        assert {u["id"] for u in dropped["items"]} == {3, 4}
-        assert client.get("/api/units/3").json()["unit"]["price_change"]["from"] == 5_500_000
+        dropped = {r["id"] for r in client.app.state.catalog.snapshot().default if r.get("price_change")
+                   and r["price_change"]["change"] < 0}
+        assert dropped == {3, 4}
+        assert client.app.state.catalog.snapshot().records[3]["price_change"]["from"] == 5_500_000
 
 
 def test_the_weekly_content_brief_writes_posts_cards_and_tracked_links(database, tmp_path):  # noqa: F811
@@ -311,4 +332,4 @@ def test_the_weekly_content_brief_writes_posts_cards_and_tracked_links(database,
     assert "utm_campaign=brief-2026-w48-1" in brief and "#قيّم" in brief
     cards = sorted((tmp_path / "brief" / "cards").glob("*.svg"))
     assert len(cards) == len(stories) and all(card.read_text().startswith("<svg") for card in cards)
-    assert json.loads((tmp_path / "brief" / "brief.json").read_text())[0]["link"].startswith("https://qayem.ai/units")
+    assert json.loads((tmp_path / "brief" / "brief.json").read_text())[0]["link"].startswith("https://qayem.ai/evaluate")

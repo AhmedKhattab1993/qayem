@@ -16,7 +16,7 @@ from qayem.db import init_db
 from qayem.models import ParseRun, Property, PropertyVersion
 from qayem.web import create_app
 from qayem.web_common import within
-from qayem.website_data import opportunity_key
+from qayem.website_data import opportunity_key, public_unit
 
 SEEN = datetime(2026, 9, 21, tzinfo=timezone.utc)
 BASE = {
@@ -96,17 +96,25 @@ def client(database: Path, tmp_path: Path) -> TestClient:
         yield test_client
 
 
-def unit(client: TestClient, unit_id: int) -> dict:
-    return client.get(f"/api/units/{unit_id}").json()["unit"]
+# Listings are inputs to the guide's figures, not pages (docs/STRATEGY.md 14): the model's view of
+# each one is read from the published catalogue, as the price guide, the alerts and the redirects do.
+def unit(client: TestClient, unit_id: int) -> dict | None:
+    record = client.app.state.catalog.snapshot().records.get(unit_id)
+    return public_unit(record, full=True) if record else None
+
+
+def listed(client: TestClient, resale: bool = True) -> list[dict]:
+    """Every published listing, best opportunity first; `resale=False` adds the eligible non-resale ones."""
+    snapshot = client.app.state.catalog.snapshot()
+    return [public_unit(r) for r in sorted(snapshot.default if resale else snapshot.records.values(), key=opportunity_key)]
 
 
 def test_inventory_and_eligibility(client: TestClient):
-    listing = client.get("/api/units", params={"page_size": 100}).json()
-    ids = {item["id"] for item in listing["items"]}
-    assert 22 not in ids and len(ids) == listing["total"] == 23
-    assert client.get("/api/units", params={"resale": "all"}).json()["total"] == 24
+    ids = {item["id"] for item in listed(client)}
+    assert 22 not in ids and len(ids) == 23
+    assert len(listed(client, resale=False)) == 24
     for ineligible in range(24, 30):
-        assert client.get(f"/api/units/{ineligible}").status_code == 404
+        assert unit(client, ineligible) is None
     overview = client.get("/api/overview").json()
     # the two developer-launch rows are a price benchmark, not indexed records
     assert (overview["total_records"], overview["total_eligible"], overview["total_resale"]) == (30, 24, 23)
@@ -148,47 +156,11 @@ def test_payment_terms_drive_cash_equivalent(client: TestClient):
     assert unit(client, 21)["opportunity"]["level"] == "unrated"  # the only office: nothing to compare with
 
 
-def test_units_filters_and_sorting(client: TestClient):
-    strong = client.get("/api/units", params={"level": "strong"}).json()
-    assert [item["id"] for item in strong["items"]] == [17]
-    ranked = client.get("/api/units", params={"page_size": 100}).json()["items"]  # by opportunity by default
+def test_listings_rank_by_opportunity(client: TestClient):
+    ranked = listed(client)
     levels = [item["opportunity"]["level"] for item in ranked]
     assert ranked[0]["id"] == 17 and levels.index("check") > levels.index("in_line")
     assert levels[-3:] == ["unrated"] * 3
-    peers = client.get("/api/units", params={"sort": "peer_gap", "page_size": 100}).json()["items"]
-    assert peers[0]["id"] == 17 and 23 not in {item["id"] for item in peers}
-    assert client.get("/api/units", params={"compound": "lake", "terms": "partial"}).json()["total"] == 1
-    assert client.get("/api/units", params={"source": "GPM"}).json()["total"] == 1
-    assert client.get("/api/units", params={"developer": "Nile Developments"}).json()["total"] >= 8
-    assert client.get("/api/units", params={"q": "%' OR 1=1 --"}).json()["total"] == 0
-
-
-def test_units_fit_a_buyers_budget_and_needs(client: TestClient):
-    every = client.get("/api/units", params={"page_size": 100}).json()["items"]
-
-    def ids(**params):
-        return {item["id"] for item in client.get("/api/units", params={"page_size": 100, **params}).json()["items"]}
-
-    def paid(item):
-        remaining = item["payment"]["remaining"]
-        return None if remaining is None else item["price"] - remaining
-
-    assert ids(price_max=5_000_000) == {i["id"] for i in every if i["price"] <= 5_000_000}
-    # unknown terms have no cash value or signing amount, so they never fit a limit on either
-    assert ids(cash_max=4_000_000) == {i["id"] for i in every
-                                       if i["payment"]["cash_equivalent"] is not None
-                                       and i["payment"]["cash_equivalent"] <= 4_000_000}
-    signing = ids(signing_max=1_500_000)
-    assert signing == {i["id"] for i in every if paid(i) is not None and paid(i) <= 1_500_000}
-    assert 19 not in signing and 20 not in signing  # unknown and partial terms
-    assert ids(area_min=100, area_max=160) == {i["id"] for i in every if 100 <= i["area_m2"] <= 160}
-    assert ids(bedrooms_min=3) == {i["id"] for i in every if (i["bedrooms"] or -1) >= 3}
-    ready = ids(delivery="ready")
-    assert ready == {i["id"] for i in every if i["delivery"]["bucket"] == "ready"}
-    assert ready <= ids(delivery="2030")
-    newest = client.get("/api/units", params={"sort": "newest", "newer_than": 10, "page_size": 100}).json()["items"]
-    assert [i["id"] for i in newest] == sorted((i["id"] for i in every if i["id"] > 10), reverse=True)
-    assert client.get("/api/units", params={"delivery": "soon"}).status_code == 422
 
 
 def test_bedrooms_and_delivery_limits_never_match_what_a_listing_does_not_publish():
@@ -214,30 +186,22 @@ def test_a_unit_cheaper_on_both_comparisons_outranks_one_checked_once():
     assert sorted([once, both], key=opportunity_key) == [both, once]
 
 
-@pytest.mark.parametrize("params", [
-    {"page": 0}, {"page_size": 101}, {"sort": "price;DROP TABLE properties"}, {"resale": "false"},
-    {"level": "cheap"}, {"sort": "value"},
-])
-def test_invalid_query_values_return_422(client: TestClient, params: dict):
-    assert client.get("/api/units", params=params).status_code == 422
-
-
-def test_detail_is_sanitized_and_explains_itself(client: TestClient):
-    detail = client.get("/api/units/30").json()
-    text = json.dumps(detail)
+def test_a_published_listing_is_sanitized(client: TestClient):
+    published = unit(client, 30)
+    text = json.dumps(published)
     assert "PRIVATE" not in text and "phone" not in text and '"raw"' not in text
     # sources' photos are never served, even when stored
-    assert detail["unit"]["images"] == [] and detail["unit"]["photo"] is None
+    assert published["images"] == [] and published["photo"] is None
     assert "example.test/b.jpg" not in text
-    assert detail["unit"]["source_url"] is None and detail["unit"]["bedrooms"] is None
-    assert "description" not in detail["unit"]
+    assert published["source_url"] is None and published["bedrooms"] is None
+    assert "description" not in published
     assert "+201012345678" not in text and "<script>" not in text
-    # the similar units it is ranked against, nearest in size first
-    assert [c["area_m2"] for c in detail["comparables"]][:3] == [120, 120, 120]
-    # every similar unit is listed (the page shows the nearest six until asked), each with its seller's contract year
-    assert len(detail["comparables"]) == 11 and all(c["compound"]["key"] == "garden" for c in detail["comparables"])
-    assert all("contract_year" in c for c in detail["comparables"])
-    assert client.get("/api/units/999999").status_code == 404
+
+
+def test_listings_have_no_api_of_their_own(client: TestClient):
+    """Qayem publishes prices, not listings (docs/STRATEGY.md 14)."""
+    for route in ("/api/units", "/api/units/30", "/api/units?compound=garden"):
+        assert client.get(route).status_code == 404
 
 
 def test_compounds_developers_and_districts(client: TestClient):
@@ -266,8 +230,8 @@ def test_compounds_developers_and_districts(client: TestClient):
 
 
 def test_launch_prices_are_a_benchmark_not_inventory(client: TestClient):
-    assert client.get("/api/units", params={"resale": "all", "page_size": 100}).json()["total"] == 24
-    assert client.get("/api/units/31").status_code == 404
+    assert len(listed(client, resale=False)) == 24
+    assert unit(client, 31) is None
     garden = client.get("/api/compounds/garden").json()["compound"]
     assert garden["launch"]["units"] == 2 and garden["launch"]["phases"] == ["Garden - New Phase"]
     assert garden["launch"]["median_plan_years"] == 8.0 and garden["launch"]["median_headline_ppm"] == 100_000
@@ -288,14 +252,9 @@ def test_each_resale_unit_is_compared_with_the_developers_price_for_a_similar_un
     assert launch["headline_gap"] == pytest.approx(garden["price"] / 12_000_000 - 1, abs=1e-3)
     assert launch["gap"] == max(launch["cash_gap"], launch["headline_gap"])
     assert unit(client, 12)["launch"] is None  # Lake: the developer has no current launch
-    ranked = client.get("/api/units", params={"sort": "launch_gap", "page_size": 100}).json()["items"]
-    assert ranked and all(item["compound"]["key"] == "garden" for item in ranked)
-    gaps = [item["launch"]["gap"] for item in ranked]
-    assert gaps == sorted(gaps)
-    only = client.get("/api/units", params={"launch": "true", "page_size": 100}).json()["items"]
-    # the ranking leaves out prices too far from anything to be real (unit 23: EGP 150,000)
-    left_out = {item["id"] for item in only} - {item["id"] for item in ranked}
-    assert left_out == {23} and unit(client, 23)["opportunity"]["level"] == "check"
+    compared = [item for item in listed(client) if item["launch"]]
+    assert compared and all(item["compound"]["key"] == "garden" for item in compared)
+    assert unit(client, 23)["opportunity"]["level"] == "check"  # EGP 150,000: too far from anything to be real
 
 
 def test_a_contract_price_unit_shows_how_the_developers_price_moved_since_it_was_signed(database: Path):
@@ -366,7 +325,7 @@ def test_evaluate_compares_a_described_unit(client: TestClient):
     # EGP 60,000/m² against Lake units at 80,000: cheaper both as listed and in today's money
     assert result["peers"]["headline_gap"] == pytest.approx(-0.25, abs=0.02)
     assert result["opportunity"]["level"] in ("good", "strong") and result["launch"] is None
-    assert len(result["comparables"]) == 8  # all the similar units, nearest in size first
+    assert "comparables" not in result  # the comparison, not the listings behind it
     garden = client.get("/api/evaluate", params={"property_type": "apartment", "area": 120, "price": 6_000_000,
                                                  "compound": "Garden", "finishing": "finished"}).json()
     assert garden["payment"]["terms"] == "cash" and garden["opportunity"]["signals"] == ["developer", "peers"]
@@ -382,16 +341,20 @@ def test_evaluate_compares_a_described_unit(client: TestClient):
     assert client.get("/api/evaluate", params={**params, "delivery": "soon"}).status_code == 422
 
 
-def test_lookup_matches_normalized_links_only(client: TestClient):
-    assert client.get("/api/lookup", params={"url": "https://example.test/deal"}).json() == {"id": 17}
+def test_lookup_fills_in_the_price_check_from_a_normalized_link_only(client: TestClient):
+    found = client.get("/api/lookup", params={"url": "https://example.test/deal"}).json()
+    # the listing's facts, as the price check's own fields; no listing ID or page
+    assert found == {"query": {"property_type": "apartment", "area": "120", "price": "4200000", "compound": "Garden",
+                               "delivery": "ready", "finishing": "finished"}}
+    assert client.get("/api/evaluate", params=found["query"]).json()["status"] == "compared"
     assert client.get("/api/lookup", params={"url": "https://example.test/listing"}).status_code == 404
 
 
 def test_requests_cannot_write_the_source_database(client: TestClient, database: Path):
     before = hashlib.sha256(database.read_bytes()).hexdigest()
-    for route in ("health", "overview", "catalog", "units", "units/1", "compounds", "developers"):
+    for route in ("health", "overview", "catalog", "compounds", "developers"):
         assert client.get(f"/api/{route}").status_code == 200
-    assert client.post("/api/units", json={"price": 1}).status_code in (404, 405)
+    assert client.post("/api/compounds", json={"price": 1}).status_code in (404, 405)
     with pytest.raises(sqlite3.OperationalError, match="readonly"):
         connection = client.app.state.catalog.connect()
         try:
@@ -411,7 +374,7 @@ def test_database_without_delivery_date_column_still_serves(database: Path):
 def test_missing_database_is_actionable_and_never_created(tmp_path: Path):
     missing = tmp_path / "nonexistent" / "qayem.db"
     with TestClient(create_app(missing)) as client:
-        for route in ("health", "units", "overview", "catalog"):
+        for route in ("health", "overview", "catalog"):
             response = client.get(f"/api/{route}")
             assert response.status_code == 503 and "QAYEM_DB" in response.json()["detail"]
     assert not missing.exists() and not missing.parent.exists()
@@ -425,7 +388,7 @@ def test_cache_refreshes_when_an_external_ingestion_changes_wal(database: Path):
             writer.execute("UPDATE properties SET is_resale = 0 WHERE id = 1")
             writer.commit()
             assert client.get("/api/overview").json()["total_resale"] == 22
-            assert client.get("/api/units").json()["total"] == 22
+            assert len(listed(client)) == 22
 
 
 def test_refits_are_throttled_while_a_crawl_is_writing(database: Path):
@@ -443,12 +406,19 @@ def test_spa_routes_and_unknown_api_remain_separate(database: Path, tmp_path: Pa
     (dist / "brand.svg").write_text("<svg></svg>")
     (dist / "leak.db").symlink_to(database)
     with TestClient(create_app(database, dist)) as client:
-        for route in ("/", "/evaluate", "/units", "/compounds/garden", "/developers", "/methodology"):
+        for route in ("/", "/evaluate", "/compounds/garden", "/developers", "/methodology"):
             response = client.get(route)
             assert response.status_code == 200 and response.text.startswith("<!doctype html><title>")
         assert "Garden" in client.get("/compounds/garden").text  # the route's own head (seo.py)
         assert client.get("/compounds/nowhere").status_code == 404  # still the app, which says so
-        assert client.get("/units/999999").status_code == 404
+        # the retired listing pages move for good to the guide that covers the listing
+        moved = {"/units/17": "/compounds/garden", "/sheet/17": "/compounds/garden", "/units/999999": "/map",
+                 "/units": "/map", "/units?compound=lake&sort=newest": "/compounds/lake",
+                 "/units?district=new-cairo": "/districts/new-cairo", "/units?developer=nile": "/developers/nile"}
+        for old, new in moved.items():
+            response = client.get(old, follow_redirects=False)
+            assert response.status_code == 301 and response.headers["location"] == new, old
+        assert client.get("/units/17").status_code == 200  # the compound guide, after the redirect
         assert client.get("/brand.svg").status_code == 200
         assert client.get("/missing.js").status_code == 404
         assert client.get("/leak.db").status_code == 404
@@ -466,7 +436,7 @@ def test_listing_whose_price_is_only_the_down_payment_is_hidden(database: Path):
             "model, reasoning_effort, flags) VALUES (17, 'done', 1, '2026-09-27', 'x', 'gpt-6-sol', 'low', "
             "'[\"price_is_down_payment\"]')")
     with TestClient(create_app(database)) as client:
-        assert client.get("/api/units/17").status_code == 404
+        assert unit(client, 17) is None
         assert client.get("/api/overview").json()["total_eligible"] == 23
 
 
@@ -493,9 +463,9 @@ def test_only_the_configured_sources_are_shown_and_fitted(database: Path, monkey
         # market sources (the price guide's classifieds) are counted in the sources, never listed as units
         assert [source["id"] for source in overview["sources"]][0] == "gpm"
         assert {source["id"] for source in overview["sources"]} <= {"gpm", "aqarmap", "opensooq", "semsar"}
-        assert {item["source"] for item in client.get("/api/units").json()["items"]} == {"gpm"}
+        assert {item["source"] for item in listed(client)} == {"gpm"}
         assert overview["launch"]["compared"] == 0  # launch benchmarks come from nawy_primary
-        assert client.get("/api/units/1").status_code == 404  # a Nawy listing
+        assert unit(client, 1) is None  # a Nawy listing
 
 
 def test_aqarexit_and_nawy_resale_are_the_default_sources(monkeypatch: pytest.MonkeyPatch):

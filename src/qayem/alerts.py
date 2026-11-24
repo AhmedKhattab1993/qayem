@@ -1,5 +1,6 @@
-"""Search alerts: after each catalogue publication, the units newly listed or newly cut in price
-that match a saved search go to the person who asked for them.
+"""Price alerts for a compound or a district: after each catalogue publication, the person who asked
+hears how many listings there were added or cut in price, with a link to the guide's prices today.
+No listing is sent one by one (docs/STRATEGY.md 14).
 
 The public Worker checks every hour (a cron trigger) and sends once per published version, so
 alerts follow the nightly update whenever it finishes. E-mail goes out through Resend
@@ -10,16 +11,11 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from html import escape
-import json
 from urllib.parse import quote, urlencode
 
-from .growth import Database, Growth, Http, Settings, telegram, unit_filters, wa_link
-from .seo import LEVEL_AR, money_ar, name_ar, place_ar, type_ar
+from .growth import Database, Growth, Http, Settings, guide_path, telegram, unit_filters, wa_link
 
 MAX_ALERTS = 2000
-SHOWN = 5
-LEVEL_EN = {"strong": "Strong opportunity", "good": "Good opportunity", "in_line": "In line", "mixed": "Mixed signals",
-            "pricier": "Pricier", "check": "Check this listing", "unrated": "Not enough to compare"}
 
 
 def link(settings: Settings, path: str, medium: str) -> str:
@@ -27,63 +23,42 @@ def link(settings: Settings, path: str, medium: str) -> str:
     return f"{settings.site}{path}{joiner}{urlencode({'utm_source': 'alert', 'utm_medium': medium})}"
 
 
-def unit_line(unit: dict, lang: str) -> str:
-    compound = unit.get("compound")
-    launch, peers = unit.get("launch"), unit.get("peers")
-    if lang == "en":
-        where = (compound or {}).get("name") or unit.get("district") or ""
-        gap = (f"{launch['gap'] * 100:+.0f}% vs developer" if launch and launch.get("same_finishing")
-               else f"{peers['gap'] * 100:+.0f}% vs similar units" if peers else LEVEL_EN[unit["opportunity"]["level"]])
-        cut = f" · price cut {unit['price_change']['change'] * 100:.0f}%" if (unit.get("price_change") or {}).get("change", 0) < 0 else ""
-        return f"{unit['property_type'].title()} {unit['area_m2']:g} m² in {where} · EGP {unit['price'] / 1e6:.2f}M · {gap}{cut}"
-    where = name_ar(compound) or place_ar(unit.get("district"))
-    gap = (f"{'أرخص' if launch['gap'] < 0 else 'أغلى'} {abs(launch['gap']) * 100:.0f}% من المطور"
-           if launch and launch.get("same_finishing")
-           else f"{'أرخص' if peers['gap'] < 0 else 'أغلى'} {abs(peers['gap']) * 100:.0f}% من المماثل" if peers
-           else LEVEL_AR[unit["opportunity"]["level"]])
-    cut = (f" · نزل سعرها {abs(unit['price_change']['change']) * 100:.0f}%"
-           if (unit.get("price_change") or {}).get("change", 0) < 0 else "")
-    return f"{type_ar(unit['property_type'])} {unit['area_m2']:g} م² في {where} · {money_ar(unit['price'])} · {gap}{cut}"
+def summary_line(alert: dict, total: int) -> str:
+    """What changed, counted: Qayem does not publish listings one by one, so an alert says how many
+    moved and links to the guide that prices them (docs/STRATEGY.md 14)."""
+    if alert["lang"] == "en":
+        return (f"{total} listing{'s' if total != 1 else ''} in “{alert['label']}” "
+                f"{'were' if total != 1 else 'was'} added or cut in price since your last alert.")
+    return f"{total} إعلان جديد أو نزل سعره في «{alert['label']}» منذ آخر تنبيه."
 
 
-def email_message(alert: dict, units: list[dict], total: int, settings: Settings) -> dict:
-    lang = alert["lang"]
-    english = lang == "en"
-    more = link(settings, f"/units?{alert['query']}{'&' if alert['query'] else ''}sort=newest", "email")
+def email_message(alert: dict, total: int, settings: Settings) -> dict:
+    english = alert["lang"] == "en"
+    guide = link(settings, guide_path(alert["query"]), "email")
     stop = f"{settings.site}/api/alerts/unsubscribe?token={quote(alert['token'])}"
     subject = (f"Qayem: {total} new for “{alert['label']}”" if english
                else f"قيّم: {total} جديد يطابق «{alert['label']}»")
-    urls = [link(settings, "/units/" + str(u["id"]), "email") for u in units]
-    rows = "".join(f'<li style="margin:0 0 10px"><a href="{escape(url)}" style="color:#0b6e4f">'
-                   f"{escape(unit_line(u, lang))}</a></li>" for u, url in zip(units, urls))
-    intro = (f"{total} units were listed or cut in price since your last alert and match your search:" if english
-             else f"{total} وحدة جديدة أو نزل سعرها منذ آخر تنبيه تطابق بحثك:")
-    see_all = "See them all, best first" if english else "شاهدها كلها، الأفضل أولًا"
+    intro = summary_line(alert, total)
+    see = "See today’s prices" if english else "شاهد الأسعار اليوم"
     footer = ("You asked Qayem for this alert. We never share your contact with brokers. "
               if english else "طلبت هذا التنبيه من قيّم. لن نشارك بياناتك مع سماسرة. ")
     unsubscribe = "Stop this alert" if english else "أوقف هذا التنبيه"
     direction = "ltr" if english else "rtl"
     html = (f'<div dir="{direction}" style="font-family:system-ui,Segoe UI,Tahoma,sans-serif;font-size:15px;line-height:1.7;'
             f'max-width:560px;margin:auto;color:#14201b"><h2 style="font-size:18px">{escape(alert["label"])}</h2>'
-            f"<p>{escape(intro)}</p><ul style=\"padding-inline-start:18px\">{rows}</ul>"
-            f'<p><a href="{escape(more)}" style="background:#0b6e4f;color:#fff;padding:10px 16px;border-radius:8px;'
-            f'text-decoration:none">{see_all}</a></p><p style="color:#66746e;font-size:13px">{footer}'
+            f"<p>{escape(intro)}</p>"
+            f'<p><a href="{escape(guide)}" style="background:#0b6e4f;color:#fff;padding:10px 16px;border-radius:8px;'
+            f'text-decoration:none">{see}</a></p><p style="color:#66746e;font-size:13px">{footer}'
             f'<a href="{escape(stop)}" style="color:#66746e">{unsubscribe}</a></p></div>')
-    plain = "\n".join([intro, *[f"- {unit_line(u, lang)}: {url}" for u, url in zip(units, urls)],
-                       f"{see_all}: {more}", f"{unsubscribe}: {stop}"])
+    plain = "\n".join([intro, f"{see}: {guide}", f"{unsubscribe}: {stop}"])
     return {"from": settings.alert_from, "to": [alert["destination"]], "subject": subject, "html": html, "text": plain,
             "headers": {"List-Unsubscribe": f"<{stop}>", "List-Unsubscribe-Post": "List-Unsubscribe=One-Click"}}
 
 
-def whatsapp_text(alert: dict, units: list[dict], total: int, settings: Settings) -> str:
-    more = link(settings, f"/units?{alert['query']}{'&' if alert['query'] else ''}sort=newest", "whatsapp")
-    if alert["lang"] == "en":
-        lines = [f"Qayem: {total} new for “{alert['label']}”", *[f"• {unit_line(u, 'en')}" for u in units[:3]], more,
-                 "Reply STOP to end this alert."]
-    else:
-        lines = [f"قيّم: {total} جديد يطابق «{alert['label']}»", *[f"• {unit_line(u, 'ar')}" for u in units[:3]], more,
-                 "للإيقاف رد بكلمة: إيقاف"]
-    return "\n".join(lines)
+def whatsapp_text(alert: dict, total: int, settings: Settings) -> str:
+    guide = link(settings, guide_path(alert["query"]), "whatsapp")
+    stop = "Reply STOP to end this alert." if alert["lang"] == "en" else "للإيقاف رد بكلمة: إيقاف"
+    return "\n".join([summary_line(alert, total), guide, stop])
 
 
 async def send_email(http: Http, settings: Settings, message: dict) -> bool:
@@ -96,9 +71,9 @@ async def send_email(http: Http, settings: Settings, message: dict) -> bool:
 
 
 async def dispatch(store, leads: Database, http: Http | None, settings: Settings, now: datetime | None = None) -> dict:
-    """Send each active alert the matching units listed (higher ID) or cut in price since it last checked.
-    Runs once per published catalogue version; a repeat is a no-op."""
-    from .cloud_web import unit_clauses  # the same filter as the Units API
+    """Tell each active alert how many matching listings were added (higher ID) or cut in price since it
+    last checked. Runs once per published catalogue version; a repeat is a no-op."""
+    from .cloud_web import unit_clauses
 
     now = now or datetime.now(timezone.utc)
     today = now.date().isoformat()
@@ -122,12 +97,9 @@ async def dispatch(store, leads: Database, http: Http | None, settings: Settings
         total = (await store.database.all(f"SELECT count(*) AS n FROM units WHERE {where}", params))[0]["n"]
         status = "none"
         if total:
-            rows = await store.database.all(f"SELECT public FROM units WHERE {where} ORDER BY opportunity_rank LIMIT ?",
-                                            (*params, SHOWN))
-            units = [json.loads(row["public"]) for row in rows]
             summary["matched"] += 1
             if alert["channel"] == "email":
-                if settings.resend_key and http and await send_email(http, settings, email_message(alert, units, total, settings)):
+                if settings.resend_key and http and await send_email(http, settings, email_message(alert, total, settings)):
                     status = "emailed"
                     summary["emailed"] += 1
                 else:
@@ -136,13 +108,13 @@ async def dispatch(store, leads: Database, http: Http | None, settings: Settings
             else:
                 status = "whatsapp_queued"
                 summary["whatsapp"] += 1
-                text = whatsapp_text(alert, units, total, settings)
+                text = whatsapp_text(alert, total, settings)
                 digest.append(f'• {escape(alert["label"])} ({total}) → '
                               f'<a href="{escape(wa_link(alert["destination"], text))}">{alert["destination"]}</a>')
             await leads.run("INSERT OR IGNORE INTO deliveries(created_at,alert_id,version,channel,matches,status) "
                             "VALUES (?,?,?,?,?,?)", (now.isoformat(), alert["id"], version, alert["channel"], total, status))
         sent = status in {"emailed", "whatsapp_queued"}
-        # A failed e-mail keeps its starting point, so the next publication retries the same units.
+        # A failed e-mail keeps its starting point, so the next publication counts the same listings again.
         await leads.run("UPDATE alerts SET last_seen_unit=?, last_checked=?, last_sent=coalesce(?, last_sent), "
                         "sent_count=sent_count+? WHERE id=?",
                         (alert["last_seen_unit"] if status == "email_failed" else max(newest, alert["last_seen_unit"]),

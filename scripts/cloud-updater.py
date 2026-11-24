@@ -71,8 +71,8 @@ def verify_publication():
         with urllib.request.urlopen(req, timeout=60) as response:
             return json.load(response)
     health = public("/api/health")
-    units = public("/api/units?resale=all&page_size=1")
-    if health.get("status") != "ok" or units.get("total") != dataset["unit_count"] or not units.get("items"):
+    overview = public("/api/overview")  # every published listing is counted there, never listed
+    if health.get("status") != "ok" or overview.get("total_eligible") != dataset["unit_count"]:
         raise SystemExit("Local schedule retained: the public API did not verify the complete cloud catalogue")
     proof = {"verified_at": datetime.now(timezone.utc).isoformat(), "run_id": status["run_id"],
              "dataset": dataset, "checkpoint": pointer, "public_api": "verified"}

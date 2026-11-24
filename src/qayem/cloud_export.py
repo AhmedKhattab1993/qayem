@@ -7,7 +7,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from .valuation import slug
-from .website_data import Catalog, detail, opportunity_key, public_unit, url_key
+from .website_data import Catalog, opportunity_key, public_unit, url_key
 
 
 def encoded(value) -> str:
@@ -109,15 +109,6 @@ def export_sql(database: Path, output: Path, *, sources=None, version: str | Non
                 int(bool(launch and launch["same_finishing"])), peers["gap"] if peers else None,
                 cash / record["area_m2"] if cash else None, url_key(record["source_url"]),
                 encoded(public_unit(record)), encoded(record)])
-            unit_detail = detail(snapshot, record)
-            # Store comparable IDs, rather than duplicating their photos and public fields
-            # across thousands of detail rows. The API joins the same immutable version.
-            unit_detail["comparables"] = [{"id": item["id"], "cash_ppm": item["cash_ppm"]}
-                                          for item in unit_detail["comparables"]]
-            text = encoded(unit_detail)
-            for part, start in enumerate(range(0, len(text), 8000)):
-                insert("documents", [version, "unit_detail", str(record["id"]), part, record["id"], text[start:start + 8000]])
-                part_count += 1
         for compound, pool in snapshot.launches.items():
             for record in pool:
                 insert("launches", [version, compound, record["id"], encoded(record)])

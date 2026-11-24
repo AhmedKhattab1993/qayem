@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowRight, ChevronDown, Link2, Scale, Tag } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import { ArrowRight, ChevronDown, Link2, Ruler, Tag } from "lucide-react";
 import { year as formatYear, api, ApiError, money, number, percent, quarterly, signed, titleCase, tone, useApi, useCatalog, scrollBehavior, sep, nameOf, place } from "../lib";
 import { t } from "../locale";
 import type { Evaluation, Payment } from "../types";
@@ -8,7 +8,6 @@ import { ErrorState, Loading } from "../components/States";
 import { ConfidenceBadge, NoSalePrices, resaleVsNewText } from "../components/Guide";
 import { OpportunitySummary, PaymentFacts, PeerPanel, Unknowns, levelText } from "../components/Opportunity";
 import { DeveloperPrice } from "../components/DeveloperPrice";
-import { Comparables } from "../components/UnitTable";
 import { NameList } from "../components/Names";
 import { LeadCard, SellerForm } from "../components/Capture";
 import { DealCheckLink, ObservationAsk } from "../components/Observation";
@@ -109,14 +108,14 @@ export default function Evaluate() {
     <div className="evaluate page-enter">
       <header className="page-head">
         <div className="page">
-          <span className="eyebrow">{t(selling ? "Selling a unit" : "Compare a unit")}</span>
+          <span className="eyebrow">{t(selling ? "Selling a unit" : "Price check")}</span>
           {selling ? (
             <h1 className="display">
               {t("How will buyers")} <em>{t("see your price?")}</em>
             </h1>
           ) : (
             <h1 className="display">
-              {t("Is this")} <em>{t("a real opportunity?")}</em>
+              {t("Is this price")} <em>{t("a fair one?")}</em>
             </h1>
           )}
           <p className="lede">
@@ -145,7 +144,15 @@ export default function Evaluate() {
 
       <div className="page evaluate-body">
         {mode === "link" ? (
-          <LinkLookup onFallback={() => switchMode("describe")} />
+          <LinkLookup
+            onFallback={() => switchMode("describe")}
+            onFound={(found) => {
+              const next = new URLSearchParams(found);
+              setForm(fromParams(next));
+              setMode("describe");
+              setParams(next);
+            }}
+          />
         ) : (
           <form className="evaluate-form" onSubmit={submit} noValidate>
             <fieldset>
@@ -309,8 +316,8 @@ export default function Evaluate() {
                 {t(problem)}
               </p>
             )}
-            <button type="submit" className="btn btn-ink btn-block">
-              <Scale size={16} /> {t("Compare this unit")}
+            <button type="submit" className="btn btn-primary btn-block">
+              <Ruler size={16} /> {t("Compare this unit")}
             </button>
           </form>
         )}
@@ -318,11 +325,11 @@ export default function Evaluate() {
         <section className="evaluate-result" ref={result} aria-live="polite" aria-label={t("Comparison")}>
           {!query ? (
             <div className="evaluate-placeholder">
-              <Scale size={28} strokeWidth={1.4} />
+              <Ruler size={28} strokeWidth={1.4} />
               <h2>{t("Your comparison appears here")}</h2>
               <p>
                 {t(
-                  "You will see how the unit compares with the developer’s price today and with the similar units listed in its compound, what its payment plan is worth today, and the units behind the comparison.",
+                  "You will see how the unit compares with the developer’s price today and with the similar units listed in its compound, and what its payment plan is worth today.",
                 )}
               </p>
             </div>
@@ -339,8 +346,9 @@ export default function Evaluate() {
   );
 }
 
-function LinkLookup({ onFallback }: { onFallback: () => void }) {
-  const navigate = useNavigate();
+/** A listing link we have indexed fills in the unit's details, and the check runs here like any other:
+ * Qayem shows the comparison, not the listing. */
+function LinkLookup({ onFallback, onFound }: { onFallback: () => void; onFound: (query: Record<string, string>) => void }) {
   const [url, setUrl] = useState("");
   const [state, setState] = useState<"idle" | "busy" | "missing">("idle");
   const submit = async (event: FormEvent) => {
@@ -348,9 +356,10 @@ function LinkLookup({ onFallback }: { onFallback: () => void }) {
     if (!url.trim()) return;
     setState("busy");
     try {
-      const { id } = await api<{ id: number }>(`/lookup?url=${encodeURIComponent(url.trim())}`);
-      track("lookup", { unit_id: id, meta: { found: true } });
-      navigate(`/units/${id}`);
+      const { query } = await api<{ query: Record<string, string> }>(`/lookup?url=${encodeURIComponent(url.trim())}`);
+      track("lookup", { meta: { found: true } });
+      setState("idle");
+      onFound(query);
     } catch (error) {
       setState(error instanceof ApiError && error.status === 404 ? "missing" : "idle");
     }
@@ -385,8 +394,8 @@ function LinkLookup({ onFallback }: { onFallback: () => void }) {
           </button>
         </div>
       )}
-      <button type="submit" className="btn btn-ink btn-block" disabled={state === "busy"}>
-        {t("Find this listing")} <ArrowRight size={16} className="flip-rtl" />
+      <button type="submit" className="btn btn-primary btn-block" disabled={state === "busy"}>
+        {t("Check its price")} <ArrowRight size={16} className="flip-rtl" />
       </button>
     </form>
   );
@@ -494,7 +503,7 @@ function Result({ data, selling }: { data: Evaluation; selling: boolean }) {
             />
           )}
           <div className="result-share">
-            <ShareBar text={evaluationText(data)} path={`${window.location.pathname}${window.location.search}`} sheet={false} />
+            <ShareBar text={evaluationText(data)} path={`${window.location.pathname}${window.location.search}`} />
           </div>
           {!selling && <CostCalculator price={inputs.price} payment={data.payment} ready={inputs.delivery?.bucket === "ready"} />}
           {data.launch && (
@@ -536,13 +545,6 @@ function Result({ data, selling }: { data: Evaluation; selling: boolean }) {
           area={inputs.area_m2}
           price={inputs.price}
         />
-      )}
-      {data.comparables.length > 0 && (
-        <section className="result-section">
-          <h3>{t("Similar units listed now")}</h3>
-          <p className="muted">{t("Same compound and unit type, nearest in size first.")}</p>
-          <Comparables items={data.comparables} caption="Similar units" />
-        </section>
       )}
     </div>
   );

@@ -3,12 +3,12 @@ import type { GuideRow, PropertyClass } from "./types";
 
 export type Measure = "price" | "gap";
 
-/** Sand to clay: dearer is warmer. */
-export const PRICE_COLOURS = ["#f3e3bd", "#e8c27a", "#dc9a56", "#c8703d", "#a5502e", "#6f3320"];
-/** Resale cheaper than new (nile) through the same (sand) to dearer (clay). */
-export const GAP_COLOURS = ["#0c6b61", "#3fa596", "#a9d6cc", "#efe3c8", "#e9a98a", "#c8603a", "#8f3a1f"];
+/** The lapis ramp: dearer is deeper. */
+export const PRICE_COLOURS = ["#dfe6ff", "#b3c2ff", "#7f97ff", "#3f61ee", "#1b3fd0", "#0d1c66"];
+/** Resale cheaper than new (turquoise) through the same (stone) to dearer (carnelian). */
+export const GAP_COLOURS = ["#076e68", "#3bb5ab", "#a8e0da", "#e6e3d8", "#f6b8a0", "#e8562b", "#a53413"];
 export const GAP_BREAKS = [-0.2, -0.1, -0.03, 0.03, 0.1, 0.2];
-export const NO_DATA = "#d9d2c3";
+export const NO_DATA = "#d3d5de";
 
 export const rowFor = (classes: GuideRow[] | undefined, headline: GuideRow | null | undefined, cls: PropertyClass | "headline") =>
   cls === "headline" ? (headline ?? null) : (classes?.find((row) => row.class === cls) ?? null);

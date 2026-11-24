@@ -19,6 +19,7 @@ to report, never a reason to fall back to the Mac. Details: `docs/STRATEGY.md` s
 
 - `README.md`: sources, CLI, pipeline.
 - `docs/WEBSITE.md`, `docs/WEB_API.md`: the site and its API.
+- `docs/BRAND.md`: the brand (the square metre, 2026-11-24): the mark, colours, type, voice and the site's structure.
 - `docs/CLOUDFLARE.md`, `docs/CLOUD_UPDATES.md`: deployment and the nightly updater.
 - `docs/GROWTH.md`: page heads, leads, alerts, secrets, the funnel and the weekly content brief.
 - `docs/STRATEGY.md`: the direction from 2026-11-22: Egypt-wide price guide, data sources, map, article agent, SEO/GEO.

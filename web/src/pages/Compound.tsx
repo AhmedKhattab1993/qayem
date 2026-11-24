@@ -1,23 +1,21 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, ArrowUpRight, BellRing, Calculator } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, BellRing, Ruler } from "lucide-react";
 import { classLabel, money, number, signed, titleCase, useApi, useTitle, nameOf, place, sep } from "../lib";
 import { t } from "../locale";
-import type { CompoundDetail, Overview, Page, Unit } from "../types";
+import type { CompoundDetail, Overview } from "../types";
 import { ErrorState, Loading } from "../components/States";
 import { EntityActions, ScopeNote } from "../components/Opportunity";
 import { ClassCards, HistoryPanel, LaunchPanel, ProfileFacts } from "../components/Entity";
 import { AlertSignup } from "../components/Capture";
 import { Faq, compoundFaq } from "../components/Faq";
 import { track } from "../track";
-import { UnitTable } from "../components/UnitTable";
 import { NameList } from "../components/Names";
 import { GuideAnswer, SegmentTables, headlineOf } from "../components/Guide";
 
 export default function CompoundPage({ overview }: { overview: Overview | null }) {
   const { key = "" } = useParams();
   const { data, error, missing, retry } = useApi<CompoundDetail>(`/compounds/${encodeURIComponent(key)}`);
-  const units = useApi<Page<Unit>>(`/units?compound=${encodeURIComponent(key)}&page_size=10&sort=opportunity`);
   const [alerting, setAlerting] = useState(false);
   useTitle(nameOf(data?.compound));
   if (error)
@@ -59,7 +57,7 @@ export default function CompoundPage({ overview }: { overview: Overview | null }
             <EntityActions kind="compound" entityKey={compound.key} name={compound.name} />
             <button
               type="button"
-              className={`btn btn-sm${alerting ? " btn-ink" : ""}`}
+              className={`btn btn-sm${alerting ? " btn-primary" : ""}`}
               aria-expanded={alerting}
               onClick={() => {
                 setAlerting((open) => !open);
@@ -68,8 +66,8 @@ export default function CompoundPage({ overview }: { overview: Overview | null }
             >
               <BellRing size={15} /> {t("Alert me about deals here")}
             </button>
-            <Link className="btn btn-sm btn-brass" to={`/evaluate?compound=${encodeURIComponent(compound.name)}`}>
-              <Calculator size={15} /> {t("Compare a unit here")}
+            <Link className="btn btn-sm btn-accent" to={`/evaluate?compound=${encodeURIComponent(compound.name)}`}>
+              <Ruler size={15} /> {t("Check a price here")}
             </Link>
             <Link className="btn btn-sm" to={`/evaluate?mode=sell&compound=${encodeURIComponent(compound.name)}`}>
               {t("Selling here?")}
@@ -219,24 +217,6 @@ export default function CompoundPage({ overview }: { overview: Overview | null }
           </section>
         )}
 
-        <section className="section-tight">
-          <div className="section-row">
-            <div>
-              <span className="eyebrow">{t("Units")}</span>
-              <h2 className="display">{t("Best opportunities first")}</h2>
-            </div>
-            <Link className="link-arrow" to={`/units?compound=${encodeURIComponent(compound.key)}`}>
-              {t("All {n} units", { n: number(compound.units), count: compound.units })} <ArrowUpRight size={16} className="flip-rtl" />
-            </Link>
-          </div>
-          {units.data ? (
-            <UnitTable items={units.data.items} caption="Units in this compound" />
-          ) : units.error ? (
-            <ErrorState message={units.error} retry={units.retry} />
-          ) : (
-            <Loading />
-          )}
-        </section>
         <Faq items={compoundFaq(compound)} />
       </div>
     </div>

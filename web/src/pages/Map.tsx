@@ -156,7 +156,7 @@ function SummaryCard({
       ) : (
         <p className="muted">{t("Too few listings of this type here to publish a figure.")}</p>
       )}
-      <Link className="btn btn-sm btn-ink" to={to}>
+      <Link className="btn btn-sm btn-primary" to={to}>
         {t("Open the price guide")} <ArrowUpRight size={15} className="flip-rtl" />
       </Link>
     </aside>

@@ -140,7 +140,7 @@ export default function IndexPage({ overview }: { overview: Overview | null }) {
             </p>
           )}
           <div className="entity-bar">
-            <a className="btn btn-sm btn-ink" href={csv} download>
+            <a className="btn btn-sm btn-primary" href={csv} download>
               <Download size={15} /> {t("Download this month (CSV)")}
             </a>
             <a className="btn btn-sm" href="/data/qayem-index-latest.csv" download>

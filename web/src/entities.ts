@@ -1,17 +1,15 @@
 import { useEffect, useState } from "react";
 import { api, nameOf } from "./lib";
 import type { Pinned } from "./store";
-import type { CompoundDetail, Developer, UnitDetail } from "./types";
-import { unitName } from "./components/UnitTable";
+import type { CompoundDetail, Developer } from "./types";
 
 export type Loaded =
   | { status: "loading" }
   | { status: "error"; error: string }
   | { status: "ready"; kind: "compound"; data: CompoundDetail }
-  | { status: "ready"; kind: "developer"; data: Developer }
-  | { status: "ready"; kind: "unit"; data: UnitDetail };
-const folder = { compound: "compounds", developer: "developers", unit: "units" } as const;
-/** Where a pinned compound, developer or unit lives on the site. */
+  | { status: "ready"; kind: "developer"; data: Developer };
+const folder = { compound: "compounds", developer: "developers" } as const;
+/** Where a pinned compound or developer lives on the site. */
 export const pinnedPath = (item: Pinned) => `/${folder[item.kind]}/${encodeURIComponent(item.key)}`;
 
 const id = (item: Pinned) => `${item.kind}:${item.key}`;
@@ -26,16 +24,14 @@ export function usePinned(items: Pinned[]) {
     for (const item of items) {
       const path = pinnedPath(item);
       setEntries((current) => (current[id(item)]?.status === "ready" ? current : { ...current, [id(item)]: { status: "loading" } }));
-      api<CompoundDetail | Developer | UnitDetail>(path, controller.signal)
+      api<CompoundDetail | Developer>(path, controller.signal)
         .then((data) =>
           setEntries((current) => ({
             ...current,
             [id(item)]:
               item.kind === "compound"
                 ? { status: "ready", kind: "compound", data: data as CompoundDetail }
-                : item.kind === "developer"
-                  ? { status: "ready", kind: "developer", data: data as Developer }
-                  : { status: "ready", kind: "unit", data: data as UnitDetail },
+                : { status: "ready", kind: "developer", data: data as Developer },
           })),
         )
         .catch((error) => {
@@ -53,6 +49,4 @@ export function usePinned(items: Pinned[]) {
 export const pinnedName = (item: Pinned, entry: Loaded) =>
   entry.status !== "ready"
     ? item.name
-    : entry.kind === "unit"
-      ? unitName(entry.data.unit)
-      : nameOf(entry.kind === "compound" ? entry.data.compound : entry.data)!;
+    : nameOf(entry.kind === "compound" ? entry.data.compound : entry.data)!;

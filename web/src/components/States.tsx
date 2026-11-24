@@ -1,14 +1,16 @@
 import { AlertCircle, ArrowRight, Compass } from "lucide-react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { Mark } from "./Brand";
 import { t } from "../locale";
 
-export function Loading({ label = "Weighing the market…" }: { label?: string }) {
+export function Loading({ label = "Reading the prices…" }: { label?: string }) {
   return (
     <div className="state state-loading" role="status">
-      <span className="loading-scale">
-        <Mark size={44} />
+      <span className="loading-tiles" aria-hidden="true">
+        <i />
+        <i />
+        <i />
+        <i />
       </span>
       <p>{t(label)}</p>
     </div>
@@ -24,8 +26,8 @@ export function ErrorState({ message, retry, missing }: { message: string; retry
         </span>
         <h2>{t("A little off the map")}</h2>
         <p>{t(message)}</p>
-        <Link to="/evaluate" className="btn btn-ink">
-          {t("Compare a unit")} <ArrowRight size={16} className="flip-rtl" />
+        <Link to="/map" className="btn btn-primary">
+          {t("Open the price map")} <ArrowRight size={16} className="flip-rtl" />
         </Link>
       </div>
     );
@@ -37,7 +39,7 @@ export function ErrorState({ message, retry, missing }: { message: string; retry
       <h2>{t("Let’s try that again")}</h2>
       <p>{t(message)}</p>
       {retry && (
-        <button className="btn btn-ink" onClick={retry}>
+        <button className="btn btn-primary" onClick={retry}>
           {t("Try again")} <ArrowRight size={16} className="flip-rtl" />
         </button>
       )}

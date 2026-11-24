@@ -5,10 +5,11 @@ import { classLabel, money, number, percent, signed, useApi, useCatalog, tone, n
 import { t } from "../locale";
 import type { Compound, District, Page } from "../types";
 import { EmptyState, ErrorState, Loading } from "../components/States";
-import { Pager, scrollToResults } from "../components/UnitTable";
+import { Pager, scrollToResults } from "../components/Pager";
 import { ScopeNote } from "../components/Opportunity";
 import { ClassCards } from "../components/Entity";
 import { NameList } from "../components/Names";
+import { GuideTabs } from "../components/GuideTabs";
 
 export default function Compounds() {
   const [params, setParams] = useSearchParams();
@@ -49,6 +50,7 @@ export default function Compounds() {
     <div className="compounds page-enter">
       <header className="page-head">
         <div className="page">
+          <GuideTabs />
           <span className="eyebrow">{t("Compounds")}</span>
           <h1 className="display">
             {t("The compound")} <em>{t("sets the price.")}</em>
@@ -81,7 +83,7 @@ export default function Compounds() {
                 <X size={15} />
               </button>
             )}
-            <button type="submit" className="btn btn-ink">
+            <button type="submit" className="btn btn-primary">
               {t("Search")}
             </button>
           </form>

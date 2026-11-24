@@ -16,6 +16,8 @@ import re
 from typing import Awaitable, Callable
 from urllib.parse import parse_qs, quote, unquote, urlencode, urlsplit, urlunsplit
 
+from .valuation import slug
+
 SITE = "https://qayem.ai"
 CANONICAL_HOST = "qayem.ai"
 REDIRECT_HOSTS = {"www.qayem.ai"}
@@ -43,7 +45,7 @@ DISTRICT_AR = {
     "Sidi Abdel Rahman": "سيدي عبد الرحمن", "Borg el arab": "برج العرب", "Al Dabaa": "الضبعة",
 }
 # Pages people keep for themselves; nothing for a search engine to index.
-PRIVATE = ("/compare", "/watchlist", "/sheet/")
+PRIVATE = ("/compare", "/watchlist")
 
 
 @dataclass
@@ -404,8 +406,6 @@ def home_meta(overview: dict | None) -> Meta:
 STATIC = {
     "/evaluate": ("حاسبة تقييم سعر وحدة ريسيل في مصر — كاش وتقسيط مقابل سعر المطور | قيّم",
                   "صِف الوحدة المعروضة عليك: يحوّل قيّم خطة السداد إلى قيمتها اليوم ويقارنها بسعر المطور اليوم وبالوحدات المماثلة في الكمبوند نفسه."),
-    "/units": ("وحدات ريسيل للبيع في مصر مقارنة بسعر المطور — الأفضل أولًا | قيّم",
-               "كل وحدة ريسيل مقارنة بسعر المطور اليوم وبالوحدات المماثلة في كمبوندها، مع فلاتر الميزانية والكاش والمقدم والتسليم."),
     "/compounds": ("أسعار الكمبوندات في مصر — الريسيل مقابل سعر المطور اليوم | قيّم",
                    "متوسط سعر المتر ريسيل وسعر المطور اليوم والفرص في كل كمبوند، في القاهرة الجديدة وأكتوبر والساحل والعاصمة وغيرها."),
     "/developers": ("المطورون العقاريون في مصر — أسعار الريسيل مقابل أسعارهم الجديدة | قيّم",
@@ -439,48 +439,6 @@ def evaluate_meta(query: dict[str, str]) -> Meta:
         except ValueError:
             pass
     return Meta(title, description, "/evaluate", body=_summary("هل هي فرصة حقيقية؟", description, links=NAV))
-
-
-def unit_meta(detail: dict | None, unit_id: str) -> Meta:
-    if not detail:
-        return not_found(f"/units/{unit_id}")
-    unit = detail["unit"]
-    compound = unit.get("compound")
-    where = name_ar(compound) or place_ar(unit.get("district"))
-    beds = f" {unit['bedrooms']} غرف" if unit.get("bedrooms") else ""
-    name = f"{type_ar(unit['property_type'])} {unit['area_m2']:,.0f} م²{beds}"
-    launch, peers, level = unit.get("launch"), unit.get("peers"), unit["opportunity"]["level"]
-    headline = (gap_ar(launch["gap"], "المطور") if launch and launch.get("same_finishing")
-                else gap_ar(peers["gap"], "المماثل") if peers else LEVEL_AR[level])
-    title = f"{name} في {where} — {headline} | قيّم"
-    payment = unit["payment"]
-    terms = (f"تقسيط {payment['years']:g} سنة" if payment["terms"] == "plan" and payment.get("years")
-             else "كاش" if payment["terms"] == "cash" else "طريقة السداد غير منشورة")
-    parts = [f"{money_ar(unit['price'])} ({terms})"]
-    if payment.get("cash_equivalent") and payment["terms"] == "plan":
-        parts.append(f"قيمتها اليوم {money_ar(payment['cash_equivalent'])}")
-    if launch and launch.get("same_finishing"):
-        parts.append(gap_ar(launch["gap"], "سعر المطور اليوم"))
-    if peers:
-        parts.append(f"{gap_ar(peers['gap'], 'الوحدات المماثلة')} (ترتيبها {peers['rank']} من {peers['count']})")
-    parts.append(f"التقييم: {LEVEL_AR[level]}")
-    description = " • ".join(parts) + f". {place_ar(unit.get('district'))}."
-    image = next((url for url in unit.get("images") or [] if url.startswith("https://")), DEFAULT_IMAGE)
-    crumbs = [("قيّم", "/")]
-    if compound:
-        crumbs.append((name_ar(compound), f"/compounds/{quote(compound['key'])}"))
-    crumbs.append((name, f"/units/{unit['id']}"))
-    listing = {"@context": "https://schema.org", "@type": "RealEstateListing", "name": f"{name} — {where}",
-               "url": f"{SITE}/units/{unit['id']}", "description": description,
-               "offers": {"@type": "Offer", "price": round(unit["price"]), "priceCurrency": "EGP"}}
-    if image != DEFAULT_IMAGE:
-        listing["image"] = image
-    links = [(name_ar(compound), f"/compounds/{quote(compound['key'])}")] if compound else []
-    if unit.get("developer"):
-        links.append((name_ar(unit["developer"]), f"/developers/{quote(unit['developer']['key'])}"))
-    links.append(("قارن وحدة أخرى", "/evaluate"))
-    return Meta(title, description, f"/units/{unit['id']}", image=image, kind="article", index=False,
-                jsonld=[listing, breadcrumbs(*crumbs)], body=_summary(f"{name} في {where}", description, links=links))
 
 
 def compound_meta(compound: dict | None, key: str) -> Meta:
@@ -603,7 +561,7 @@ def clean_path(path: str) -> str:
 
 async def page_meta(path: str, query: dict[str, str], load: Loader) -> Meta:
     """The head for one public route. `load(kind, key)` returns a published document or None:
-    kinds are overview, unit_detail, compound, developer, district."""
+    kinds are overview, map, guide, index, article, compound, developer, district."""
     path = clean_path(path)
     if path == "/":
         return home_meta(await load("overview", ""))
@@ -621,17 +579,11 @@ async def page_meta(path: str, query: dict[str, str], load: Loader) -> Meta:
         return article_meta(await load("article", match.group(1)), match.group(1))
     if path in STATIC:
         title, description = STATIC[path]
-        if path == "/units" and query.get("price_dropped") == "true":
-            title = "وحدات ريسيل نزل سعرها مؤخرًا — مقارنة بسعر المطور | قيّم"
         return Meta(title, description, path, body=_summary(title.split(" | ")[0], description, links=NAV))
-    match = re.fullmatch(r"/(units|compounds|developers|districts)/([^/]+)", path)
+    match = re.fullmatch(r"/(compounds|developers|districts)/([^/]+)", path)
     if match:
         kind, key = match.groups()
         key = unquote(key)
-        if kind == "units":
-            if not key.isdigit() or len(key) > 12:
-                return not_found(path)
-            return unit_meta(await load("unit_detail", key), key)
         document = await load(kind[:-1], key)
         return {"compounds": compound_meta, "developers": developer_meta, "districts": district_meta}[kind](document, key)
     return not_found(path)
@@ -654,8 +606,8 @@ def render(template: str, meta: Meta, *, staging: bool = False) -> str:
     tags = [
         f'<link rel="canonical" href="{_attr(canonical)}" />',
         f'<meta property="og:site_name" content="{BRAND}" />',
-        f'<meta property="og:locale" content="ar_EG" />',
-        f'<meta property="og:locale:alternate" content="en_GB" />',
+        '<meta property="og:locale" content="ar_EG" />',
+        '<meta property="og:locale:alternate" content="en_GB" />',
         f'<meta property="og:type" content="{_attr(meta.kind)}" />',
         f'<meta property="og:title" content="{_attr(meta.title)}" />',
         f'<meta property="og:description" content="{_attr(meta.description)}" />',
@@ -679,6 +631,31 @@ def render(template: str, meta: Meta, *, staging: bool = False) -> str:
     if meta.body:
         html = html.replace('<div id="root"></div>', f'<div id="root">{meta.body}</div>', 1)
     return html
+
+
+UnitLoader = Callable[[int], Awaitable[dict | None]]
+
+
+async def retired_redirect(path: str, query: dict[str, str], unit: UnitLoader) -> str | None:
+    """Where an address of the retired listing pages now points. Qayem publishes prices, not
+    individual listings (docs/STRATEGY.md 2, 14), so the old /units, /units/:id and /sheet/:id
+    addresses move, permanently, to the guide that covers the listing: its compound, else its
+    district, else the map. `unit(id)` returns the listing's public record or None."""
+    match = re.fullmatch(r"/(?:units|sheet)(?:/([^/]+))?", clean_path(path))
+    if not match:
+        return None
+    if match.group(1) is None:  # the old Units search: its compound, district or developer filter
+        for name, folder in (("compound", "compounds"), ("district", "districts"), ("developer", "developers")):
+            if value := (query.get(name) or "").strip():
+                return f"/{folder}/{quote(value[:200])}"
+        return "/map"
+    key = match.group(1)
+    record = await unit(int(key)) if key.isdigit() and len(key) <= 12 else None
+    if record and record.get("compound"):
+        return f"/compounds/{quote(record['compound']['key'])}"
+    if record and (district := slug(record.get("district"))):
+        return f"/districts/{quote(district)}"
+    return "/map"
 
 
 def canonical_redirect(url: str) -> str | None:
@@ -706,8 +683,8 @@ def sitemap_xml(paths: list[str], lastmod: date | str | None) -> str:
             f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{rows}</urlset>\n')
 
 
-def sitemap_paths(compounds: list[str], developers: list[str], districts: list[str], units: list[int] = ()) -> list[str]:
-    """Guide, index, district, compound and developer pages (individual unit pages fade out of search)."""
+def sitemap_paths(compounds: list[str], developers: list[str], districts: list[str]) -> list[str]:
+    """Guide, index, district, compound and developer pages."""
     return [*SECTIONS, *(f"/districts/{quote(k)}" for k in districts), *(f"/compounds/{quote(k)}" for k in compounds),
             *(f"/developers/{quote(k)}" for k in developers)]
 
@@ -718,7 +695,7 @@ def robots_txt(staging: bool = False) -> str:
     # /api stays crawlable: search engines render the app, which reads it.
     ai = "\n".join(f"User-agent: {bot}\nAllow: /\n"
                    for bot in ("OAI-SearchBot", "GPTBot", "ClaudeBot", "PerplexityBot", "Google-Extended"))
-    return (f"{ai}\nUser-agent: *\nAllow: /\nDisallow: /compare\nDisallow: /watchlist\nDisallow: /sheet/\n\n"
+    return (f"{ai}\nUser-agent: *\nAllow: /\nDisallow: /compare\nDisallow: /watchlist\n\n"
             f"Sitemap: {SITE}/sitemap.xml\n")
 
 
@@ -763,12 +740,6 @@ def csv_month(name: str) -> str | None:
 
 # Thin pages are left out of the sitemap (they stay reachable and indexable through links).
 SITEMAP_MIN_UNITS = 3
-
-
-def share_text(unit: dict) -> str:
-    """The one-line verdict used when a unit is shared (kept in step with the website's share button)."""
-    meta = unit_meta({"unit": unit}, str(unit["id"]))
-    return f"{meta.title.removesuffix(' | قيّم')}\n{SITE}/units/{unit['id']}"
 
 
 def utm(path: str, source: str, medium: str, campaign: str = "") -> str:

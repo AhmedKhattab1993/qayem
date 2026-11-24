@@ -11,10 +11,9 @@ from fastapi.responses import JSONResponse, PlainTextResponse, RedirectResponse,
 from . import editorial, guide_api, seo
 from .growth import Growth, Settings, WorkerHttp, client_details, growth_router
 from .valuation import developer_key, slug
-from .web_common import DELIVERY_PATTERN, RANK_MIN_COMPOUND, RANK_MIN_DEVELOPER, Sort, search_query
-from .website_data import Snapshot, evaluate, peer_groups, url_key
+from .web_common import RANK_MIN_COMPOUND, RANK_MIN_DEVELOPER, search_query
+from .website_data import Snapshot, evaluate, evaluate_query, peer_groups, url_key
 
-Level = Literal["", "strong", "good", "in_line", "mixed", "pricier", "check", "unrated"]
 
 def _strip_third_party(item: dict) -> dict:
     """Sources' photos and listing descriptions are never served, even from older catalogues."""
@@ -102,7 +101,7 @@ UNIT_ORDER = {"opportunity": "opportunity_rank", "launch_gap": "launch_gap,id", 
 
 async def unit_clauses(data, *, q="", district="", compound="", developer="", property_type="", level="", terms="",
                        source="", resale="true", launch="", sort="opportunity", **budget) -> tuple[list[str], list]:
-    """The units filter in SQL: the Units API and the nightly alerts select the same units."""
+    """The units filter in SQL, for the nightly alerts (no listing is published one by one)."""
     clauses, params = ["version=?"], [data.version]
     if resale == "true":
         clauses.append("is_default=1")
@@ -293,6 +292,9 @@ def create_cloud_app(database=None, *, leads=_FROM_ENV, http=None, settings=None
     async def store(request: Request):
         return await Store(public_database(request)).open()
 
+    async def listing(request: Request, unit_id: int):
+        return await (await store(request)).unit(unit_id)
+
     async def growth(request: Request) -> Growth:
         env = request.scope.get("env")
         config = settings or Settings.read(lambda name: getattr(env, name))
@@ -348,54 +350,6 @@ def create_cloud_app(database=None, *, leads=_FROM_ENV, http=None, settings=None
     @app.get("/api/catalog")
     async def catalog(data=Depends(store)):
         return await data.document("catalog", required=True)
-
-    @app.get("/api/units")
-    async def units(
-        q: str = Query("", max_length=200), district: str = Query("", max_length=200),
-        compound: str = Query("", max_length=200), developer: str = Query("", max_length=200),
-        property_type: str = Query("", max_length=64), level: Level = "",
-        terms: Literal["", "cash", "plan", "partial", "unknown"] = "",
-        source: str = Query("", max_length=32), resale: Literal["true", "all"] = "true",
-        launch: Literal["", "true"] = "", sort: Sort = "opportunity",
-        price_max: float | None = Query(None, ge=0, le=1_000_000_000, allow_inf_nan=False),
-        cash_max: float | None = Query(None, ge=0, le=1_000_000_000, allow_inf_nan=False),
-        signing_max: float | None = Query(None, ge=0, le=1_000_000_000, allow_inf_nan=False),
-        area_min: float | None = Query(None, ge=0, le=100_000, allow_inf_nan=False),
-        area_max: float | None = Query(None, ge=0, le=100_000, allow_inf_nan=False),
-        bedrooms_min: int | None = Query(None, ge=0, le=12),
-        delivery: str = Query("", pattern=DELIVERY_PATTERN), newer_than: int | None = Query(None, ge=0),
-        price_dropped: Literal["", "true"] = "",
-        page: int = Query(1, ge=1, le=100_000), page_size: int = Query(25, ge=1, le=100),
-        data=Depends(store),
-    ):
-        clauses, params = await unit_clauses(
-            data, q=q, district=district, compound=compound, developer=developer, property_type=property_type,
-            level=level, terms=terms, source=source, resale=resale, launch=launch, sort=sort, price_max=price_max,
-            cash_max=cash_max, signing_max=signing_max, area_min=area_min, area_max=area_max,
-            bedrooms_min=bedrooms_min, delivery=delivery, newer_than=newer_than, price_dropped=price_dropped == "true")
-        order = UNIT_ORDER[sort]
-        where = " AND ".join(clauses)
-        total = (await data.database.all(f"SELECT count(*) AS n FROM units WHERE {where}", params))[0]["n"]
-        rows = await data.database.all(f"SELECT public FROM units WHERE {where} ORDER BY {order} LIMIT ? OFFSET ?",
-                                      (*params, page_size, (page - 1) * page_size))
-        return {"items": [public_json(row["public"]) for row in rows], "total": total,
-                "page": page, "page_size": page_size, "pages": (total + page_size - 1) // page_size}
-
-    @app.get("/api/units/{unit_id}")
-    async def unit(unit_id: int, data=Depends(store)):
-        entry = await data.document("unit_detail", str(unit_id))
-        if entry is None:
-            raise HTTPException(404, "This unit is unavailable or does not meet the published inclusion rules.")
-        if entry["comparables"]:
-            ids = [item["id"] for item in entry["comparables"]]
-            rows = await data.database.all("SELECT id,public FROM units WHERE version=? AND id IN ("
-                                          + ",".join("?" for _ in ids) + ")", (data.version, *ids))
-            public = {row["id"]: public_json(row["public"]) for row in rows}
-            if len(public) != len(ids):
-                raise Unavailable()
-            entry["comparables"] = [{**public[item["id"]], "cash_ppm": item["cash_ppm"]}
-                                    for item in entry["comparables"]]
-        return entry
 
     @app.get("/api/compounds")
     async def compounds(q: str = Query("", max_length=200), district: str = Query("", max_length=200),
@@ -487,10 +441,10 @@ def create_cloud_app(database=None, *, leads=_FROM_ENV, http=None, settings=None
     @app.get("/api/lookup")
     async def lookup(url: str = Query(..., min_length=8, max_length=2048), data=Depends(store)):
         key = url_key(url)
-        rows = await data.database.all("SELECT id FROM units WHERE version=? AND url_key=? LIMIT 2", (data.version, key))
+        rows = await data.database.all("SELECT public FROM units WHERE version=? AND url_key=? LIMIT 2", (data.version, key))
         if len(rows) != 1:
             raise HTTPException(404, "We have not indexed that listing link. Enter its details instead.")
-        return {"id": rows[0]["id"]}
+        return {"query": evaluate_query(public_json(rows[0]["public"]))}
 
     app.include_router(growth_router(growth))
     app.include_router(editorial.editorial_router(growth))
@@ -538,6 +492,13 @@ def create_cloud_app(database=None, *, leads=_FROM_ENV, http=None, settings=None
             if g.settings.indexnow_key and path == f"{g.settings.indexnow_key}.txt":
                 return PlainTextResponse(g.settings.indexnow_key)
             raise HTTPException(404, "Page not found.")
+        try:
+            moved = await seo.retired_redirect("/" + path, dict(request.query_params),
+                                               lambda unit_id: listing(request, unit_id))
+        except Exception:  # the listing's guide is unknown for now: send it to the map, not for good
+            return RedirectResponse("/map", status_code=302)
+        if moved:
+            return RedirectResponse(moved, status_code=301)
         html = await index_html(request)
         try:
             data = await store(request)

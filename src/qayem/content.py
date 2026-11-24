@@ -18,9 +18,15 @@ from urllib.parse import quote, urlencode
 from .seo import LEVEL_AR, SITE, name_ar, place_ar, ppm_ar
 
 W, H = 1080, 1350
-COLORS = {"night": "#0c1512", "paper": "#efe7d6", "muted": "#a9a294", "brass": "#e3bb66", "nile": "#3fb3a3",
-          "clay": "#d9754f", "line": "#24342f"}
-FONT = "'IBM Plex Sans Arabic','Geeza Pro','Noto Naskh Arabic',Tahoma,sans-serif"
+# The brand's stones (web/src/styles/base.css): lapis night as the ground, gold for the name and the
+# developer's price, turquoise for cheaper, carnelian for dearer.
+COLORS = {"night": "#0a1445", "paper": "#ffffff", "muted": "#aab6e8", "brass": "#f6b21b", "nile": "#1fc2b6",
+          "clay": "#f0683f", "line": "#24327a", "lapis": "#1b3fd0"}
+FONT = "'Alexandria','Readex Pro','Geeza Pro','Noto Naskh Arabic',Tahoma,sans-serif"
+# The mark (web/src/components/Brand.tsx): the square-Kufic ق on a 48-unit tile.
+MARK = ('<rect width="48" height="48" rx="5" fill="#1b3fd0"/>'
+        '<path fill="#fff" fill-rule="evenodd" d="M24 16.5h15v25H9v-15h5v10h20v-5H24zM29 21.5v5h5v-5z"/>'
+        '<path fill="#f6b21b" d="M24 6.5h5v5h-5zM34 6.5h5v5h-5z"/>')
 HASHTAGS = ["#عقارات_مصر", "#ريسيل", "#قيّم", "#شقق_للبيع", "#التجمع_الخامس", "#الساحل_الشمالي"]
 
 
@@ -73,7 +79,7 @@ def market_story(overview: dict) -> Story:
          "كاش وبقيمة الأقساط اليوم.",
          f"النتيجة: {good:,} وحدة فقط أرخص بوضوح (فرصة قوية أو جيدة)، والباقي في المتوسط أو أغلى.",
          "قبل ما تدفع عربون: قارن الوحدة مجانًا وشوف ترتيبها بين المماثل."],
-        "/units?level=strong", bars, "الوحدات المُقارنة حسب التقييم", HASHTAGS[:4])
+        "/evaluate", bars, "الوحدات المُقارنة حسب التقييم", HASHTAGS[:4])
 
 
 def compound_story(compounds: dict, week: int) -> Story | None:
@@ -99,7 +105,7 @@ def compound_story(compounds: dict, week: int) -> Story | None:
         [f"قارنّا {compound['launch']['compared']} وحدة ريسيل في {name} بوحدات {developer} المعروضة اليوم "
          "بنفس النوع والتشطيب والمساحة، على الأقل تفضيلًا بين السعر المعلن وقيمته اليوم.",
          f"{compound.get('good_count', 0)} وحدة في {name} أرخص بوضوح من البدائل الآن.",
-         f"قبل ما تشتري في {name}: شوف كل الوحدات مرتبة من الأفضل."],
+         f"قبل ما تشتري في {name}: شوف أسعار المتر فيه نوعًا نوعًا وقارن وحدتك مجانًا."],
         f"/compounds/{quote(compound['key'])}", bars, f"متوسط سعر المتر في {name}",
         [f"#{name.replace(' ', '_')}", *HASHTAGS[:3]])
 
@@ -118,8 +124,8 @@ def movers_story(compounds: dict, overview: dict) -> Story:
             [f"في آخر 30 يومًا خرج {history.get('delisted_30d', 0):,} إعلان ريسيل من السوق "
              f"({_pct(history.get('turnover_30d') or 0)} من المعروض). الخروج قد يعني البيع أو سحب الإعلان.",
              "الكمبوند اللي وحداته بتخرج بسرعة سعره عادل أو أرخص من البدائل؛ اللي وحداته قاعدة شهور غالبًا سعره عالي.",
-             "شوف الوحدات اللي نزل سعرها مؤخرًا."],
-            "/units?price_dropped=true", bars, "نسبة المعروض التي خرجت في 30 يومًا",
+             "شوف أسعار الكمبوندات دي على الخريطة."],
+            "/map", bars, "نسبة المعروض التي خرجت في 30 يومًا",
             HASHTAGS[:3] + ["#استثمار_عقاري"])
     below = sorted((c for c in compounds.values() if c.get("launch") and c["launch"].get("median_gap") is not None
                     and c["launch"]["compared"] >= 10), key=lambda c: c["launch"]["median_gap"])[:5]
@@ -130,14 +136,15 @@ def movers_story(compounds: dict, overview: dict) -> Story:
         else "الريسيل مقابل سعر المطور اليوم",
         ["قارنّا كل وحدة ريسيل بسعر المطور اليوم لوحدة مماثلة في نفس الكمبوند، كاش وبقيمة الأقساط اليوم.",
          "دي الكمبوندات اللي الوحدة النموذجية فيها أبعد تحت سعر المطور."],
-        "/units?sort=launch_gap", bars, "كم الريسيل أرخص من المطور", HASHTAGS[:4])
+        "/compounds?sort=gap_asc", bars, "كم الريسيل أرخص من المطور", HASHTAGS[:4])
 
 
 def card_svg(story: Story, stamp: str) -> str:
     """A portrait card: the hook, one chart and the link, in Qayem's colours."""
     parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" direction="rtl">',
              f'<rect width="{W}" height="{H}" fill="{COLORS["night"]}"/>',
-             f'<text x="{W - 72}" y="118" fill="{COLORS["brass"]}" font-family="{FONT}" font-size="64" font-weight="700" '
+             f'<g transform="translate({W - 72 - 84} 46) scale(1.75)">{MARK}</g>',
+             f'<text x="{W - 72 - 84 - 22}" y="112" fill="{COLORS["paper"]}" font-family="{FONT}" font-size="60" font-weight="800" '
              f'text-anchor="start">قيّم</text>',
              f'<text x="72" y="112" fill="{COLORS["muted"]}" font-family="{FONT}" font-size="30" direction="ltr" '
              f'text-anchor="start">qayem.ai</text>']
@@ -157,7 +164,7 @@ def card_svg(story: Story, stamp: str) -> str:
         width = max(6, (W - 144 - 260) * value / top)
         parts.append(f'<text x="{W - 72}" y="{y + 34}" fill="{COLORS["paper"]}" font-family="{FONT}" font-size="32" '
                      f'text-anchor="start">{escape(label[:24])}</text>')
-        parts.append(f'<rect x="{W - 72 - width}" y="{y + 50}" width="{width}" height="30" rx="8" fill="{colour}"/>')
+        parts.append(f'<rect x="{W - 72 - width}" y="{y + 50}" width="{width}" height="30" rx="3" fill="{colour}"/>')
         parts.append(f'<text x="{W - 72 - width - 16}" y="{y + 75}" fill="{COLORS["paper"]}" font-family="{FONT}" '
                      f'font-size="30" font-weight="700" text-anchor="start">{escape(shown)}</text>')
         y += step

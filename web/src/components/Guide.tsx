@@ -30,6 +30,18 @@ export function ConfidenceBadge({ confidence }: { confidence: Confidence }) {
   return <span className={`tag conf conf-${confidence}`}>{confidenceText(confidence)}</span>;
 }
 
+/** A price range on a shared scale: the bar is the middle half of asking prices, the mark is the median. */
+export function RangeBar({ low, high, mid, min, max }: { low: number; high: number; mid: number; min: number; max: number }) {
+  const span = max - min || 1;
+  const at = (value: number) => Math.min(100, Math.max(0, ((value - min) / span) * 100));
+  return (
+    <span className="range-bar" aria-hidden="true">
+      <i style={{ insetInlineStart: `${at(low)}%`, width: `${Math.max(2, at(high) - at(low))}%` }} />
+      <b style={{ insetInlineStart: `${at(mid)}%` }} />
+    </span>
+  );
+}
+
 /** Size bands as the API names them: "<100", "100-150", "200+". */
 export function sizeLabel(size: string) {
   if (size === "*") return t("All sizes");
@@ -213,7 +225,7 @@ export function GuideAnswer({
   );
 }
 
-function SegmentRow({ segment, label }: { segment: Segment; label: string }) {
+function SegmentRow({ segment, label, min, max }: { segment: Segment; label: string; min: number; max: number }) {
   return (
     <tr>
       <th scope="row">
@@ -226,7 +238,12 @@ function SegmentRow({ segment, label }: { segment: Segment; label: string }) {
         {money(segment.median_ppm, true)}
       </td>
       <td data-label={t("Middle half / m²")} className="num">
-        {money(segment.p25_ppm, true)} – {money(segment.p75_ppm, true)}
+        <span className="ledger-stack range-cell">
+          <span>
+            {money(segment.p25_ppm, true)} – {money(segment.p75_ppm, true)}
+          </span>
+          <RangeBar low={segment.p25_ppm} high={segment.p75_ppm} mid={segment.median_ppm} min={min} max={max} />
+        </span>
       </td>
       <td data-label={t("Typical price")} className="num">
         {money(segment.median_price, true)}
@@ -251,6 +268,8 @@ function SegmentRow({ segment, label }: { segment: Segment; label: string }) {
 
 function SegmentTable({ caption, rows }: { caption: string; rows: [Segment, string][] }) {
   if (!rows.length) return null;
+  const min = Math.min(...rows.map(([segment]) => segment.p25_ppm));
+  const max = Math.max(...rows.map(([segment]) => segment.p75_ppm));
   return (
     <div className="ledger-frame">
       <div className="ledger stack guide-ledger">
@@ -269,7 +288,7 @@ function SegmentTable({ caption, rows }: { caption: string; rows: [Segment, stri
           </thead>
           <tbody>
             {rows.map(([segment, label]) => (
-              <SegmentRow key={segment.key} segment={segment} label={label} />
+              <SegmentRow key={segment.key} segment={segment} label={label} min={min} max={max} />
             ))}
           </tbody>
         </table>

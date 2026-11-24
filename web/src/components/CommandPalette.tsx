@@ -14,7 +14,6 @@ import {
   Landmark,
   Languages,
   MapPin,
-  Rows3,
   Scale,
   Search,
 } from "lucide-react";
@@ -97,10 +96,9 @@ export function CommandPalette({
       ["/index", "Qayem Index", <BarChart3 size={17} />],
       ["/articles", "Articles", <Newspaper size={17} />],
       ["/deal-check", "Free deal check", <ClipboardCheck size={17} />],
-      ["/evaluate", "Compare a unit", <Calculator size={17} />],
+      ["/evaluate", "Check a price", <Calculator size={17} />],
       ["/compounds", "Compounds", <Building2 size={17} />],
       ["/developers", "Developers", <Landmark size={17} />],
-      ["/units", "Units", <Rows3 size={17} />],
       ["/compare", "Compare", <Scale size={17} />],
       ["/watchlist", "Watchlist", <Bookmark size={17} />],
       ["/methodology", "Methodology", <ArrowUpRight size={17} />],
@@ -111,9 +109,9 @@ export function CommandPalette({
       result.push({
         id: "search",
         group: "Search",
-        label: t("Units matching “{q}”", { q: query.trim() }),
+        label: t("Compounds matching “{q}”", { q: query.trim() }),
         icon: <Search size={17} />,
-        run: go(`/units?q=${encodeURIComponent(query.trim())}`),
+        run: go(`/compounds?q=${encodeURIComponent(query.trim())}`),
       });
     for (const code of currencies)
       if (code !== currency && matches("currency", "العملة", code, t(code), t("Show prices in {currency}", { currency: t(code) })))

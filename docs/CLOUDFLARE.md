@@ -15,7 +15,7 @@ GLM key as a Worker secret. The public API Worker and D1 receive no Pi credentia
 
 ## Page heads, leads and alerts
 
-Page routes (`/`, `/units/*`, `/compounds/*`, `/districts/*`, …, `/sitemap.xml`, `/robots.txt`)
+Page routes (`/`, `/compounds/*`, `/districts/*`, …, `/sitemap.xml`, `/robots.txt`, and the retired `/units`, `/units/*` and `/sheet/*`, which redirect to the guides)
 run the Worker first (`assets.run_worker_first`): it reads `index.html` from the asset binding
 once per isolate and writes each route's head (`src/qayem/seo.py`), and sends `www.qayem.ai` to
 the apex. Hashed build files, the favicon and posters are served directly.

@@ -36,7 +36,8 @@ VISITOR = re.compile(r"^[A-Za-z0-9-]{8,64}$")
 EMAIL = re.compile(r"^[^@\s<>\"']{1,64}@[A-Za-z0-9.-]{1,190}\.[A-Za-z]{2,24}$")
 DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹", "01234567890123456789")
 
-# The Units filters an alert can follow: web/src/searches.ts SEARCH_KEYS, in the same order.
+# The filters an alert can follow. The website asks only for a compound or a district; the rest
+# are read so that alerts saved from the retired Units search keep working.
 SEARCH_KEYS = ("q", "compound", "price_max", "cash_max", "signing_max", "bedrooms_min", "area_min", "area_max",
                "delivery", "district", "developer", "property_type", "level", "terms", "launch", "price_dropped")
 LEVELS = {"strong", "good", "in_line", "mixed", "pricier", "check", "unrated"}
@@ -190,7 +191,8 @@ def referrer_host(value: Any) -> str:
 
 
 def search_query(value: Any) -> str | None:
-    """The alert's Units filters, validated and spelled one way (the website's own order)."""
+    """The alert's filters (a compound or district; older alerts kept the retired Units search's
+    filters), validated and spelled one way."""
     params = dict(parse_qsl(value if isinstance(value, str) else "", keep_blank_values=False))
     clean: dict[str, str] = {}
     for key in SEARCH_KEYS:
@@ -221,6 +223,16 @@ def search_query(value: Any) -> str | None:
             item = text(item, 200)
         clean[key] = item
     return urlencode(clean, quote_via=quote)
+
+
+def guide_path(query: str) -> str:
+    """The guide page an alert's filters point to: its compound, district or developer, else the map.
+    Listings are not published one by one (docs/STRATEGY.md 14), so alerts link to the guide."""
+    params = dict(parse_qsl(query or ""))
+    for key, folder in (("compound", "compounds"), ("district", "districts"), ("developer", "developers")):
+        if value := params.get(key, "").strip():
+            return f"/{folder}/{quote(value)}"
+    return "/map"
 
 
 def unit_filters(query: str) -> dict:
@@ -304,9 +316,12 @@ async def describe_unit(g: Growth, unit_id: int | None) -> str:
         unit = None
     if not unit:
         return f"unit #{unit_id}"
-    place = (unit.get("compound") or {}).get("name") or unit.get("district") or ""
-    return (f'<a href="{g.settings.site}/units/{unit_id}">{escape(unit["property_type"])} {unit["area_m2"]:g} m² · '
-            f'{escape(place)}</a> · {unit["opportunity"]["level"]} · EGP {unit["price"] / 1e6:.2f}M')
+    compound = unit.get("compound")
+    place = escape((compound or {}).get("name") or unit.get("district") or "")
+    if compound:
+        place = f'<a href="{g.settings.site}/compounds/{quote(compound["key"])}">{place}</a>'
+    return (f'{escape(unit["property_type"])} {unit["area_m2"]:g} m² · {place} · {unit["opportunity"]["level"]} · '
+            f'EGP {unit["price"] / 1e6:.2f}M')
 
 
 async def lead_message(g: Growth, lead: dict) -> str:
@@ -461,7 +476,7 @@ def growth_router(resolve: Callable[[Request], Awaitable[Growth]]) -> APIRouter:
                           tuple(alert[c] for c in columns))
         link = destination if channel == "email" else f'<a href="{wa_link(destination)}">{destination}</a>'
         message = (f"🔔 <b>New alert</b> · {channel}" + (f" · {escape(role)}" if role else "") + f"\n📱 {link}\n"
-                   f'🔎 <a href="{g.settings.site}/units?{escape(query)}">{escape(alert["label"])}</a>\n'
+                   f'🔎 <a href="{g.settings.site}{escape(guide_path(query))}">{escape(alert["label"])}</a>\n'
                    f"🌍 {g.country or '??'} · {escape(alert['page_path'] or '')}")
 
         async def notify():

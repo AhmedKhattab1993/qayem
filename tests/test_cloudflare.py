@@ -39,18 +39,8 @@ def clients(database, tmp_path):
 
 
 @pytest.mark.parametrize("path", [
-    "/api/health", "/api/overview", "/api/catalog", "/api/units",
-    *[f"/api/units?sort={sort}&page_size=3&page=2" for sort in
-      ("opportunity", "launch_gap", "peer_gap", "price_asc", "price_desc", "area_desc", "cash_ppm_asc")],
-    "/api/units?resale=all", "/api/units?launch=true", "/api/units?terms=plan",
-    "/api/units?q=Garden", "/api/units?q=القاهرة%20الجديدة", "/api/units?q=%25",
-    "/api/units?district=New%20Cairo&compound=garden", "/api/units?developer=Nile",
-    "/api/units?source=nawy&property_type=apartment&level=strong",
-    "/api/units?price_max=5000000", "/api/units?cash_max=4000000&sort=price_desc", "/api/units?signing_max=1500000",
-    "/api/units?area_min=100&area_max=160", "/api/units?bedrooms_min=3", "/api/units?bedrooms_min=0",
-    "/api/units?delivery=ready", "/api/units?delivery=2028", "/api/units?sort=newest&newer_than=10",
-    "/api/units?delivery=soon", "/api/units?price_max=-1", "/api/units?cash_max=nan",
-    "/api/units/1", "/api/units/17", "/api/units/30", "/api/units/24",
+    "/api/health", "/api/overview", "/api/catalog",
+    "/api/units", "/api/units?compound=garden", "/api/units/17",  # retired: listings are not published one by one
     "/api/compounds", "/api/compounds?sort=name", "/api/compounds?sort=gap_asc",
     *[f"/api/{kind}?sort={sort}&page_size=1&page=2" for kind in ("compounds", "developers")
       for sort in ("units", "gap_asc", "gap_desc", "opportunities", "name")],
@@ -62,8 +52,7 @@ def clients(database, tmp_path):
     "/api/evaluate?compound=Garden&property_type=apartment&area=120&price=9500000&down_payment=1000000&installment_years=6&delivery=2029",
     "/api/evaluate?compound=missing&property_type=villa&area=200&price=8000000",
     "/api/evaluate?compound=Garden&property_type=apartment&area=nan&price=4200000",
-    "/api/units?page_size=101", "/api/unknown",
-    "/api/units?q=" + "%20".join(["a"] * 100),
+    "/api/lookup?url=https%3A%2F%2Fexample.test%2Fnowhere", "/api/unknown",
 ])
 def test_every_published_route_matches_local_calculations(clients, path):
     local, cloud, _, _ = clients
@@ -76,7 +65,8 @@ def test_publication_contains_no_phone_or_raw_payload(clients):
     _, cloud, _, export = clients
     text = export.read_text()
     assert "PRIVATE" not in text and "+201012345678" not in text and "phone_reveal_key" not in text
-    assert "description" not in cloud.get("/api/units/30").json()["unit"]
+    # no listing is exported as a document of its own; the units rows feed alerts, lookups and redirects
+    assert "unit_detail" not in text and cloud.get("/api/units/30").status_code == 404
 
 
 def test_incomplete_import_cannot_replace_the_active_catalogue(clients):

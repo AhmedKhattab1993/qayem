@@ -51,7 +51,7 @@ export function Articles() {
             title={t("No articles yet")}
             text={t("The first reports come with the monthly index. Until then, the map and the guides have every figure.")}
             action={
-              <Link className="btn btn-ink" to="/map">
+              <Link className="btn btn-primary" to="/map">
                 {t("Open the map")} <ArrowRight size={16} className="flip-rtl" />
               </Link>
             }

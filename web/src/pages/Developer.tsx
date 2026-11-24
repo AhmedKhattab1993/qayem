@@ -148,11 +148,6 @@ export default function DeveloperPage({ overview }: { overview: Overview | null 
                 {t("{n} further compounds have no like-for-like developer price.", { n: number(data.compounds.length - priced.length), count: data.compounds.length - priced.length })}
               </p>
             )}
-            <p className="entity-link">
-              <Link className="link-arrow" to={`/units?developer=${encodeURIComponent(data.key)}&sort=opportunity`}>
-                {t("See its units")} <ArrowUpRight size={15} className="flip-rtl" />
-              </Link>
-            </p>
           </div>
         </section>
         <HistoryPanel history={data.history} overview={overview} />

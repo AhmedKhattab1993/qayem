@@ -1,22 +1,15 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-import "@fontsource-variable/fraunces/full.css";
-import "@fontsource-variable/fraunces/full-italic.css";
-import "@fontsource-variable/reem-kufi";
-import "@fontsource/ibm-plex-sans-arabic/400.css";
-import "@fontsource/ibm-plex-sans-arabic/500.css";
-import "@fontsource/ibm-plex-sans-arabic/600.css";
-import "@fontsource/ibm-plex-sans-arabic/700.css";
+import "@fontsource-variable/alexandria";
+import "@fontsource-variable/readex-pro";
 import App from "./App";
 import { StoreProvider } from "./store";
 import "./styles/base.css";
 import "./styles/shell.css";
 import "./styles/ui.css";
 import "./styles/home.css";
-import "./styles/valuation.css";
-import "./styles/growth.css";
-import "./styles/guide.css";
+import "./styles/pages.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

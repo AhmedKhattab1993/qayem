@@ -1,7 +1,7 @@
 import { ArrowDown, Banknote, Building2, CalendarClock, FileQuestion, Files, Gavel, History, Landmark, Layers3, ScanLine, Truck } from "lucide-react";
-import { date, number, percent, signed, sep } from "../lib";
+import { date, egp, nameOf, number, percent, signed, sep } from "../lib";
 import type { ReactNode } from "react";
-import { getLanguage, t } from "../locale";
+import { t } from "../locale";
 import type { Level, Overview } from "../types";
 import { ErrorState, Loading } from "../components/States";
 import { LevelBadge, ScopeNote } from "../components/Opportunity";
@@ -93,7 +93,7 @@ export default function Methodology({ overview, error, retry }: { overview: Over
                 "Qayem does not estimate a fair price. Egypt publishes no resale sale prices, and AqarExit lists each unit at its old contract price. Instead, every unit is compared with what could be bought instead today.",
               )}
             </p>
-            <a className="btn btn-brass" href="#levels">
+            <a className="btn btn-accent" href="#levels">
               {t("See the rules")} <ArrowDown size={16} />
             </a>
           </div>
@@ -176,18 +176,21 @@ export default function Methodology({ overview, error, retry }: { overview: Over
                   </tr>
                 </thead>
                 <tbody>
-                  {overview.fee_schedules.items.map((item) => {
-                    const ar = getLanguage() === "ar";
-                    return (
-                      <tr key={item.key}>
-                        <th scope="row">{ar ? item.label_ar : item.label}</th>
-                        <td data-label={t("Typical schedule")} className="num">
-                          {ar ? item.value_ar : item.value}
-                        </td>
-                        <td data-label={t("Notes")}>{ar ? item.note_ar : item.note}</td>
-                      </tr>
-                    );
-                  })}
+                  {overview.fee_schedules.items.map((item) => (
+                    <tr key={item.key}>
+                      <th scope="row">{nameOf(item)}</th>
+                      <td data-label={t("Typical schedule")} className="num">
+                        {item.typical_pct != null
+                          ? `${percent(item.typical_pct / 100, 1)}${
+                              item.range_pct ? ` (${percent(item.range_pct[0] / 100, 1)} – ${percent(item.range_pct[1] / 100, 1)})` : ""
+                            }`
+                          : item.flat_egp_range
+                            ? `${egp(item.flat_egp_range[0])} – ${egp(item.flat_egp_range[1])}`
+                            : "—"}
+                      </td>
+                      <td data-label={t("Notes")}>{t(item.note)}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>

@@ -126,13 +126,6 @@ export interface UnitFull extends Unit {
   first_seen_at?: string | null;
   unknowns: string[];
 }
-export interface Comparable extends Unit {
-  cash_ppm: number;
-}
-export interface UnitDetail {
-  unit: UnitFull;
-  comparables: Comparable[];
-}
 export interface Page<T> {
   items: T[];
   total: number;
@@ -270,12 +263,13 @@ export interface CompoundDetail {
 }
 export interface FeeScheduleItem {
   key: string;
-  label: string;
-  label_ar: string;
-  value: string;
-  value_ar: string;
+  name: string;
+  name_ar: string;
+  /** A share of the price, in percent, with its usual range; fixed fees give an EGP range instead. */
+  typical_pct?: number;
+  range_pct?: [number, number];
+  flat_egp_range?: [number, number];
   note: string;
-  note_ar: string;
 }
 export interface FeeSchedule {
   year: number;
@@ -372,7 +366,6 @@ export interface Evaluation {
   launch: UnitLaunch | null;
   peers: Peers | null;
   opportunity: Opportunity;
-  comparables: Comparable[];
   unknowns: string[];
   district_guide?: DistrictGuideComparison | null;
 }

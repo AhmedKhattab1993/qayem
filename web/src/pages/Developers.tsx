@@ -5,8 +5,9 @@ import { number, percent, signed, useApi, tone, nameOf, place } from "../lib";
 import { t } from "../locale";
 import type { Developer, Page } from "../types";
 import { EmptyState, ErrorState, Loading } from "../components/States";
-import { Pager, scrollToResults } from "../components/UnitTable";
+import { Pager, scrollToResults } from "../components/Pager";
 import { NameList } from "../components/Names";
+import { GuideTabs } from "../components/GuideTabs";
 
 export default function Developers() {
   const [params, setParams] = useSearchParams();
@@ -42,6 +43,7 @@ export default function Developers() {
     <div className="developers page-enter">
       <header className="page-head">
         <div className="page">
+          <GuideTabs />
           <span className="eyebrow">{t("Developers")}</span>
           <h1 className="display">
             {t("The name on the gate")} <em>{t("is priced in.")}</em>
@@ -74,7 +76,7 @@ export default function Developers() {
                 <X size={15} />
               </button>
             )}
-            <button type="submit" className="btn btn-ink">
+            <button type="submit" className="btn btn-primary">
               {t("Search")}
             </button>
           </form>

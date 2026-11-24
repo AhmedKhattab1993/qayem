@@ -255,7 +255,7 @@ export function CaptureForm({
           {problem}
         </p>
       )}
-      <button type="submit" className="btn btn-nile btn-block" disabled={state === "busy"}>
+      <button type="submit" className="btn btn-primary btn-block" disabled={state === "busy"}>
         <Send size={15} className="flip-rtl" /> {t(cta)}
       </button>
       <Pledge />
@@ -368,7 +368,7 @@ export function LeadCard({
         </div>
       </div>
       {!open ? (
-        <button type="button" className="btn btn-nile" onClick={opener}>
+        <button type="button" className="btn btn-primary" onClick={opener}>
           <MessageCircle size={16} /> {t(cta)}
         </button>
       ) : (
@@ -424,7 +424,7 @@ export function LeadCard({
   );
 }
 
-/** An alert for a saved search or a compound: new listings and price cuts, after each nightly update. */
+/** An alert for a compound or a district: how many listings were added or cut in price, after each nightly update. */
 export function AlertSignup({ query, label, onDone }: { query: string; label: string; onDone?: () => void }) {
   const config = useGrowthConfig();
   if (!config?.leads) return null;
@@ -435,9 +435,9 @@ export function AlertSignup({ query, label, onDone }: { query: string; label: st
           <BellRing size={20} />
         </span>
         <div>
-          <h3>{t("Get an alert for this search")}</h3>
+          <h3>{t("Get an alert when prices move here")}</h3>
           <p>
-            {t("We message you when a unit matching «{label}» is listed or cut in price, after each nightly update. No broker calls.", {
+            {t("After each nightly update, we tell you how many listings in «{label}» were added or cut in price, with a link to today’s prices. No broker calls.", {
               label,
             })}
           </p>
@@ -535,51 +535,6 @@ export function SellerForm({ compound, price }: { compound: Ref | null; price: n
             ["now", "As soon as possible"],
             ["3_months", "Within 3 months"],
             ["checking", "Just checking the price"],
-          ]}
-        />
-      </CaptureForm>
-    </section>
-  );
-}
-
-/** Send the deal sheet to yourself; the role tells a broker from a buyer. */
-export function SendSheet({ unitId, compound }: { unitId: number; compound: Ref | null }) {
-  const config = useGrowthConfig();
-  const [role, setRole] = useState("");
-  if (!config?.leads) return null;
-  return (
-    <section className="capture capture-alert no-print" aria-label={t("Send this sheet to yourself")}>
-      <div className="capture-head">
-        <span className="capture-icon">
-          <Send size={20} className="flip-rtl" />
-        </span>
-        <div>
-          <h3>{t("Send this sheet to yourself")}</h3>
-          <p>{t("We send the link to your WhatsApp or e-mail, so it is there when you talk to the seller.")}</p>
-        </div>
-      </div>
-      <CaptureForm
-        cta="Send it"
-        roles={false}
-        send={lead("deal_sheet", {
-          unit_id: unitId,
-          compound: compound?.key,
-          role: ({ buying: "buyer", selling: "seller", broker: "broker" } as Record<string, string>)[role] ?? "",
-        })}
-        done={
-          <p>
-            <CheckCircle2 size={17} /> {t("Sent. Check your messages shortly.")}
-          </p>
-        }
-      >
-        <Chips
-          label="I am"
-          value={role}
-          onChange={setRole}
-          options={[
-            ["buying", "Buying"],
-            ["selling", "Selling"],
-            ["broker", "A broker"],
           ]}
         />
       </CaptureForm>

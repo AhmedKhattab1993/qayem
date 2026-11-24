@@ -1,7 +1,7 @@
 import { useImperativeHandle, useRef, useState, type Ref } from "react";
 import { flushSync } from "react-dom";
 import { Link } from "react-router-dom";
-import { Play, RotateCcw, Scale } from "lucide-react";
+import { Play, RotateCcw, Ruler } from "lucide-react";
 import { number, scrollBehavior } from "../lib";
 import { getLanguage, t } from "../locale";
 
@@ -85,8 +85,8 @@ export function Explainer({ ref }: { ref?: Ref<ExplainerHandle> }) {
       )}
       {state === "ended" && (
         <div className="explainer-end">
-          <Link className="btn btn-brass" to="/evaluate">
-            <Scale size={16} /> {t("Compare a unit")}
+          <Link className="btn btn-accent" to="/evaluate">
+            <Ruler size={16} /> {t("Check a price")}
           </Link>
           <button type="button" className="btn explainer-again" onClick={start}>
             <RotateCcw size={16} /> {t("Watch again")}

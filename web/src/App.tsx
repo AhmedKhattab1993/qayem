@@ -1,10 +1,8 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { Link, NavLink, Route, Routes, useLocation } from "react-router-dom";
-import { ArrowRight, BarChart3, Bookmark, BookOpen, Building2, Calculator, Check, Compass, Landmark, Map as MapIcon, MapPin, Scale, Search, X } from "lucide-react";
+import { ArrowRight, BarChart3, Bookmark, BookOpen, Building2, Check, Map as MapIcon, Menu, Ruler, Scale, Search, X } from "lucide-react";
 import Home from "./pages/Home";
 import Evaluate from "./pages/Evaluate";
-import Units from "./pages/Units";
-import UnitPage from "./pages/Unit";
 import Compounds from "./pages/Compounds";
 import CompoundPage from "./pages/Compound";
 import Developers from "./pages/Developers";
@@ -14,14 +12,13 @@ import Watchlist from "./pages/Watchlist";
 import Methodology from "./pages/Methodology";
 import DistrictPage from "./pages/District";
 import Districts from "./pages/Districts";
-import Sheet from "./pages/Sheet";
 import Privacy from "./pages/Privacy";
 import { Loading } from "./components/States";
 import { CURRENCIES, CurrencyContext, chosenCurrency, getCurrency, rateOf, setCurrency, setRates, type Currency } from "./currency";
 import { track } from "./track";
 import { keepsServerHead, serverTitle } from "./head";
 import { CommandPalette } from "./components/CommandPalette";
-import { Brand, Mark } from "./components/Brand";
+import { Brand } from "./components/Brand";
 import { useStore } from "./store";
 import { api, date, number } from "./lib";
 import { getLanguage, setLanguage, t, type Language } from "./locale";
@@ -37,31 +34,52 @@ const Corrections = lazy(() => import("./pages/Terms").then((m) => ({ default: m
 const DealCheck = lazy(() => import("./pages/DealCheck"));
 
 const nav = [
-  { to: "/map", label: "Map", short: "Map", icon: MapIcon },
-  { to: "/districts", label: "Districts", short: "Districts", icon: MapPin },
-  { to: "/compounds", label: "Compounds", short: "Compounds", icon: Building2 },
-  { to: "/developers", label: "Developers", short: "Developers", icon: Landmark },
+  { to: "/map", label: "Price map", short: "Map", icon: MapIcon },
+  { to: "/districts", label: "Price guide", short: "Guide", icon: Building2 },
   { to: "/index", label: "Qayem Index", short: "Index", icon: BarChart3 },
   { to: "/articles", label: "Articles", short: "Articles", icon: BookOpen },
-  { to: "/evaluate", label: "Compare a unit", short: "Evaluate", icon: Calculator },
 ];
-const tabs = ["/map", "/districts", "/compounds", "/evaluate"];
-const footerLinks = [
-  ...nav,
-  { to: "/units", label: "Resale units" },
-  { to: "/deal-check", label: "Free deal check" },
-  { to: "/methodology", label: "Methodology" },
-  { to: "/watchlist", label: "Watchlist" },
-  { to: "/compare", label: "Compare" },
-  { to: "/terms", label: "Terms of use" },
-  { to: "/corrections", label: "Corrections and takedowns" },
-  { to: "/privacy", label: "Privacy" },
+/** The guide is one section with three doors: a district, a compound or a developer. */
+const guidePaths = ["/districts", "/compounds", "/developers"];
+const footerGroups: { title: string; links: { to: string; label: string }[] }[] = [
+  {
+    title: "Prices",
+    links: [
+      { to: "/map", label: "Price map" },
+      { to: "/districts", label: "Districts" },
+      { to: "/compounds", label: "Compounds" },
+      { to: "/developers", label: "Developers" },
+    ],
+  },
+  {
+    title: "Tools",
+    links: [
+      { to: "/evaluate", label: "Check a price" },
+      { to: "/deal-check", label: "Free deal check" },
+      { to: "/compare", label: "Compare" },
+      { to: "/watchlist", label: "Watchlist" },
+    ],
+  },
+  {
+    title: "Read",
+    links: [
+      { to: "/index", label: "Qayem Index" },
+      { to: "/articles", label: "Articles" },
+      { to: "/methodology", label: "Methodology" },
+    ],
+  },
+  {
+    title: "About Qayem",
+    links: [
+      { to: "/terms", label: "Terms of use" },
+      { to: "/corrections", label: "Corrections and takedowns" },
+      { to: "/privacy", label: "Privacy" },
+    ],
+  },
 ];
 const titles: [RegExp, string][] = [
   [/^\/$/, "Egypt property price guide"],
-  [/^\/evaluate/, "Compare a unit"],
-  [/^\/units\/\d+/, "Unit"],
-  [/^\/units/, "Units"],
+  [/^\/evaluate/, "Check a price"],
   [/^\/compounds\/.+/, "Compound"],
   [/^\/compounds/, "Compounds"],
   [/^\/developers\/.+/, "Developer"],
@@ -71,7 +89,6 @@ const titles: [RegExp, string][] = [
   [/^\/methodology/, "Methodology"],
   [/^\/districts\/.+/, "District"],
   [/^\/districts/, "Districts"],
-  [/^\/sheet/, "Deal sheet"],
   [/^\/privacy/, "Privacy"],
   [/^\/map/, "Price map"],
   [/^\/index/, "Qayem Index"],
@@ -89,6 +106,7 @@ export default function App() {
   const [retryKey, setRetryKey] = useState(0);
   const [language, setCurrentLanguage] = useState<Language>(getLanguage);
   const [palette, setPalette] = useState(false);
+  const [menu, setMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [currency, setCurrentCurrency] = useState<Currency>(chosenCurrency);
   const location = useLocation();
@@ -110,6 +128,7 @@ export default function App() {
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
+    setMenu(false);
     track("pageview");
   }, [location.pathname]);
   useEffect(() => {
@@ -118,11 +137,16 @@ export default function App() {
   }, [location.pathname, language]);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    document.body.classList.toggle("menu-open", menu);
+    return () => document.body.classList.remove("menu-open");
+  }, [menu]);
 
   useEffect(() => {
     if (!message) return;
@@ -139,6 +163,8 @@ export default function App() {
       } else if (event.key === "/" && !typing) {
         event.preventDefault();
         setPalette(true);
+      } else if (event.key === "Escape") {
+        setMenu(false);
       }
     };
     window.addEventListener("keydown", handler);
@@ -148,21 +174,36 @@ export default function App() {
   const toggleLanguage = useCallback(() => setCurrentLanguage((current) => (current === "ar" ? "en" : "ar")), []);
   const changeCurrency = useCallback((next: Currency) => setCurrentCurrency(next), []);
   const closePalette = useCallback(() => setPalette(false), []);
-  const onDark = location.pathname === "/" && !scrolled;
+  const onHero = location.pathname === "/" && !scrolled && !menu;
   const counts: Record<string, number> = { "/watchlist": watch.length, "/compare": compare.length };
   const retry = () => setRetryKey((k) => k + 1);
+  const inGuide = guidePaths.some((path) => location.pathname.startsWith(path));
+  const active = (to: string, isActive: boolean) => (isActive || (to === "/districts" && inGuide) ? "is-active" : "");
+  const currencySwitch = (className: string) =>
+    currencies.length > 1 && (
+      <label className={className} title={t("Show prices in")}>
+        <span className="sr-only">{t("Show prices in")}</span>
+        <select value={shown} onChange={(event) => changeCurrency(event.target.value as Currency)}>
+          {currencies.map((code) => (
+            <option key={code} value={code}>
+              {t(code)}
+            </option>
+          ))}
+        </select>
+      </label>
+    );
 
   return (
     <CurrencyContext.Provider value={{ currency: shown, currencies, change: changeCurrency }}>
       <a className="skip-link" href="#main">
         {t("Skip to content")}
       </a>
-      <header className={`nav${onDark ? " nav-dark" : ""}${scrolled ? " nav-scrolled" : ""}`}>
+      <header className={`nav${onHero ? " nav-on-hero" : ""}${scrolled ? " nav-scrolled" : ""}`}>
         <div className="nav-inner">
           <Brand />
           <nav className="nav-links" aria-label={t("Main navigation")}>
             {nav.map(({ to, label }) => (
-              <NavLink key={to} to={to} className={({ isActive }) => (isActive ? "is-active" : "")}>
+              <NavLink key={to} to={to} className={({ isActive }) => active(to, isActive)}>
                 {t(label)}
               </NavLink>
             ))}
@@ -170,7 +211,7 @@ export default function App() {
           <div className="nav-tools">
             <button className="nav-search" onClick={() => setPalette(true)} aria-label={t("Search Qayem")}>
               <Search size={16} />
-              <span>{t("Search")}</span>
+              <span>{t("Search a district or compound")}</span>
               <span className="kbd">⌘K</span>
             </button>
             {(
@@ -182,7 +223,7 @@ export default function App() {
               <NavLink
                 key={to}
                 to={to}
-                className={({ isActive }) => `nav-icon${to === "/watchlist" ? " nav-icon-tabbed" : ""}${isActive ? " is-active" : ""}`}
+                className={({ isActive }) => `nav-icon nav-wide${isActive ? " is-active" : ""}`}
                 aria-label={`${t(label)}${counts[to] ? ` (${number(counts[to])})` : ""}`}
                 title={t(label)}
               >
@@ -190,18 +231,7 @@ export default function App() {
                 {counts[to] > 0 && <span className="nav-badge num">{number(counts[to])}</span>}
               </NavLink>
             ))}
-            {currencies.length > 1 && (
-              <label className="nav-currency" title={t("Show prices in")}>
-                <span className="sr-only">{t("Show prices in")}</span>
-                <select value={shown} onChange={(event) => changeCurrency(event.target.value as Currency)}>
-                  {currencies.map((code) => (
-                    <option key={code} value={code}>
-                      {t(code)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
+            {currencySwitch("nav-currency nav-wide")}
             <button
               type="button"
               className="nav-lang"
@@ -211,9 +241,59 @@ export default function App() {
             >
               {language === "ar" ? "EN" : "ع"}
             </button>
+            <Link to="/evaluate" className="btn btn-sm btn-primary nav-cta nav-wide">
+              <Ruler size={15} /> {t("Check a price")}
+            </Link>
+            <button
+              type="button"
+              className="nav-icon nav-menu"
+              aria-expanded={menu}
+              aria-controls="site-menu"
+              aria-label={t(menu ? "Close menu" : "Open menu")}
+              onClick={() => setMenu((open) => !open)}
+            >
+              {menu ? <X size={20} /> : <Menu size={20} />}
+            </button>
           </div>
         </div>
       </header>
+
+      {menu && (
+        <div className="menu" id="site-menu" key={`m-${language}`}>
+          <nav className="page menu-inner" aria-label={t("All pages")}>
+            <Link to="/evaluate" className="btn btn-primary btn-block">
+              <Ruler size={16} /> {t("Check a price")}
+            </Link>
+            {footerGroups.map((group) => (
+              <div key={group.title} className="menu-group">
+                <span className="eyebrow">{t(group.title)}</span>
+                <ul>
+                  {group.links.map((item) => (
+                    <li key={item.to}>
+                      <Link to={item.to} onClick={() => setMenu(false)}>
+                        {t(item.label)}
+                        <ArrowRight size={16} className="flip-rtl" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+            {currencies.length > 1 && (
+              <div className="menu-group">
+                <span className="eyebrow">{t("Show prices in")}</span>
+                <div className="segmented" role="group" aria-label={t("Show prices in")}>
+                  {currencies.map((code) => (
+                    <button key={code} type="button" aria-pressed={shown === code} onClick={() => changeCurrency(code)}>
+                      {t(code)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </nav>
+        </div>
+      )}
 
       {shown !== "EGP" && overview?.rates && (
         <div className="rate-bar" role="status">
@@ -235,8 +315,6 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home data={overview} error={error} retry={retry} />} />
           <Route path="/evaluate" element={<Evaluate />} />
-          <Route path="/units" element={<Units />} />
-          <Route path="/units/:id" element={<UnitPage />} />
           <Route path="/compounds" element={<Compounds />} />
           <Route path="/compounds/:key" element={<CompoundPage overview={overview} />} />
           <Route path="/developers" element={<Developers />} />
@@ -246,7 +324,6 @@ export default function App() {
           <Route path="/methodology" element={<Methodology overview={overview} error={error} retry={retry} />} />
           <Route path="/districts" element={<Districts />} />
           <Route path="/districts/:key" element={<DistrictPage overview={overview} />} />
-          <Route path="/sheet/:id" element={<Sheet />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/map" element={<MapPage overview={overview} />} />
           <Route path="/index" element={<IndexPage overview={overview} />} />
@@ -260,13 +337,16 @@ export default function App() {
             path="*"
             element={
               <div className="page lost page-enter">
-                <span className="lost-compass" aria-hidden="true">
-                  <Compass size={54} strokeWidth={1.1} />
+                <span className="lost-tiles" aria-hidden="true">
+                  <i />
+                  <i />
+                  <i />
+                  <i />
                 </span>
                 <h1 className="display">{t("A little off the map")}</h1>
                 <p>{t("That page isn’t here.")}</p>
-                <Link to="/evaluate" className="btn btn-ink">
-                  {t("Compare a unit")} <ArrowRight size={16} className="flip-rtl" />
+                <Link to="/map" className="btn btn-primary">
+                  {t("Open the price map")} <ArrowRight size={16} className="flip-rtl" />
                 </Link>
               </div>
             }
@@ -276,41 +356,57 @@ export default function App() {
       </main>
 
       <footer className="footer" key={`f-${language}`}>
+        <div className="footer-ramp" aria-hidden="true">
+          <i />
+          <i />
+          <i />
+          <i />
+          <i />
+          <i />
+        </div>
         <div className="page footer-inner">
           <div className="footer-brand">
-            <Mark size={46} />
-            <p className="display">
-              {t("What does property")} <em>{t("really cost in Egypt?")}</em>
-            </p>
+            <Brand />
+            <p className="display">{t("The price of a square metre, anywhere in Egypt.")}</p>
             <span>{t("Egypt’s property price guide: asking prices per m² by district and compound, and resale against the developer.")}</span>
           </div>
           <nav className="footer-links" aria-label={t("Footer")}>
-            {footerLinks.map((item) => (
-              <Link key={item.to} to={item.to}>
-                {t(item.label)}
-              </Link>
+            {footerGroups.map((group) => (
+              <div key={group.title}>
+                <span className="footer-title">{t(group.title)}</span>
+                {group.links.map((item) => (
+                  <Link key={item.to} to={item.to}>
+                    {t(item.label)}
+                  </Link>
+                ))}
+              </div>
             ))}
           </nav>
-          <div className="footer-meta">
-            <span className="live-dot" />
-            <span>
-              {t("Last observed")} <b className="num">{overview ? date(overview.last_updated) : "—"}</b>
-            </span>
-            <p>
-              {t(
-                "Comparisons use published listing and developer list prices, not appraisals or completed sales. Confirm every detail with the seller and the developer.",
-              )}
-            </p>
-          </div>
         </div>
-        <div className="footer-word" aria-hidden="true">
-          قيّم
+        <div className="page footer-meta">
+          <span className="footer-observed">
+            <span className="live-dot" />
+            {t("Last observed")} <b className="num">{overview ? date(overview.last_updated) : "—"}</b>
+          </span>
+          <p>
+            {t(
+              "Comparisons use published listing and developer list prices, not appraisals or completed sales. Confirm every detail with the seller and the developer.",
+            )}
+          </p>
         </div>
       </footer>
 
       <nav className="tabbar" aria-label={t("Quick navigation")} key={`t-${language}`}>
-        {[...nav.filter((item) => tabs.includes(item.to)), { to: "/watchlist", short: "Watchlist", icon: Bookmark }].map(({ to, short, icon: Icon }) => (
-          <NavLink key={to} to={to} className={({ isActive }) => (isActive ? "is-active" : "")}>
+        {(
+          [
+            ["/map", "Map", MapIcon],
+            ["/districts", "Guide", Building2],
+            ["/evaluate", "Check", Ruler],
+            ["/index", "Index", BarChart3],
+            ["/watchlist", "Saved", Bookmark],
+          ] as const
+        ).map(([to, short, Icon]) => (
+          <NavLink key={to} to={to} className={({ isActive }) => `${active(to, isActive)}${to === "/evaluate" ? " tabbar-main" : ""}`}>
             <span className="tabbar-icon">
               <Icon size={20} />
               {counts[to] > 0 && <span className="nav-badge num">{number(counts[to])}</span>}

@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, ArrowUpRight, BellRing, Calculator, Map as MapIcon } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, BellRing, Ruler, Map as MapIcon } from "lucide-react";
 import { nameOf, number, place, sep, signed, useApi, useTitle } from "../lib";
 import { t } from "../locale";
-import type { District, Overview, Page, Unit } from "../types";
+import type { District, Overview } from "../types";
 import { ErrorState, Loading } from "../components/States";
 import { DivergingBars, ScopeNote } from "../components/Opportunity";
 import { ClassCards, HistoryPanel, ProfileFacts } from "../components/Entity";
-import { UnitTable } from "../components/UnitTable";
 import { AlertSignup } from "../components/Capture";
 import { Faq, districtFaq } from "../components/Faq";
 import { track } from "../track";
@@ -18,7 +17,6 @@ export default function DistrictPage({ overview }: { overview: Overview | null }
   const { data, error, missing, retry } = useApi<District>(`/districts/${encodeURIComponent(key)}`);
   const [alerting, setAlerting] = useState(false);
   const hasUnits = Boolean(data && data.units > 0);
-  const units = useApi<Page<Unit>>(hasUnits ? `/units?district=${encodeURIComponent(key)}&page_size=10&sort=opportunity` : null);
   useTitle(data && (data.name_ar ? nameOf({ name: data.name, name_ar: data.name_ar }) : place(data.name)));
   if (error)
     return (
@@ -61,7 +59,7 @@ export default function DistrictPage({ overview }: { overview: Overview | null }
             {hasUnits && (
               <button
                 type="button"
-                className={`btn btn-sm${alerting ? " btn-ink" : ""}`}
+                className={`btn btn-sm${alerting ? " btn-primary" : ""}`}
                 aria-expanded={alerting}
                 onClick={() => {
                   setAlerting((open) => !open);
@@ -71,8 +69,8 @@ export default function DistrictPage({ overview }: { overview: Overview | null }
                 <BellRing size={15} /> {t("Alert me about deals here")}
               </button>
             )}
-            <Link className="btn btn-sm btn-brass" to="/evaluate">
-              <Calculator size={15} /> {t("Compare a unit here")}
+            <Link className="btn btn-sm btn-accent" to="/evaluate">
+              <Ruler size={15} /> {t("Check a price here")}
             </Link>
             <Link className="btn btn-sm" to={`/map?focus=${encodeURIComponent(data.key)}`}>
               <MapIcon size={15} /> {t("See it on the map")}
@@ -161,31 +159,10 @@ export default function DistrictPage({ overview }: { overview: Overview | null }
           </ul>
         </section>
 
-        <section className="section-tight split">
-          <div>
-            <span className="eyebrow">{t("Delivery and payment")}</span>
-            <h2 className="display">{t("What you are really buying")}</h2>
-            <ProfileFacts profile={data} />
-          </div>
-          <div>
-            <span className="eyebrow">{t("Units")}</span>
-            <h2 className="display">{t("Best opportunities first")}</h2>
-            <p className="entity-link">
-              <Link className="link-arrow" to={`/units?district=${encodeURIComponent(data.key)}`}>
-                {t("All {n} units", { n: number(data.units), count: data.units })} <ArrowUpRight size={15} className="flip-rtl" />
-              </Link>
-            </p>
-          </div>
-        </section>
-
         <section className="section-tight">
-          {units.data ? (
-            <UnitTable items={units.data.items} caption="Units in this district" />
-          ) : units.error ? (
-            <ErrorState message={units.error} retry={units.retry} />
-          ) : (
-            <Loading />
-          )}
+          <span className="eyebrow">{t("Delivery and payment")}</span>
+          <h2 className="display">{t("What you are really buying")}</h2>
+          <ProfileFacts profile={data} />
         </section>
 
         <HistoryPanel history={data.history} overview={overview} />
