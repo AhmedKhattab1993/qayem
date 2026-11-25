@@ -12,11 +12,12 @@ How the direction in [STRATEGY.md](STRATEGY.md) is built (phases 1–4). Everyth
 | Dedupe | The same unit on two sites counts once: same compound (or district) and class, area within 2%, price within 3%, seen within 30 days, different sources. The most structured copy is kept (AqarExit, Nawy, Aqarmap, OpenSooq, Semsar). | `guide.dedupe` |
 | Segments | District × (all / one compound / outside compounds) × class × size band, delivery (ready / under 2 years / later) or finishing (`finished`, `semi_finished`, `core_shell`, `furnished`). Published only with ≥5 listings from ≥2 sources, or ≥10 from one ("single source", confidence *indicative*). *High*: ≥20 listings, ≥2 sources, no source above 80%. Every figure carries its 30-day period, count, source mix, median, quartiles, cash-today median, developers' list price and resale against new (today's money). | `guide.build`, `guide.stats` |
 | Qayem Index | One edition a month (`/index/2026-11`), rewritten nightly while the month runs and frozen after it, in the canonical database (`index_editions`). Each day's district and compound figures go to `segment_history`, which finds ±5% moves over 30 days. | `guide.index`, `ledger.py`, `qayem record-index` |
-| CBE rates & official fees | Exchange rates (EGP per USD, EUR, GBP, SAR, AED, KWD, QAR), overnight rates and inflation from cbe.org.eg, nightly; the CBE overnight deposit rate dynamically drives the installment discount rate (`website_data._cbe_discount_rate`). Yearly statutory Egypt buying/registration fee schedules (`src/qayem/data/fee_schedules.json`) and polite CAPMAS/NUCA public parsers live in `official.py`. | `rates.py`, `official.py`, `qayem fetch-rates`, `qayem fetch-official` |
+| CBE rates & official fees | Exchange rates (EGP per USD, EUR, GBP, SAR, AED, KWD, QAR), overnight rates and inflation from cbe.org.eg, nightly; the CBE overnight deposit rate dynamically drives the installment discount rate (`website_data._cbe_discount_rate`). Yearly statutory Egypt buying/registration fee schedules (`src/qayem/data/fee_schedules.json`) live in `official.py`. | `rates.py`, `official.py`, `qayem fetch-rates` |
+| Market signals | CAPMAS indicators and release calendar (JSON API), Binance P2P USDT/EGP, gold, the CBE's quarterly balance of payments, Marsad Omran's rent indices, FRA financing statistics, NUCA notices, the real-estate platform's land and housing offers, and property news, nightly into `market_signals` / `market_events`; published as `overview.signals` and shown on `/index`. Unstructured sources are read by the Claude CLI (Opus 5.5, medium effort), never by regular expressions; a figure is kept only when its quote is in the source and its number in the quote. See [DATA_SOURCES.md](DATA_SOURCES.md). | `signals.py`, `claude_cli.py`, `qayem fetch-signals` |
 | Developer reports & VM pages | New earnings releases and presentations from SODIC, Madinet Masr, Palm Hills and TMG's investor pages (plain links, robots.txt respected). Monthly isolated-VM checks (`scripts/vm-developer-pages.py`, 10 top developers + `realestate.gov.eg` terms check) run strictly inside the `computer-use` OrbStack VM behind `studio.desktop_lock` (`scripts/install-vm-pages.sh`). | `reports.py`, `qayem developer-reports`, `scripts/vm-developer-pages.py` |
 
-The nightly cloud run adds three stages after the health check: `fetch-rates`, `developer-reports` and
-`record-index` (from the sources fit to publish). None of them can hold back publication.
+The nightly cloud run adds four stages after the health check: `fetch-rates`, `fetch-signals`,
+`developer-reports` and `record-index` (from the sources fit to publish). None of them can hold back publication.
 
 On the development copy (22 November 2026): 22,700 listings in the window, 2,150 cross-source
 duplicates and 200 suspect prices removed, 1,713 published segments (447 high, 992 medium, 274
@@ -44,8 +45,10 @@ indicative), 84% of them resting on more than one source.
 `gemini-4-neon` at `--effort medium`; override with `QAYEM_ARTICLE_MODEL` / `QAYEM_ARTICLE_EFFORT`):
 
 1. Reads the live public API (`--site`, default `https://qayem.ai`) and the recent articles (admin token).
-2. Triggers, best first: the monthly index, a CBE rate decision, a developer's quarterly results, a
-   segment that moved ±5%, a developer's list prices moving ≥3% over 60 days, a Search Console query gap
+2. Triggers, best first: the monthly index, a CBE rate decision, a developer's quarterly results, a new
+   rent index edition (`rent_index`: rents per m² with the gross yield against Qayem's asking prices, only where
+   the neighbourhood names the guide district), a segment that moved ±5%, property news with ≥2 checked
+   figures (`market_news`), a developer's list prices moving ≥3% over 60 days, a Search Console query gap
    (`.artifacts/articles/search-gaps.json`), then the calendar (the largest compounds and districts, each
    at most once in 60 days).
 3. Builds the data pack: every figure with its period and count; gaps and ranks computed in Python

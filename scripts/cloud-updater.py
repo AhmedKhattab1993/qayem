@@ -105,7 +105,12 @@ elif args.action == "secrets":
         raise SystemExit("Qayem's GLM provider credential is unavailable")
     wrangler("secret", "put", "ADMIN_TOKEN", input=TOKEN.read_text().strip() + "\n")
     wrangler("secret", "put", "GLM_API_KEY", input=provider["key"] + "\n")
-    print("Stored the Qayem administration and GLM credentials as Cloudflare Worker secrets.")
+    claude = ARTIFACTS / "claude-oauth-token"  # from `claude setup-token`, for the signals stage
+    if claude.is_file() and claude.read_text().strip():
+        claude.chmod(0o600)
+        wrangler("secret", "put", "CLAUDE_CODE_OAUTH_TOKEN", input=claude.read_text().strip() + "\n")
+    print("Stored the Qayem administration, GLM" + (" and Claude" if claude.is_file() else "")
+          + " credentials as Cloudflare Worker secrets.")
 elif args.action in {"run", "status", "stop"}:
     body = {"skip_crawl": True} if args.action == "run" and args.skip_crawl else None
     result = request("/" + args.action, "POST" if args.action in {"run", "stop"} else "GET", body=body)

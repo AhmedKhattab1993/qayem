@@ -255,6 +255,9 @@ class Pipeline:
             fit = self.publish_sources()
             for stage, arguments, budget in (
                     ("rates", ["fetch-rates"], 5 * 60),
+                    # CAPMAS, the P2P dollar, gold, the balance of payments, rents, FRA, NUCA and the news
+                    # (unstructured ones read by Claude Opus 5.5; a failing source is skipped)
+                    ("signals", ["fetch-signals"], 30 * 60),
                     # listed developers' new results (a few PDFs a quarter)
                     ("reports", ["developer-reports", "--folder", str(self.directory / "reports")], 20 * 60),
                     ("index", ["record-index", *[arg for name in sorted(fit or []) for arg in ("--source", name)]], 30 * 60)):

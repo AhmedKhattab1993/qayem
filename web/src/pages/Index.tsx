@@ -5,6 +5,7 @@ import { classLabel, date, money, monthLabel, nameOf, number, percent, periodLab
 import { getLanguage, t } from "../locale";
 import { ErrorState, Loading } from "../components/States";
 import { ConfidenceBadge, NoSalePrices, RateNote, SourceMix, confidenceRules } from "../components/Guide";
+import { MarketSignals } from "../components/Signals";
 import type { GuideRow, Overview, QayemIndex } from "../types";
 
 const COMPOUNDS_SHOWN = 25;
@@ -204,6 +205,8 @@ export default function IndexPage({ overview }: { overview: Overview | null }) {
             </ul>
           </section>
         )}
+
+        <MarketSignals overview={overview} />
 
         <section className="section-tight split index-about">
           <div>

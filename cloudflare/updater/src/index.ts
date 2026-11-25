@@ -12,6 +12,8 @@ interface Bindings {
   DB: D1Database;
   ADMIN_TOKEN: string;
   GLM_API_KEY: string;
+  /** Optional: `claude setup-token`, for the signals stage's Claude Opus 5.5 extraction. */
+  CLAUDE_CODE_OAUTH_TOKEN?: string;
   QAYEM_SOURCES: string;
   QAYEM_BENCHMARK_SOURCES: string;
 }
@@ -23,7 +25,8 @@ export class UpdateContainer extends Container<Bindings> {
   enableInternet = true;
   pingEndpoint = "/health";
   envVars = {GLM_API_KEY: this.env.GLM_API_KEY, QAYEM_SOURCES: this.env.QAYEM_SOURCES,
-    QAYEM_BENCHMARK_SOURCES: this.env.QAYEM_BENCHMARK_SOURCES};
+    QAYEM_BENCHMARK_SOURCES: this.env.QAYEM_BENCHMARK_SOURCES,
+    ...(this.env.CLAUDE_CODE_OAUTH_TOKEN ? {CLAUDE_CODE_OAUTH_TOKEN: this.env.CLAUDE_CODE_OAUTH_TOKEN} : {})};
 
   async active(runId: string): Promise<Job> {
     assertRunId(runId);
@@ -59,7 +62,7 @@ export class UpdateContainer extends Container<Bindings> {
     });
     if (!response.ok) {
       let detail = await response.text();
-      for (const secret of [this.env.GLM_API_KEY, this.env.ADMIN_TOKEN]) {
+      for (const secret of [this.env.GLM_API_KEY, this.env.ADMIN_TOKEN, this.env.CLAUDE_CODE_OAUTH_TOKEN]) {
         if (secret) detail = detail.replaceAll(secret, "[redacted]");
       }
       console.error("Container startup failed", response.status, detail.slice(0, 800));
@@ -225,7 +228,7 @@ export default {
       return Response.json(await env.UPDATER.getByName("nightly").status());
     }
     if (path === "/run" && request.method === "POST") {
-      const payload = await request.json<{skip_crawl?: boolean}>().catch(() => ({}));
+      const payload: {skip_crawl?: boolean} = await request.json<{skip_crawl?: boolean}>().catch(() => ({}));
       const runId = `manual-${crypto.randomUUID()}`;
       const instance = await env.UPDATES.create({id: runId, params: {run_id: runId, skip_crawl: Boolean(payload?.skip_crawl)}});
       return Response.json({run_id: instance.id, skip_crawl: Boolean(payload?.skip_crawl)}, {status: 202});

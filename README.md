@@ -109,6 +109,7 @@ qayem resolve-entities --dry-run     # spelling pairs waiting for canonical name
 qayem resolve-entities               # resolve them (glm-5.3-flash, 120 pairs per Pi call)
 qayem content-brief --png            # this week's three Arabic data stories, cards and tracked links
 qayem fetch-rates                    # today's CBE exchange rates, policy rates and inflation (nightly in the cloud)
+qayem fetch-signals                  # CAPMAS, P2P dollar, gold, BOP, rents, FRA, NUCA, news (Claude Opus 5.5; nightly)
 qayem record-index                   # this month's Qayem Index and today's segment figures (nightly in the cloud)
 qayem developer-reports              # listed developers' new results PDFs, read for their key figures (Pi/GLM)
 qayem articles --dry-run             # the article agent: draft with agy, fact-check, gate (publishes without --dry-run)

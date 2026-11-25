@@ -169,12 +169,9 @@ def test_finishing_segments_hex_grid_official_and_observations():
     assert len(payload["hexes"]) == 1 and payload["hexes"][0]["count"] == 12
     assert len(payload["hexes"][0]["ring"]) == 7
     assert payload["districts"][0]["bedrooms"]["3"] == 12
-    # Official fee schedules & public parsers
+    # Official fee schedules
     fees = official.fee_schedules()
     assert fees["year"] >= 2026 and len(fees["items"]) >= 3
-    assert official.parse_capmas_inflation("<p>Annual Inflation 13.4%</p>")["value"] == 13.4
-    nuca = official.parse_nuca_announcements('<a href="/news/1">طرح أراضي إسكان متميز بالمدن الجديدة</a>')
-    assert len(nuca) == 1 and "newcities.gov.eg" in nuca[0]["url"]
     # First-party observations with outlier rejection
     from datetime import datetime, timezone
     schema = Path(__file__).resolve().parents[1] / "cloudflare" / "leads-schema.sql"

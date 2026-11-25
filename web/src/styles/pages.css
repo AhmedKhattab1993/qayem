@@ -1547,6 +1547,32 @@
   color: var(--ink-3);
 }
 
+.signal-figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1px;
+  margin-bottom: 12px;
+  border-top: 2px solid var(--ink);
+  background: var(--line);
+}
+.signal-figures li {
+  display: grid;
+  gap: 4px;
+  padding: 14px 12px 14px 0;
+  background: var(--paper);
+}
+.signal-figures b {
+  font-family: var(--font-display);
+  font-size: 22px;
+}
+.signal-figures small,
+.signal-events small {
+  color: var(--ink-3);
+}
+.signal-events {
+  margin-top: 12px;
+}
+
 /* ——— Articles ——— */
 .article-list {
   display: grid;

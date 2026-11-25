@@ -326,6 +326,33 @@ export interface Overview {
   index_months?: string[];
   /** Statutory Egyptian property fee schedules (Law 9/2022 & market norms). */
   fee_schedules?: FeeSchedule | null;
+  /** The economy around the prices, read nightly (docs/DATA_SOURCES.md). */
+  signals?: MarketSignals | null;
+}
+export interface MarketSignal {
+  period: string;
+  value: number;
+  unit: string;
+  label: string;
+  source: string;
+  url: string | null;
+}
+export interface MarketEvent {
+  key: string;
+  kind: string;
+  day: string;
+  title: string;
+  url: string | null;
+  source: string;
+  summary: string | null;
+  figures: { name: string; value: number; unit?: string; quote: string; area?: string; district?: string | null }[];
+  topic?: string;
+  title_en?: string;
+}
+export interface MarketSignals {
+  latest: Record<string, MarketSignal>;
+  events: MarketEvent[];
+  calendar: { day: string; title: string; source: string }[];
 }
 export interface Catalog {
   districts: { key: string; name: string; units: number }[];

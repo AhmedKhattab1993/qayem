@@ -42,9 +42,18 @@ Each run also runs `qayem scrub-personal`, so no personal data stays in the cano
 OpenSooq and Semsar the next, `Scope.every_days`), so a night's crawl stays inside its four hours; a
 market source counts as stale only after it missed its night. They feed the guide's figures, never
 the unit listings, and none of them is required. After the health check the run adds `fetch-rates`
-(CBE), `developer-reports` (new results PDFs, Pi/GLM) and `record-index` (this month's Qayem Index and
+(CBE), `fetch-signals` (the economy around the prices, below), `developer-reports` (new results PDFs, Pi/GLM) and `record-index` (this month's Qayem Index and
 today's segment figures, from the sources fit to publish); a failure in any of them never holds back
 publication. Details: [PRICE_GUIDE.md](PRICE_GUIDE.md).
+
+**Signals and the Claude CLI (2026-11-25).** `fetch-signals` reads the sources in
+[DATA_SOURCES.md](DATA_SOURCES.md) "Integrated": JSON ones as data, unstructured ones through the Claude
+CLI (`claude -p`, Opus 5.5 at medium effort, no tools; `src/qayem/claude_cli.py`). The container image
+installs `@anthropic-ai/claude-code`; the Worker passes `CLAUDE_CODE_OAUTH_TOKEN` when that secret is set
+(create it with `claude setup-token`, save it to `.artifacts/cloud-updater/claude-oauth-token`, then
+`python scripts/cloud-updater.py secrets`). Without it the Claude-read sources are reported as skipped and
+the structured ones still run. Egyptian government hosts may answer differently from the container than
+from Egypt; each source failing is recorded in the run log, never retried another way.
 
 ## Schedule and operation
 

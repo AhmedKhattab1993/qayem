@@ -5,8 +5,10 @@
 It runs on the operator's machine (`qayem articles run`, scheduled daily), because the drafting model
 is the local Antigravity CLI (`agy`, Gemini 4 Neon at medium effort; owner decision 2026-11-22).
 
-- Triggers: the monthly index, a CBE rate decision, a segment that moved ±5% in 30 days, a developer
-  whose list prices moved, and otherwise the calendar: a compound or district report, rotated by size.
+- Triggers: the monthly index, a CBE rate decision, a new rent index edition (with the gross yield
+  against Qayem's prices), a segment that moved ±5% in 30 days, a developer whose list prices moved,
+  property news with figures (from `signals`), and otherwise the calendar: a compound or district
+  report, rotated by size.
 - The data pack is every figure the article may use, read from the live public API, with its period
   and listing count. Derived figures (gaps, ranks) are computed here, never by the model.
 - The model writes Arabic and English from the pack. The fact check rejects any number in the text
@@ -37,6 +39,8 @@ WEEKLY_CAP = 4
 MAX_DRAFTS = 3  # model calls a run, published or not
 CALENDAR_REPEAT_DAYS = 60  # a compound or district report is not repeated within two months
 MIN_HEADLINE_COUNT = 20
+RENT_DAYS = 45  # a new rent index edition is written about within six weeks
+NEWS_DAYS = 7  # a news item with figures, within a week
 CLASS_EN = {"apartment": "apartments", "chalet": "chalets", "house": "villas and houses"}
 CLASS_AR = {"apartment": "الشقق", "chalet": "الشاليهات", "house": "الفيلات والمنازل"}
 MONTHS_EN = ("January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
@@ -108,6 +112,14 @@ def triggers(data: dict, recent: list[dict], today: date) -> list[Trigger]:
                 and names & {"contracted_sales", "units_sold", "net_sales"}):
             seen_reports.add(key)
             out.append(Trigger("developer_report", key, 1, {"developer": report["developer"], "period": report["period"]}))
+    signals = (data.get("overview") or {}).get("signals") or {}
+    for event in signals.get("events") or []:
+        age = (today - date.fromisoformat(event["day"])).days if event.get("day") else 999
+        figures = [f for f in event.get("figures") or [] if f.get("checked")]
+        if event["kind"] == "rent_index" and age <= RENT_DAYS and len(figures) >= 2:
+            out.append(Trigger("rent_index", event["key"], 2, event))
+        elif event["kind"] == "news" and age <= NEWS_DAYS and len(figures) >= 2:
+            out.append(Trigger("market_news", event["key"], 3, {**event, "count": len(figures)}))
     for move in (data.get("guide") or {}).get("moves", [])[:5]:
         out.append(Trigger("move", f"move:{move['key']}:{move['to_day'][:7]}", 2, move))
     for developer in data.get("developers", []):
@@ -413,6 +425,75 @@ def rates_pack(trigger: Trigger, data: dict, site: Site) -> Pack | None:
                 {"start": before["day"], "end": after["day"]}, figures, [], {})
 
 
+SIGNAL_UNITS = {"egp": ("egp", "EGP"), "egp_per_m2": ("egp_per_m2", "EGP per m²"), "egp_month": ("egp", "EGP a month"),
+                "egp_per_m2_month": ("egp", "EGP per m² a month"), "percent": ("percent_points", "percent"),
+                "egp_mn": ("number", "million EGP"), "egp_bn": ("number", "billion EGP"), "egp_trn": ("number", "trillion EGP"),
+                "usd": ("egp", "US dollars"), "usd_mn": ("number", "million US dollars"),
+                "usd_bn": ("number", "billion US dollars"), "count": ("count", ""), "m2": ("count", "m²")}
+
+
+def _event_figure(figure: dict, period: str, prefix: str) -> Figure:
+    unit = figure.get("unit") or ("percent" if figure["name"].endswith("_pct") else
+                                  "egp_per_m2_month" if figure["name"] == "rent_per_m2_month" else
+                                  "egp_month" if figure["name"] == "median_rent_month" else "count")
+    kind, words = SIGNAL_UNITS.get(unit, ("number", unit))
+    what = figure.get("label") or figure["name"].replace("_", " ")
+    where = f", {figure['area']}" if figure.get("area") else ""
+    return Figure(f"{prefix}.{figure['name']}.{figure.get('area') or ''}".rstrip("."),
+                  f"{what}{where}" + (f" ({words})" if words else "") + f", as stated: «{figure['quote'][:160]}»",
+                  figure["value"], kind, period, new=True)
+
+
+def rent_pack(trigger: Trigger, data: dict, site: Site) -> Pack | None:
+    """A new rent index edition, set against Qayem's asking prices: the gross rental yield per district."""
+    event = trigger.subject
+    period = event["key"].rsplit(":", 1)[-1]
+    checked = [f for f in event["figures"] if f.get("checked")]
+    figures = [Figure("index_source", "rent index publisher", event["source"], "text"),
+               Figure("index_period", "period the rent index covers", period, "text")]
+    figures += [_event_figure(f, period, "rent") for f in checked]
+    districts = {d["key"]: d for d in data.get("districts") or []}
+    rows, path = [], "/index"
+    for figure in checked:
+        district = districts.get(figure.get("district") or "")
+        head = (district or {}).get("headline") or {}
+        if figure["name"] != "rent_per_m2_month" or head.get("class") != "apartment" or not head.get("median_ppm"):
+            continue
+        if head.get("confidence") == "indicative":
+            continue
+        gross = round(figure["value"] * 12 / head["median_ppm"], 4)
+        key, area = district["key"], figure.get("area") or district["name"]
+        figures += [Figure(f"sale.{key}.median_ppm", f"apartments in {district['name']} (the guide district {area} is in): "
+                           "Qayem's median asking price per m²", head["median_ppm"], "egp_per_m2", "last 30 days", head["count"]),
+                    Figure(f"yield.{key}.{area}", f"{area}: a year's asking rent per m² against {district['name']}'s asking "
+                           "price per m² (gross rental yield, indicative)", gross, "share", period, new=True)]
+        rows.append([area, district["name"], district.get("name_ar") or "", figure["value"], head["median_ppm"], gross])
+        path = f"/districts/{key}"
+    if len(checked) < 2:
+        return None
+    tables = [{"id": "rent_vs_price", "columns": ["neighbourhood", "district", "district_ar", "rent_per_m2_month",
+                                                   "median_ppm", "gross_yield"], "rows": rows}] if rows else []
+    return Pack(trigger, event["title"], path if len(rows) == 1 else "/index", {"start": "", "end": period}, figures,
+                tables, {"source": f"{event['source']} rent price index (median asking rents of unfurnished apartments)",
+                         "method": "Rents are the publisher's medians; prices are Qayem's medians of asking prices.",
+                         "urls_not_to_cite": True})
+
+
+def news_pack(trigger: Trigger, data: dict, site: Site) -> Pack | None:
+    """A property-market fact the press reported, with the figures the report itself states."""
+    event = trigger.subject
+    checked = [f for f in event["figures"] if f.get("checked")]
+    if len(checked) < 2:
+        return None
+    figures = [Figure("reported_by", "publication that reported it", event["source"], "text"),
+               Figure("reported_on", "date reported", event["day"], "date")]
+    figures += [_event_figure(f, event["day"][:7], "news") for f in checked]
+    return Pack(trigger, event.get("title_en") or event["title"], "/index", {"start": event["day"], "end": event["day"]},
+                figures, [], {"summary": event.get("summary"), "topic": event.get("topic"),
+                              "source": f"reported by {event['source']}", "urls_not_to_cite": True,
+                              "method": "Figures are as the publication reported them; Qayem did not compute them."})
+
+
 UNIT_WORDS = {"egp_bn": "billion EGP", "egp_mn": "million EGP", "egp": "EGP", "units": "units", "m2": "m²",
               "egp_per_m2": "EGP per m²"}
 
@@ -463,7 +544,7 @@ def search_gap_pack(trigger: Trigger, data: dict, site: Site) -> Pack | None:
 
 
 PACKS: dict[str, Callable[[Trigger, dict, Site], Pack | None]] = {
-    "developer_report": report_pack, "search_gap": search_gap_pack,
+    "developer_report": report_pack, "search_gap": search_gap_pack, "rent_index": rent_pack, "market_news": news_pack,
     "guide": guide_pack, "index": index_pack, "move": move_pack, "developer_prices": developer_pack, "rates": rates_pack}
 
 

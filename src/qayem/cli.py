@@ -465,19 +465,24 @@ def fetch_rates() -> None:
                   f"overnight deposit {figures['key'].get('overnight_deposit')}%.")
 
 
-@app.command("fetch-official")
-def fetch_official_cmd(
-    out: Path = typer.Option(Path(".artifacts/official/latest.json"), help="Where to save the public CAPMAS/NUCA snapshot."),
+@app.command("fetch-signals")
+def fetch_signals(
+    only: list[str] = typer.Option(None, "--only", help="Read only these sources (capmas, binance, world_bank, dbnomics, "
+                                                        "gold, nuca, cbe_bop, marsad, fra, platform, news)."),
 ) -> None:
-    """Fetch public CAPMAS inflation and NUCA housing announcements (best-effort, polite)."""
-    from .official import fee_schedules, fetch_official
+    """Economic and market signals: CAPMAS, the P2P dollar, gold, the balance of payments, rents, FRA, NUCA, news (nightly).
 
-    result = fetch_official()
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    fees = fee_schedules()
-    console.print(f"Official {result['day']}: CAPMAS={'ok' if result['capmas'] else 'none'}, "
-                  f"NUCA notices={len(result['nuca'])}, statutory fee schedule {fees.get('year')} ({len(fees.get('items', []))} items).")
+    Unstructured sources are read by Claude Opus 5.5 at medium effort through the Claude CLI; a source that
+    fails is reported and skipped, and the stage exits 0 so it never holds back publication.
+    """
+    import sqlite3
+    from .config import db_path
+    from .signals import run
+
+    with sqlite3.connect(db_path()) as connection:
+        outcomes = run(connection, only=set(only) if only else None)
+    for outcome in outcomes:
+        console.print(json.dumps(outcome, ensure_ascii=False))
 
 
 @app.command("articles")

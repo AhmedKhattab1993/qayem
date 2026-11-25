@@ -593,6 +593,8 @@ class Catalog:
                     from .reports import published as published_reports
                     from .official import fee_schedules
                     developer_reports = published_reports(connection)
+                    from .signals import published as published_signals
+                    market_signals = published_signals(connection)
                     history = connection.execute("SELECT 1 FROM sqlite_master WHERE name='segment_history'").fetchone()
                     rate = _cbe_discount_rate(rates)
                     snapshot = build_snapshot(rows, runs, moves, hidden, aliases, prices, self.market_sources,
@@ -600,6 +602,7 @@ class Catalog:
                     snapshot.moves = ledger.moves(connection, snapshot.today) if history else []
                 attach_ledger(snapshot, archive, rates)
                 snapshot.overview["developer_reports"] = developer_reports
+                snapshot.overview["signals"] = market_signals
                 snapshot.overview["fee_schedules"] = fee_schedules()
             except sqlite3.Error as exc:
                 raise CatalogUnavailable("Qayem dataset is not ready. Point QAYEM_DB to a database containing the Qayem tables.") from exc

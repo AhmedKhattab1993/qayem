@@ -11,6 +11,8 @@ const KINDS: Record<string, string> = {
   developer_prices: "Developer prices",
   rates: "Interest rates",
   developer_report: "Developer results",
+  rent_index: "Rents",
+  market_news: "Market news",
   guide: "Guide",
   explainer: "Explainer",
 };
